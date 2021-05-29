@@ -1,17 +1,39 @@
-plugins {
-    id 'java'
-}
-
-group 'moe.ore'
-version '1.0.0'
+apply plugin: 'java'
 
 repositories {
     mavenCentral()
 }
+allprojects {
+    group 'moe.ore'
+    version '1.0.0'
+    sourceCompatibility = '1.8'
+}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        google()
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        implementation 'io.netty:netty-buffer:5.0.0.Alpha2'
+        implementation 'io.netty:netty-transport:5.0.0.Alpha2'
+        implementation 'io.netty:netty-handler:5.0.0.Alpha2'
+        implementation 'io.netty:netty-codec:5.0.0.Alpha2'
+    }
 }
 
 test {
