@@ -1,9 +1,9 @@
 package moe.ore.tars;
 
 import io.netty.buffer.ByteBuf;
-import moe.ore.helper.bytes.ByteBuilder;
-import moe.ore.helper.bytes.StringExtKt;
+import moe.ore.util.bytes.ByteBuilder;
 import moe.ore.tars.exc.TarsEncodeException;
+import moe.ore.util.bytes.StringExtKt;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
