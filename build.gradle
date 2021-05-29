@@ -29,10 +29,15 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
         implementation 'io.netty:netty-buffer:5.0.0.Alpha2'
         implementation 'io.netty:netty-transport:5.0.0.Alpha2'
         implementation 'io.netty:netty-handler:5.0.0.Alpha2'
         implementation 'io.netty:netty-codec:5.0.0.Alpha2'
+
+        implementation("com.google.code.gson:gson:2.6.2")
+
+        implementation("com.squareup.okhttp3:okhttp:4.9.1")
     }
 }
 
