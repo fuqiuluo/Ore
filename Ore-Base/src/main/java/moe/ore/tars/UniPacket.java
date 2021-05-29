@@ -1,6 +1,5 @@
 package moe.ore.tars;
 
-import moe.ore.helper.bytes.ByteArrayExtKt;
 import moe.ore.util.bytes.ByteBuilder;
 import moe.ore.protocol.tars.RequestPacket;
 
