@@ -1,1 +1,4 @@
-include 'Ore-Core'
+rootProject.name = 'Ore'
+
+include 'Ore-Base'
+

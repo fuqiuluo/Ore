@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'moe.ore.base'
+group 'moe.ore'
 version '1.0.0'
 
 repositories {
