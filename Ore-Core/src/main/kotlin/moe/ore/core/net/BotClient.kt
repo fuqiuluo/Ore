@@ -3,6 +3,7 @@ package moe.ore.core.net
 import io.netty.buffer.ByteBuf
 import kotlin.Throws
 import io.netty.channel.ChannelHandlerContext
+import moe.ore.core.net.listener.MassageListener
 import java.lang.InterruptedException
 import java.util.HashMap
 import java.util.Objects
@@ -25,7 +26,6 @@ class BotClient {
     fun connect(): BotClient {
         connection.setMassageListener(massageListener)
         connection.connect()
-        println("massageListener")
         return this
     }
 

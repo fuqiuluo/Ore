@@ -25,8 +25,8 @@ class HeartBeatListener(private val botConnection: BotConnection) : ChannelHandl
             when {
                 evt.state() == IdleState.READER_IDLE -> {
                     println("长期没收到服务器数据 或心跳了 是不是要重连一下？ 可能断网了")
-                    //可以选择重新连接
-            //                Client.getImConnection().connect(Client.HOST, Client.PORT);
+                    // todo 长期没收到服务器数据 可以选择重新连接?
+                    // botConnection.connect();
                 }
                 evt.state() == IdleState.WRITER_IDLE -> {
                     println("该发心跳包了")

@@ -1,39 +1,13 @@
 package moe.ore.core.net
 
 import io.netty.bootstrap.Bootstrap
-import io.netty.handler.codec.MessageToMessageDecoder
-import io.netty.buffer.ByteBuf
 import kotlin.Throws
-import io.netty.channel.ChannelHandlerContext
-import moe.ore.core.net.decoder.DemoMessageDecoder
-import moe.ore.core.net.decoder.Demo
-import io.netty.util.ReferenceCountUtil
-import io.netty.channel.ChannelHandlerAdapter
-import io.netty.channel.ChannelHandler.Sharable
-import moe.ore.core.net.BotConnection
-import java.net.SocketAddress
-import io.netty.channel.ChannelPromise
-import io.netty.handler.timeout.IdleStateEvent
-import io.netty.handler.timeout.IdleState
 import io.netty.buffer.Unpooled
-import io.netty.channel.ChannelFutureListener
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import io.netty.channel.ChannelFuture
-import java.lang.Runnable
 import java.lang.InterruptedException
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.JvmStatic
-import moe.ore.core.net.BotClient
-import java.util.Arrays
-import moe.ore.core.net.PackRequest.OnDataListener
-import java.util.HashMap
-import moe.ore.core.net.PackRequest
-import moe.ore.core.net.MassageListener
-import java.util.Objects
-import java.util.concurrent.locks.AbstractQueuedSynchronizer
-import java.lang.IllegalMonitorStateException
-import moe.ore.core.net.MutexLock
+import moe.ore.core.net.listener.MassageListener
 import kotlin.jvm.Synchronized
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.handler.timeout.IdleStateHandler
@@ -54,11 +28,11 @@ class BotConnection {
     private val bootstrap: Bootstrap = Bootstrap()
     private val nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private var massageListener: MassageListener? = null
-    private val eventListener: EventListener = EventListener(this)
+    private val eventListener: EventListener = EventListener(this@BotConnection)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
     private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
     private val reConnectionListener: ReConnectionListener = ReConnectionListener(this@BotConnection)
-    private val exceptionListener: ExceptionListener = ExceptionListener()
+    private val exceptionListener: ExceptionListener = ExceptionListener(this@BotConnection)
     private val connectionListener: ConnectionListener = ConnectionListener(this@BotConnection)
     private val scheduler = Executors.newScheduledThreadPool(1)
     fun setMassageListener(massageListener: MassageListener?) {
@@ -72,26 +46,11 @@ class BotConnection {
         scheduler.execute {
             try {
                 channelFuture.channel().closeFuture().sync()
-                //                    System.err.println("啦啦啦啦啦啦啦啦绿");
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             } finally {
-                // TODO: 2021/5/29 如果需要重连 我海需要关闭它吗？
-//                    nioEventLoopGroup.shutdownGracefully();
             }
         }
-        //        TimerTask timerTask = new TimerTask() {
-//            @Override
-//            public void run() {
-//                try {
-//                    System.err.println("vvvvvvvvvvvvvvvvvvvvvv");
-//                    channelFuture = connect(host, port);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        };
-//        new Timer().schedule(timerTask, TimeUnit.SECONDS.toMillis(5));
     }
 
     fun send(bytes: ByteArray): Boolean {
@@ -112,11 +71,7 @@ class BotConnection {
 
     init {
         bootstrap.group(nioEventLoopGroup)
-        bootstrap.channel(NioSocketChannel::class.java)
-            .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
-            .option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE)
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
-            .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
+        bootstrap.channel(NioSocketChannel::class.java).option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE).option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000).option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
         bootstrap.handler(object : ChannelInitializer<SocketChannel>() {
             public override fun initChannel(socketChannel: SocketChannel) {
 //                注意添加顺序决定执行的先后
@@ -126,11 +81,11 @@ class BotConnection {
                 socketChannel.pipeline().addLast(heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 socketChannel.pipeline().addLast(eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast(massageListener)
-                //                socketChannel.pipeline().addLast(new DemoMessageDecoder(), new DemoMessageHandler());
+                // socketChannel.pipeline().addLast(new DemoMessageDecoder(), new DemoMessageHandler());
             }
         })
         bootstrap.remoteAddress(InetSocketAddress(HOST, PORT))
-        //        String s = HOST_LIST[new Random().nextInt(HOST_LIST.length)];
+//        String s = HOST_LIST[new Random().nextInt(HOST_LIST.length)];
 //        String[] split = s.split(":");
 //        bootstrap.remoteAddress(new InetSocketAddress(split[0], Integer.parseInt(split[1])));
     }

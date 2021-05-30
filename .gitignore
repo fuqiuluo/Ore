@@ -1,2 +1,5 @@
 /.gradle/
 /.idea/
+/Ore-Api/build/
+/Ore-Base/build/
+/Ore-Core/build/

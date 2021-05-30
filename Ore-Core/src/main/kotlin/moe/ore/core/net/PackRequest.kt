@@ -22,16 +22,15 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     private var dataListener: OnDataListener? = null
     private var isCallComplete = false
 
-    // TODO: 2021/5/30 改成kotlin的超时参数 设置默认值
     @Synchronized
     @Throws(InterruptedException::class)
-    fun await(): ByteArray? {
+    fun await(timeout: Long = 1000 * 3): ByteArray? {
         requestStyle = true
         if (requestBody != null) botClient.send(requestBody)
         reentrantLock.lock()
-        return if (!reentrantLock.tryLock((1000 * 3).toLong(), TimeUnit.MILLISECONDS) && source != null) {
-            null
-        } else source
+        return if (reentrantLock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
+            source
+        } else null
     }
 
     init {
