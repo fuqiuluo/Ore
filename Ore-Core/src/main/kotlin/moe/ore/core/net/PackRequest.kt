@@ -34,7 +34,7 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     }
 
     init {
-        botClient.registerHandler(this);
+        botClient.registerHandler(this)
     }
 
     /**

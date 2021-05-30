@@ -12,7 +12,7 @@ object TestMain {
     fun main(args: Array<String>) {
         val reqBody = ByteArray(10)
 
-        val botClient: BotClient = BotClient().connect()
+        val botClient: BotClient = BotClient.instance.connect()
 
         val bytes = botClient.newPackRequest("cmda", 1, reqBody).await()
 

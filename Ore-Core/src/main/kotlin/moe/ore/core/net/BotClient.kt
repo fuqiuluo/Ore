@@ -12,7 +12,13 @@ import java.util.Objects
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotClient {
+class BotClient private constructor() {
+    companion object {
+        val instance: BotClient by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            BotClient()
+        }
+    }
+
     //    map key is hashcode
     private val packHandlerMap: HashMap<Int, PackRequest> = HashMap()
     private val connection: BotConnection = BotConnection()
@@ -42,6 +48,7 @@ class BotClient {
     fun registerHandler(handler: PackRequest) {
         packHandlerMap[handler.hashCode()] = handler
     }
+
 
     init {
         massageListener = object : MassageListener() {
