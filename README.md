@@ -1,6 +1,7 @@
 # Ore
 Tencent Protocol Project
 
+![](https://img.shields.io/badge/Java-1.8.0-green.svg)
 ![](https://img.shields.io/badge/Kotlin-1.5.10-green.svg)
 
 ### 开发注意
