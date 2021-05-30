@@ -169,9 +169,10 @@ class ByteBuilder(private var position: BytePosition = BytePosition.END) {
 
     /**
      * 关闭流释放资源
+     *
+     * 流指向内存，不需要释放
      */
     fun close() {
         dataOutputStream.close()
-        outputStream.close()
     }
 }

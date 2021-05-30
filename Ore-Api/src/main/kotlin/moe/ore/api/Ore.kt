@@ -5,5 +5,9 @@ package moe.ore.api
  */
 interface Ore {
 
+    /**
+     * 登录
+     */
+    fun login()
 
 }
