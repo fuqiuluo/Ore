@@ -3,22 +3,21 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.0'
 }
 
-group 'moe.ore.base'
+group 'moe.ore.core'
 version '1.0.0'
-
-/**
- * 子模块需要的声明
- */
-jar.enabled = true
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    implementation project(":Ore-Base")
+    implementation project(":Ore-Api")
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
 }
 
 test {
