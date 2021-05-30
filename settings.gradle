@@ -1,4 +1,5 @@
 rootProject.name = 'Ore'
 
 include 'Ore-Base'
+include 'Ore-Coree'
 
