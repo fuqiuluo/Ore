@@ -7,6 +7,7 @@ import io.netty.channel.ChannelFuture
 import java.lang.InterruptedException
 import java.lang.Exception
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * @author 飞翔的企鹅
@@ -30,7 +31,7 @@ class ConnectionListener(private val botConnection: BotConnection) : ChannelFutu
                         e.printStackTrace()
                     }
                 }
-            }, 5L)
+            }, TimeUnit.SECONDS.toMillis(5))
         } else {
             System.err.println("服务端链接成功...")
         }
