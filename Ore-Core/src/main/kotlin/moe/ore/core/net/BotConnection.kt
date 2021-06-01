@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit
 import moe.ore.core.net.listener.MassageListener
 import kotlin.jvm.Synchronized
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.handler.timeout.IdleStateHandler
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.ChannelOption
 import io.netty.channel.ChannelInitializer
@@ -22,22 +21,20 @@ import java.net.InetSocketAddress
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotConnection {
+class BotConnection constructor(massageListener: MassageListener) {
+
     lateinit var channelFuture: ChannelFuture
 
     private val bootstrap: Bootstrap = Bootstrap()
     private val nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
-    private var massageListener: MassageListener? = null
     private val eventListener: EventListener = EventListener(this@BotConnection)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
+
     private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
     private val reConnectionListener: ReConnectionListener = ReConnectionListener(this@BotConnection)
     private val exceptionListener: ExceptionListener = ExceptionListener(this@BotConnection)
     private val connectionListener: ConnectionListener = ConnectionListener(this@BotConnection)
     private val scheduler = Executors.newScheduledThreadPool(1)
-    fun setMassageListener(massageListener: MassageListener?) {
-        this.massageListener = massageListener
-    }
 
     @Synchronized
     @Throws(InterruptedException::class)
@@ -77,7 +74,7 @@ class BotConnection {
 //                注意添加顺序决定执行的先后
                 socketChannel.pipeline().addLast(exceptionListener)
                 socketChannel.pipeline().addLast(reConnectionListener)
-                socketChannel.pipeline().addLast(IdleStateHandler(5, 3, 10, TimeUnit.SECONDS))
+                socketChannel.pipeline().addLast(idleStateHandler)
                 socketChannel.pipeline().addLast(heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 socketChannel.pipeline().addLast(eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast(massageListener)

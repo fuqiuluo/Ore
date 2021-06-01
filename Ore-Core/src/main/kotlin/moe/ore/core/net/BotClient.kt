@@ -13,6 +13,7 @@ import java.util.Objects
  * create 2021-05-30 13:18
  */
 class BotClient private constructor() {
+
     companion object {
         val instance: BotClient by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
             BotClient()
@@ -21,8 +22,29 @@ class BotClient private constructor() {
 
     //    map key is hashcode
     private val packHandlerMap: HashMap<Int, PackRequest> = HashMap()
-    private val connection: BotConnection = BotConnection()
-    private val massageListener: MassageListener
+    private val connection: BotConnection = BotConnection(object : MassageListener() {
+        override fun onMassage(ctx: ChannelHandlerContext, msg: Any) {
+            println("channelRead = $ctx, msg = $msg")
+            val byteBuf = msg as ByteBuf
+            // TODO: 2021/5/30 一顿操作之后 大概伪代码
+            val cmdName = byteBuf.readBytes(10).toString()
+            val requestId = byteBuf.readBytes(10).toString()
+            // TODO: 2021/5/30 Objects.hash(cmdName, requestId)待测试同参是否一致
+            val packRequest = packHandlerMap[Objects.hash(cmdName, requestId)]
+            packRequest?.callData(byteBuf.array())
+//                try {
+//                    ByteBuf bb = (ByteBuf) msg;
+//                    byte[] respByte = new byte[bb.readableBytes()];
+//                    bb.readBytes(respByte);
+//                    String respStr = new String(respByte);
+//                    System.err.println("收到响应：" + respStr);
+//                    ctx.writeAndFlush(Unpooled.copiedBuffer("msgggggggggg".getBytes()));
+//                } finally {
+                    //todo 必须释放msg数据？没看文档还没搞懂
+//                  ReferenceCountUtil.release(msg);
+//                }
+        }
+    })
 
     fun send(requestBody: ByteArray): Boolean {
         return connection.send(requestBody)
@@ -30,9 +52,12 @@ class BotClient private constructor() {
 
     @Throws(InterruptedException::class)
     fun connect(): BotClient {
-        connection.setMassageListener(massageListener)
         connection.connect()
         return this
+    }
+
+    fun registerHandler(handler: PackRequest) {
+        packHandlerMap[handler.hashCode()] = handler
     }
 
     fun unregisterHandler(handler: PackRequest) {
@@ -45,35 +70,4 @@ class BotClient private constructor() {
         return PackRequest(this, cmdName, requestId, requestBody)
     }
 
-    fun registerHandler(handler: PackRequest) {
-        packHandlerMap[handler.hashCode()] = handler
-    }
-
-
-    init {
-        massageListener = object : MassageListener() {
-            override fun onMassage(ctx: ChannelHandlerContext, msg: Any) {
-                println("channelRead = $ctx, msg = $msg")
-                val byteBuf = msg as ByteBuf
-                // TODO: 2021/5/30 一顿操作之后 大概伪代码
-                val cmdName = byteBuf.readBytes(10).toString()
-                val requestId = byteBuf.readBytes(10).toString()
-                // TODO: 2021/5/30 Objects.hash(cmdName, requestId)待测试同参是否一致
-                val packRequest = packHandlerMap[Objects.hash(cmdName, requestId)]
-                packRequest?.callData(byteBuf.array())
-                //                try {
-//                    ByteBuf bb = (ByteBuf) msg;
-//                    byte[] respByte = new byte[bb.readableBytes()];
-//                    bb.readBytes(respByte);
-//                    String respStr = new String(respByte);
-//                    System.err.println("收到响应：" + respStr);
-//                    ctx.writeAndFlush(Unpooled.copiedBuffer("msgggggggggg".getBytes()));
-//                } finally {
-                //todo 必须释放msg数据？没看文档还没搞懂
-//                  ReferenceCountUtil.release(msg);
-
-//                }
-            }
-        }
-    }
 }

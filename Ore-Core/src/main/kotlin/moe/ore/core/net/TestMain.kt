@@ -3,8 +3,8 @@ package moe.ore.core.net
 import kotlin.Throws
 import java.lang.InterruptedException
 import kotlin.jvm.JvmStatic
-import java.util.Arrays
 import moe.ore.core.net.PackRequest.OnDataListener
+import java.util.*
 
 object TestMain {
     @Throws(InterruptedException::class)
@@ -23,5 +23,7 @@ object TestMain {
                 println("result：" + Arrays.toString(data))
             }
         })
+        println(Objects.hash("cmdName", "requestId"))
+//        println(Objects.hash("cmdName", "requestId"))
     }
 }

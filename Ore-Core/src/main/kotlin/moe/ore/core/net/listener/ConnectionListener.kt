@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
  */
 class ConnectionListener(private val botConnection: BotConnection) : ChannelFutureListener {
     private val timer = Timer()
+
     @Throws(Exception::class)
     override fun operationComplete(channelFuture: ChannelFuture) {
         if (!channelFuture.isSuccess) {
