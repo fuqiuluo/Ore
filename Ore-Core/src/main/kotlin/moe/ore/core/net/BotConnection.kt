@@ -30,6 +30,7 @@ class BotConnection constructor(massageListener: MassageListener) {
     private val eventListener: EventListener = EventListener(this@BotConnection)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
 
+    // TODO: 2021/6/1 设置一个合理的心跳时间
     private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
     private val reConnectionListener: ReConnectionListener = ReConnectionListener(this@BotConnection)
     private val exceptionListener: ExceptionListener = ExceptionListener(this@BotConnection)
@@ -37,7 +38,6 @@ class BotConnection constructor(massageListener: MassageListener) {
     private val scheduler = Executors.newScheduledThreadPool(1)
 
     @Synchronized
-    @Throws(InterruptedException::class)
     fun connect() {
         channelFuture = bootstrap.connect().addListener(connectionListener)
         scheduler.execute {
@@ -53,7 +53,7 @@ class BotConnection constructor(massageListener: MassageListener) {
     fun send(bytes: ByteArray): Boolean {
         val channel = channelFuture.channel()
         if (channel.isActive && !nioEventLoopGroup.isShutdown) {
-            channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(bytes))
+            channel.writeAndFlush(Unpooled.copiedBuffer(bytes))
             return true
         }
         return false
