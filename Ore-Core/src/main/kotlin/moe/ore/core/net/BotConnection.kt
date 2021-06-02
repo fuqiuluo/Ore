@@ -30,8 +30,8 @@ class BotConnection constructor(massageListener: MassageListener) {
     private val eventListener: EventListener = EventListener(this@BotConnection)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
 
-    // TODO: 2021/6/1 设置一个合理的心跳时间
-    private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
+    //    1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
+    private val idleStateHandler: IdleStateHandler = IdleStateHandler(1000 * (60 + 10), 1000 * 60, 1000 * (60 + 20), TimeUnit.SECONDS)
     private val reConnectionListener: ReConnectionListener = ReConnectionListener(this@BotConnection)
     private val exceptionListener: ExceptionListener = ExceptionListener(this@BotConnection)
     private val connectionListener: ConnectionListener = ConnectionListener(this@BotConnection)

@@ -3,12 +3,30 @@ package moe.ore.core.net
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import moe.ore.core.net.listener.MassageListener
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
 class BotClient {
+    companion object {
+        private val seqFactory = AtomicInteger(Random().nextInt(100000))
+
+        @JvmStatic
+        @Synchronized
+        fun getNextSeq(): Int {
+            var incrementAndGet: Int
+            synchronized(this) {
+                incrementAndGet = seqFactory.incrementAndGet()
+                if (incrementAndGet > 1000000) {
+                    seqFactory.set(Random().nextInt(100000) + 60000)
+                }
+            }
+            return incrementAndGet
+        }
+    }
 
 //    不应该做单例 因为考虑存在多个bot
 //    companion object {
@@ -50,7 +68,6 @@ class BotClient {
 //                    System.err.println("收到响应：" + respStr);
 //                    ctx.writeAndFlush(Unpooled.copiedBuffer("msgggggggggg".getBytes()));
 //                } finally {
-            //todo 必须释放msg数据？没看文档还没搞懂
 //                  ReferenceCountUtil.release(msg);
 //                }
         }

@@ -8,6 +8,7 @@ import moe.ore.core.net.BotConnection
 import io.netty.handler.timeout.IdleStateEvent
 import io.netty.handler.timeout.IdleState
 import io.netty.buffer.Unpooled
+import moe.ore.core.net.BotClient
 import java.lang.Exception
 
 /**
@@ -26,12 +27,12 @@ class HeartBeatListener(private val botConnection: BotConnection) : ChannelHandl
                 evt.state() == IdleState.READER_IDLE -> {
                     println("长期没收到服务器数据 或心跳了 是不是要重连一下？ 可能断网了")
                     // todo 长期没收到服务器数据 可以选择重新连接?
-                    // botConnection.connect();
+                     botConnection.connect()
                 }
                 evt.state() == IdleState.WRITER_IDLE -> {
                     println("该发心跳包了")
                     //发送心跳包
-                    ctx.writeAndFlush(Unpooled.copiedBuffer("心跳~".toByteArray()))
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(makeHeartBeatPacket(BotClient.getNextSeq())))
                 }
                 evt.state() == IdleState.ALL_IDLE -> {
                     System.err.println("ALL????")
@@ -41,5 +42,37 @@ class HeartBeatListener(private val botConnection: BotConnection) : ChannelHandl
             }
         }
         //        super.userEventTriggered(ctx, evt); //彻底拦截事件独享
+    }
+
+    private fun makeHeartBeatPacket(seq: Int): ByteArray {
+//        val builder = ByteBuilder()
+//        builder.writeInt(0xA)
+//        builder.writeByte(0)
+//        builder.writeBytesWithSize(byteArrayOf(), 4)
+//        builder.writeByte(0)
+//        builder.writeStringWithSize(toolQ.account.user.toString(), 4)
+//
+//        val headBuilder = ByteBuilder()
+//        headBuilder.writeInt(seq)
+//        headBuilder.writeInt(toolQ.androidQQ.appId())
+//        headBuilder.writeInt(toolQ.androidQQ.appId())
+//        headBuilder.writeInt(16777216)
+//        headBuilder.writeInt(0)
+//        headBuilder.writeInt(256)
+//        headBuilder.writeBytesWithSize(byteArrayOf(), 4)
+//        headBuilder.writeStringWithSize("Heartbeat.Alive", 4)
+//        headBuilder.writeBytesWithSize(byteArrayOf(), 4)
+//        headBuilder.writeStringWithSize(Android.androidId, 4)
+//        headBuilder.writeBytesWithSize(Android.getKsid(), 4)
+//        headBuilder.writeStringWithShortSize(toolQ.androidQQ.agreementVersion(), 2)
+//        headBuilder.writeStringWithSize("", 4)
+//
+//        builder.writeBytesWithSize(headBuilder.toByteArray(), 4)
+//
+//        builder.writeInt(4)
+//
+//        builder.writeSize(4)
+//        return builder.toByteArray()
+        TODO("心跳内容还未实现")
     }
 }
