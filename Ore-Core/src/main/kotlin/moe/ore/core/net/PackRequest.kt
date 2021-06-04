@@ -1,5 +1,6 @@
 package moe.ore.core.net
 
+import moe.ore.util.bytes.toHexString
 import java.util.concurrent.TimeUnit
 import java.util.Objects
 import java.util.concurrent.ConcurrentHashMap
@@ -27,7 +28,7 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     // 内部维护一个Static变量 相关的东西还是放在相关的类里面比较方便后期维护
     class CacheHandler {
         companion object {
-//            改成字符串拼接作为mapkey发布调试时知道有哪些Handler在map里面
+            //            改成字符串拼接作为mapkey发布调试时知道有哪些Handler在map里面
             val packHandlerMap: ConcurrentHashMap<String, PackRequest> by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
                 ConcurrentHashMap()
             }
@@ -48,13 +49,17 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     private var maxLifeTime = 1000 * 10L
 
     fun await(timeout: Long = 1000 * 3): ByteArray? {
+        checkOneRunLimit()
         setHandlerLifeTime(timeout)
         requestStyle = true
         botClient.send(requestBody)
         reentrantLock.lock()
         return if (reentrantLock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
             source
-        } else null
+        } else {
+            unregisterHandler()
+            return null
+        }
     }
 
     init {
@@ -67,6 +72,7 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
      * @param dataListener 可空 相当于异步请求不要结果
      */
     fun async(dataListener: OnDataListener?) {
+        checkOneRunLimit()
         setHandlerLifeTime()
         requestStyle = false
         this.dataListener = dataListener
@@ -76,9 +82,15 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     /**
      * 这里主要进行回调数据和移除Handler
      * 如果是同步请求也将在这里接锁线程的阻塞
+     *Synchronized保护 防止以为抽风可能导致瞬间回调多次可能 反正只要一次结果
      */
+
+    @Synchronized
     private fun callData(data: ByteArray?) {
-        if (isCallComplete) return
+        if (isCallComplete) {
+            println("重复的回调执行 请检查原因 callData：" + data?.toHexString())
+            return
+        }
         isCallComplete = true
         unregisterHandler()
         source = data
@@ -119,15 +131,24 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
 
     private fun unregisterHandler() {
         if (CacheHandler.packHandlerMap.containsKey("$cmdName,$requestId")) {
-            if (CacheHandler.packHandlerMap.remove("$cmdName,$requestId", this)) {
-                throw RuntimeException("找不到要移除的Handler")
+            if (!CacheHandler.packHandlerMap.remove("$cmdName,$requestId", this)) {
+//                throw RuntimeException("找不到要移除的Handler")
+                println("找不到要移除的Handler")
             }
         }
     }
 
-//    private fun checkOneRunLimit() {
-//        if (isCallComplete) {
-//            throw RuntimeException("一个Handler只能使用一次")
-//        }
-//    }
+    /**
+     * 当程序发生错误(没收到服务器异步返回，同步超时已做释放)时你可能需要手动释放一下
+     * 释放是指从map中移除自身 在此之后你任然可以操作这个类
+     * */
+    fun release() {
+        unregisterHandler()
+    }
+
+    private fun checkOneRunLimit() {
+        if (isCallComplete) {
+            throw RuntimeException("一个Handler只能使用一次")
+        }
+    }
 }
