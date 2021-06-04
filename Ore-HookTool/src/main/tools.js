@@ -101,7 +101,7 @@ function bytes2Hex(value) {
 
 
 /**
- * 收发包监视器 不保证所有包都能监视到 过滤打印1024*1024的包
+ * 收发包监视器 不保证所有包都能监视到 过滤打印1024*4
  * */
 function registeredPackListener() {
     Java.use("com.tencent.qphone.base.remote.ToServiceMsg").writeToParcel.overload("android.os.Parcel", "int").implementation = function (v1, v2) {
@@ -131,8 +131,10 @@ function registeredPackListener() {
             var svm = sv.tag.value;
             if (svm === "ToServiceMsg") {
                 svm = sv.getServiceName();
+
             }
-            return s !== "apollo_monitor.report_trace" && s !== "App_reportRDM" && s !== "OnlinePush.PbPushGroupMsg" && s !== "MultibusidURLSvr.HeadUrlReq" && s !== "CliLogSvc.UploadReq" && s !== "SQQzoneSvc.getUndealCount" && s !== "cmd_pushSetConfig" && svm !== "com.tencent.mobileqq.msf.service.MsfService";
+        // && svm !== "com.tencent.mobileqq.msf.service.MsfService"
+            return s !== "apollo_monitor.report_trace" && s !== "App_reportRDM" && s !== "OnlinePush.PbPushGroupMsg" && s !== "MultibusidURLSvr.HeadUrlReq" && s !== "CliLogSvc.UploadReq" && s !== "SQQzoneSvc.getUndealCount" && s !== "cmd_pushSetConfig";
         }
     }
 }
