@@ -117,8 +117,8 @@ function registeredPackListener() {
     }
 
     function print(va) {
-        if (filter(va.getServiceCmd())) {
-            if (va.getWupBuffer().length > 1024 * 1024) {
+        if (filter(va)) {
+            if (va.getWupBuffer().length > 1024 * 4) {
                 console.warn("###############过滤了一个很大的包：" + va.getServiceCmd() + " 大小：" + va.getWupBuffer().length + " 如果没有头绪可以看看这个包")
             } else
                 send("=============start===============" + "\n" + va.getStringForLog() + "\n" + hexdumpBytes(va.getWupBuffer(), true) + "\n=============end===============")
@@ -126,8 +126,13 @@ function registeredPackListener() {
             console.error(">>>已过滤包：" + va.getServiceCmd() + " 大小：" + va.getWupBuffer().length + " 如果没有头绪可以看看这个包")
         }
 
-        function filter(s) {
-            return s !== "apollo_monitor.report_trace" && s !== "App_reportRDM" && s !== "OnlinePush.PbPushGroupMsg" && s !== "MultibusidURLSvr.HeadUrlReq" && s !== "CliLogSvc.UploadReq" && s !== "SQQzoneSvc.getUndealCount" && s !== "cmd_pushSetConfig";
+        function filter(sv) {
+            var s = sv.getServiceCmd();
+            var svm = sv.tag.value;
+            if (svm === "ToServiceMsg") {
+                svm = sv.getServiceName();
+            }
+            return s !== "apollo_monitor.report_trace" && s !== "App_reportRDM" && s !== "OnlinePush.PbPushGroupMsg" && s !== "MultibusidURLSvr.HeadUrlReq" && s !== "CliLogSvc.UploadReq" && s !== "SQQzoneSvc.getUndealCount" && s !== "cmd_pushSetConfig" && svm !== "com.tencent.mobileqq.msf.service.MsfService";
         }
     }
 }

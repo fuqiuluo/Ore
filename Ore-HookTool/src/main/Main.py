@@ -18,7 +18,9 @@ rdev = frida.get_usb_device()
 # 附加到的包名 如果包没有运行会报错
 session = rdev.attach("com.tencent.mobileqq")
 # js文件 txt方式拼接 不要怀疑人生
-script = session.create_script(read_file("tools.js") + read_file("boothook.js"))
+text = read_file("tools.js") + \
+       read_file("simpleHookTest.js")
+script = session.create_script(text)
 script.on('message', on_message)
 
 print('[*] Running')
