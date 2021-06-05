@@ -14,8 +14,8 @@ import java.lang.Exception
 abstract class MassageListener : ChannelHandlerAdapter() {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-//        println("MassageListener.channelRead")
-        onMassage(ctx, msg)
+
+
     }
 
     protected abstract fun onMassage(ctx: ChannelHandlerContext, msg: Any)

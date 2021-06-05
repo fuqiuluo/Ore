@@ -11,46 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * create 2021-05-30 13:18
  */
 class BotClient {
-    companion object {
-        private val seqFactory = AtomicInteger(Random().nextInt(100000))
-
-        @JvmStatic
-        @Synchronized
-        fun getNextSeq(): Int {
-            var incrementAndGet: Int
-            synchronized(this) {
-                incrementAndGet = seqFactory.incrementAndGet()
-                if (incrementAndGet > 1000000) {
-                    seqFactory.set(Random().nextInt(100000) + 60000)
-                }
-            }
-            return incrementAndGet
-        }
-    }
-
-//    不应该做单例 因为考虑存在多个bot
-//    companion object {
-//        val instance: BotClient by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
-//            BotClient()
-//        }
-//    }
-
-//    private val timer = Timer()
-//
-//    init {
-////        定时移没有收到结果的请求Handler 一般来说很少会有因收不到请求结果而无被法移除的Handler 感觉不是特别必要
-//        timer.schedule(object : TimerTask() {
-//            override fun run() {
-////                println("packHandlerMap---$packHandlerMap")
-//                // TODO: 2021/6/1 在循环中移除map自身的kv会不会和list那样出现异常？目前测试没有问题 有待长期观察
-//                packHandlerMap.forEachValue(1) { it.checkHandlerLifeTime() }
-//            }
-//
-//        }, 1000, 1000 * 5)
-//    }
-
-    //    map key is hashcode
-//    private val packHandlerMap: ConcurrentHashMap<Int, PackRequest> = ConcurrentHashMap()
     private val connection: BotConnection = BotConnection(object : MassageListener() {
         override fun onMassage(ctx: ChannelHandlerContext, msg: Any) {
             println("channelRead = $ctx, msg = $msg")

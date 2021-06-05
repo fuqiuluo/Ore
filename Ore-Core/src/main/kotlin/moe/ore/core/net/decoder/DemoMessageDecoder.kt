@@ -12,6 +12,9 @@ class DemoMessageDecoder : MessageToMessageDecoder<ByteBuf>() {
     @Throws(Exception::class)
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         try {
+
+
+
             if (msg.readBytes(4).toString() == CMD_NAME) {
                 out.add(Demo(msg.readInt())) //一旦add进去就标识被处理了
             }
