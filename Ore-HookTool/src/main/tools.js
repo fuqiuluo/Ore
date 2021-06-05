@@ -133,9 +133,13 @@ function registeredPackListener() {
                 svm = sv.getServiceName();
 
             }
-        // && svm !== "com.tencent.mobileqq.msf.service.MsfService"
+            // && svm !== "com.tencent.mobileqq.msf.service.MsfService"
             return s !== "apollo_monitor.report_trace" && s !== "App_reportRDM" && s !== "OnlinePush.PbPushGroupMsg" && s !== "MultibusidURLSvr.HeadUrlReq" && s !== "CliLogSvc.UploadReq" && s !== "SQQzoneSvc.getUndealCount" && s !== "cmd_pushSetConfig";
         }
     }
 }
 
+function getAndroidContext() {
+    return Java.use("android.app.ActivityThread").currentApplication();
+
+}
