@@ -20,7 +20,7 @@ class TicketManager {
             return ssoSessions.getOrDefault(uin, Sessions())
         }
 
-        fun getIdIteratorNext(uin: Long): Int {
+        fun getNextRequestId(uin: Long): Int {
             var incrementAndGet: Int
             synchronized(this) {
                 val atomicInteger = idIterator.getOrDefault(uin, AtomicInteger(Random().nextInt(100000)))
