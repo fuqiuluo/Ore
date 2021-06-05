@@ -52,7 +52,9 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
         checkOneRunLimit()
         setHandlerLifeTime(timeout)
         requestStyle = true
-        botClient.send(requestBody)
+        if (!botClient.send(requestBody)) {
+            return null
+        }
         reentrantLock.lock()
         return if (reentrantLock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
             source
@@ -76,7 +78,9 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
         setHandlerLifeTime()
         requestStyle = false
         this.dataListener = dataListener
-        botClient.send(requestBody)
+        if (!botClient.send(requestBody)) {
+            this.dataListener?.onReceive(null)
+        }
     }
 
     /**

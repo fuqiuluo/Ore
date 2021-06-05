@@ -1,7 +1,6 @@
 package moe.ore.core.net
 
 import io.netty.bootstrap.Bootstrap
-import kotlin.Throws
 import io.netty.buffer.Unpooled
 import java.util.concurrent.Executors
 import io.netty.channel.ChannelFuture
@@ -50,6 +49,7 @@ class BotConnection constructor(massageListener: MassageListener) {
         }
     }
 
+//    @Synchronized
     fun send(bytes: ByteArray): Boolean {
         val channel = channelFuture.channel()
         if (channel.isActive && !nioEventLoopGroup.isShutdown) {
