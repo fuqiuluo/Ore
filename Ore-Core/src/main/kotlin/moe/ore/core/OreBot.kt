@@ -2,7 +2,7 @@ package moe.ore.core
 
 import moe.ore.api.Ore
 import moe.ore.api.listener.OreListener
-import moe.ore.core.protocol.WloginSigInfo
+import moe.ore.core.protocol.WLoginSigInfo
 
 class OreBot : Ore {
 
@@ -15,7 +15,7 @@ class OreBot : Ore {
      * 保存各种Token
      */
     @JvmField
-    val sigInfo = WloginSigInfo()
+    val sigInfo = WLoginSigInfo()
 
     override fun login() {
         // 登录开始传递登录开始事件
