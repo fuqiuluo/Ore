@@ -25,7 +25,6 @@ import kotlin.random.Random
  */
 class BotConnection(private val massageListener: MassageListener, val uin: ULong) {
     lateinit var channelFuture: ChannelFuture
-
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)

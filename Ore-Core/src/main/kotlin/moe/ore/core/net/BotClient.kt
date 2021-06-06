@@ -6,6 +6,7 @@ import moe.ore.core.net.listener.MassageListener
 /**
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
+ * uin 为BotClient唯一身份标识 代表是哪个号的bot实例
  */
 class BotClient(val uin: ULong) {
 
