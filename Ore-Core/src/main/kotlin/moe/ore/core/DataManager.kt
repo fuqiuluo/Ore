@@ -18,6 +18,8 @@ class DataManager(val uin: ULong) {
      * 销毁
      */
     fun destroy() {
+        // 清空所有map
+
 
     }
 
