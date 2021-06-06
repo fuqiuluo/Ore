@@ -1,5 +1,7 @@
 package moe.ore.core.protocol
 
+import moe.ore.core.bot.WLoginSigInfo
+
 interface SsoSession {
     var outgoingPacketSessionId: ByteArray
 

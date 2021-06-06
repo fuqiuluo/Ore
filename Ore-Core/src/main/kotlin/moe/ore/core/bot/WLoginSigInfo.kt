@@ -1,4 +1,4 @@
-package moe.ore.core.protocol
+package moe.ore.core.bot
 
 class WLoginSigInfo {
 

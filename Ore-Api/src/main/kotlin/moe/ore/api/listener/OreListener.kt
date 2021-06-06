@@ -9,9 +9,8 @@ interface OreListener {
 
     /**
      * 开始登录
-     * @param ore Ore
      */
-    fun loginStart(ore : Ore)
+    fun onLoginStart()
 
 
 

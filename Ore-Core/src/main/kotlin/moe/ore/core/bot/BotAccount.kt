@@ -3,7 +3,7 @@ package moe.ore.core.bot
 import moe.ore.util.MD5
 
 data class BotAccount(
-    val uin : Long,
+    val uin : ULong,
     val password : String
 ) {
     /**

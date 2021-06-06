@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotClient {
+class BotClient() {
 
     fun getUin(): Long {
         TODO("client仅维护必要的uin和一些简单的数据 其余的用管理器")

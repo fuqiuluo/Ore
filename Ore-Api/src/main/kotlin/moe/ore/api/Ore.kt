@@ -1,13 +1,18 @@
 package moe.ore.api
 
+
 /**
  * Ore实体对象接口文件
  */
-interface Ore {
+abstract class Ore {
 
     /**
      * 登录
      */
-    fun login()
+    abstract fun login()
 
+    /**
+     * 关闭机器人
+     */
+    abstract fun shut()
 }
