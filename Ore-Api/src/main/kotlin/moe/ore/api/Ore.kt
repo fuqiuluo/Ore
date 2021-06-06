@@ -12,6 +12,12 @@ abstract class Ore {
     abstract fun login()
 
     /**
+     * 获取机器人状态
+     * @return OreStatus
+     */
+    abstract fun status() : OreStatus
+
+    /**
      * 关闭机器人
      */
     abstract fun shut()
