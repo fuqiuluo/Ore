@@ -20,26 +20,22 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
          * 回调分发 获取请求Handler然后调用callData把数据返回
          * */
         @JvmStatic
-        fun call(cmdName: String, requestId: Long, source: ByteArray) {
-            CacheHandler.packHandlerMap["$cmdName,$requestId"]?.callData(source)
+        fun call(uin: Long, cmdName: String, requestId: Long, source: ByteArray) {
+            CacheHandler.packHandlerMap["$uin,$$cmdName,$requestId"]?.callData(source)
         }
     }
 
     // 内部维护一个Static变量 相关的东西还是放在相关的类里面比较方便后期维护
+    //改成字符串拼接作为mapkey发布调试时知道有哪些Handler在map里面
     class CacheHandler {
         companion object {
-            //            改成字符串拼接作为mapkey发布调试时知道有哪些Handler在map里面
             val packHandlerMap: ConcurrentHashMap<String, PackRequest> by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
                 ConcurrentHashMap()
-            }
-
-            @JvmStatic
-            fun call(cmdName: String, requestId: Long, source: ByteArray) {
-                packHandlerMap["$cmdName,$requestId"]?.callData(source)
             }
         }
     }
 
+    private var uin = botClient.getUin()
     private val reentrantLock = MutexLock()
     private var requestStyle = true
     private var source: ByteArray? = null
@@ -130,12 +126,12 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     }
 
     private fun registerHandler() {
-        CacheHandler.packHandlerMap["$cmdName,$requestId"] = this
+        CacheHandler.packHandlerMap["$uin,$cmdName,$requestId"] = this
     }
 
     private fun unregisterHandler() {
-        if (CacheHandler.packHandlerMap.containsKey("$cmdName,$requestId")) {
-            if (!CacheHandler.packHandlerMap.remove("$cmdName,$requestId", this)) {
+        if (CacheHandler.packHandlerMap.containsKey("$uin,$cmdName,$requestId")) {
+            if (!CacheHandler.packHandlerMap.remove("$uin,$cmdName,$requestId", this)) {
 //                throw RuntimeException("找不到要移除的Handler")
                 println("找不到要移除的Handler")
             }
