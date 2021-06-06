@@ -26,7 +26,6 @@ import kotlin.random.Random
 class BotConnection(private val massageListener: MassageListener, val uin: ULong) {
     lateinit var channelFuture: ChannelFuture
 
-    private val bootstrap: Bootstrap = Bootstrap()
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
@@ -39,8 +38,7 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
     @Synchronized
     @Throws(InterruptedException::class)
     fun connect() {
-        init()
-        channelFuture = bootstrap.connect().addListener(connectionListener)
+        channelFuture = init(Bootstrap()).connect().addListener(connectionListener)
         scheduler.execute {
             try {
                 channelFuture.channel().closeFuture().sync()
@@ -66,7 +64,7 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
         private val oicqServer = arrayOf("msfwifi.3g.qq.com" to 8080, "14.215.138.110" to 8080, "113.96.12.224" to 8080, "157.255.13.77" to 14000, "120.232.18.27" to 443, "183.3.235.162" to 14000, "163.177.89.195" to 443, "183.232.94.44" to 80, "203.205.255.224" to 8080, "203.205.255.221" to 8080, "msfwifiv6.3g.qq.com" to 8080, "[240e:ff:f101:10::109]" to 14000)
     }
 
-    private fun init() {
+    private fun init(bootstrap: Bootstrap): Bootstrap {
         if (nioEventLoopGroup.isShutdown) {
             // TODO: 2021/6/6 待测试
             nioEventLoopGroup = NioEventLoopGroup()
@@ -86,6 +84,6 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
             }
         })
         val server = oicqServer[Random.nextInt(oicqServer.size)]
-        bootstrap.remoteAddress(InetSocketAddress(server.first, server.second))
+        return bootstrap.remoteAddress(InetSocketAddress(server.first, server.second))
     }
 }
