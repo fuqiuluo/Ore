@@ -4,7 +4,7 @@ import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
 import java.util.*
 
-class DataManager(val uin: ULong) {
+class DataManager(uin: ULong) {
 
     init {
         println("init$uin")
@@ -27,6 +27,7 @@ class DataManager(val uin: ULong) {
     fun destroy() {
         println("destroy")
         // TODO: 2021/6/6 销毁之前序列化到本地文件
+        // 清空自身类里面的map或存在引用关系的事务
     }
 
     companion object {
