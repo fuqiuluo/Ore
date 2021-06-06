@@ -2,6 +2,7 @@ package moe.ore.core
 
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
+import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -10,30 +11,16 @@ import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 import moe.ore.util.bytes.hex2ByteArray
 import java.io.File
+import java.security.SecureRandom
+import java.util.*
+import kotlin.math.abs
 
-class DataManager private constructor(uin: ULong) {
+class DataManager private constructor(uin: ULong) : TarsStructBase() {
     /**
      * 数据保存目录
      */
     @JvmField
-    var dataPath : String = File("data/$uin").absolutePath
-
-    /**
-     * 模拟的安卓信息
-     */
-    private var androidConfig : AndroidConfig? = null
-
-    fun androidConfig() : AndroidConfig {
-        if(androidConfig == null) {
-            val configPath = "$dataPath/androidConfig"
-            androidConfig = if(FileUtil.has(configPath)) {
-                AndroidConfig().apply {
-                    readFrom(TarsInputStream(FileUtil.readFile(configPath)))
-                }
-            } else AndroidConfig().apply { flush(configPath) }
-        }
-        return androidConfig!!
-    }
+    var dataPath: String = File("data/{$uin}.ore").absolutePath
 
     /**
      * 管理器
@@ -45,44 +32,77 @@ class DataManager private constructor(uin: ULong) {
      * 保存各种Token
      */
     @JvmField
-    val sigInfo = WLoginSigInfo()
+    var sigInfo = WLoginSigInfo()
+
+    /**
+     * 模拟的安卓信息
+     */
+    private var deviceInfo = DeviceInfo()
+    var protocol: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+
+    init {
+        if (FileUtil.has(dataPath)) {
+            readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
+        }
+    }
 
     /**
      * 销毁
      */
     fun destroy() {
+        FileUtil.saveFile(dataPath, toByteArray())
         println("destroy")
         // TODO: 2021/6/6 销毁之前序列化到本地文件
         // 清空自身类里面的map或存在引用关系的事务
-
     }
 
-    class AndroidConfig : TarsStructBase() {
-        var imei : String = ""
-        var androidId : String = "53f156a0b5b89966"
-        var imsi : String = "460023785098616"
-        var machineName : String = "M2002J9E"
-        var osType : String = "android"
-        var machineManufacturer : String = "Xiaomi"
-        var androidVersion : String = "11"
-        var androidSdkVersion : Int = 30
-        var wifiSsid : String = "705"
-        var wifiBSsid = "D8:9E:61:9C:3D:E0"
-        var macAddress = "20:F4:78:6B:80:AA"
+    fun flush() {
+        FileUtil.saveFile(dataPath, toByteArray())
+    }
 
-        var netType = "wifi"
-        var apn = "中国移动"
-        var ksid : ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
+    class DeviceInfo : TarsStructBase() {
+        class NetworkType(val value: Int) {
+            companion object {
+                /**
+                 * 移动网络
+                 */
+                val MOBILE = NetworkType(1)
 
-        var randKey : ByteArray = BytesUtil.randomKey(16)
+                /**
+                 * Wifi
+                 */
+                val WIFI = NetworkType(2)
 
-        fun getTgtgKey() = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), getGuid()))!!
-
-        fun getGuid() = MD5.toMD5Byte( (imei.ifEmpty { androidId }) + macAddress)!!
-
-        internal fun flush(path : String) {
-            FileUtil.saveFile(path, toByteArray())
+                /**
+                 * 其他任何类型
+                 */
+                val OTHER = NetworkType(0)
+            }
         }
+
+        var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14));
+        var androidId: String = getRandomAndroidId()
+        var imsi: String = ("46002" + System.currentTimeMillis()).substring(0, 15)
+        var machineName: String = "M2002J9E"
+        var osType: String = "android"
+        var machineManufacturer: String = "Xiaomi"
+        var androidVersion: String = "11"
+        var androidSdkVersion: Int = 30
+        var wifiSsid: String = "<unknown ssid>"
+        var wifiBSsid = "02:00:00:00:00:00"
+        var macAddress = getRandomMacAddress()
+        var netType = NetworkType.WIFI.value
+        var apn = if (netType == NetworkType.WIFI.value) {
+            "wifi"
+        } else {
+            "cmnet"
+        }
+        var apnName = "中国移动"
+        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray() //t108
+        var randKey: ByteArray = BytesUtil.randomKey(16)
+        var guid: ByteArray = MD5.toMD5Byte((imei.ifEmpty { androidId }) + macAddress)
+
+        var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
         override fun writeTo(output: TarsOutputStream) {
             output.write(imei, 1)
@@ -98,8 +118,11 @@ class DataManager private constructor(uin: ULong) {
             output.write(macAddress, 11)
             output.write(netType, 12)
             output.write(apn, 13)
-            output.write(ksid, 14)
-            output.write(randKey, 15)
+            output.write(apnName, 14)
+            output.write(ksid, 15)
+            output.write(randKey, 16)
+            output.write(guid, 17)
+            output.write(tgtgKey, 18)
         }
 
         override fun readFrom(input: TarsInputStream) {
@@ -116,8 +139,49 @@ class DataManager private constructor(uin: ULong) {
             macAddress = input.read(macAddress, 11, true)
             netType = input.read(netType, 12, true)
             apn = input.read(apn, 13, true)
-            ksid = input.read(ksid, 14, true)
-            randKey = input.read(randKey, 15, true)
+            apnName = input.read(apn, 14, true)
+            ksid = input.read(ksid, 15, true)
+            randKey = input.read(randKey, 16, true)
+            guid = input.read(guid, 17, true)
+            tgtgKey = input.read(guid, 17, true)
+        }
+
+        private fun getImei15(imei: String): String {
+            val imeiChar = imei.toCharArray()
+            var resultInt = 0
+            var i = 0
+            while (i < imeiChar.size) {
+                val a = imeiChar[i].toString().toInt()
+                i++
+                val temp = imeiChar[i].toString().toInt() * 2
+                val b = if (temp < 10) temp else temp - 9
+                resultInt += a + b
+                i++
+            }
+            resultInt %= 10
+            resultInt = if (resultInt == 0) 0 else 10 - resultInt
+            return imei + resultInt
+        }
+
+        private fun getRandomAndroidId(): String {
+            return UUID.randomUUID().toString().replace("-", "").substring(0, 16)
+        }
+
+        private fun getRandomMacAddress(): String {
+            val randomKey = BytesUtil.randomKey(6)
+//             println(byteArray.contentToString())
+//            还有一种奇怪的生成方法
+//             val seed = SecureRandom.getSeed(6)
+//            println(seed.contentToString())
+            val sb = StringBuilder()
+            val length: Int = randomKey.size
+            for (i in 0 until length) {
+                sb.append(String.format("%02X:", java.lang.Byte.valueOf(randomKey[i])))
+            }
+            if (sb.isNotEmpty()) {
+                sb.deleteCharAt(sb.length - 1)
+            }
+            return sb.toString()
         }
     }
 
@@ -135,6 +199,10 @@ class DataManager private constructor(uin: ULong) {
             return managerMap.getOrPut(uin) { DataManager(uin) }
         }
 
+        fun flush(uin: ULong) {
+            managerMap.remove(uin)?.flush()
+        }
+
         /**
          * 销毁释放
          *
@@ -143,6 +211,31 @@ class DataManager private constructor(uin: ULong) {
         @JvmStatic
         fun destroy(uin: ULong) {
             managerMap.remove(uin)?.destroy()
+        }
+    }
+
+    override fun writeTo(output: TarsOutputStream) {
+        output.write(deviceInfo, 1)
+        output.write(sigInfo, 2)
+        output.write(protocol.name, 3)
+    }
+
+    override fun readFrom(input: TarsInputStream) {
+        deviceInfo = input.read(deviceInfo, 1, true)
+        sigInfo = input.read(sigInfo, 2, true)
+        protocol = ProtocolInternal.ProtocolType.valueOf(input.read("", 3, true))
+    }
+
+    fun get_mpasswd(): String {
+        return try {
+            val str = StringBuilder()
+            for (b in SecureRandom.getSeed(16)) {
+                val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
+                str.append(abs.toChar())
+            }
+            str.toString()
+        } catch (unused: Throwable) {
+            "1234567890123456"
         }
     }
 }
