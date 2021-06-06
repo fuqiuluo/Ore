@@ -2,8 +2,15 @@ package moe.ore.core
 
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
+import java.util.*
 
 class DataManager(val uin: ULong) {
+
+    init {
+        println("init$uin")
+        // TODO: 2021/6/6 加载本地保存的实例
+    }
+
     /**
      * 管理器
      */
@@ -18,7 +25,8 @@ class DataManager(val uin: ULong) {
      * 销毁
      */
     fun destroy() {
-
+        println("destroy")
+        // TODO: 2021/6/6 销毁之前序列化到本地文件
     }
 
     companion object {
@@ -31,11 +39,8 @@ class DataManager(val uin: ULong) {
          * @return DataManger
          */
         @JvmStatic
-        fun manager(uin : ULong) : DataManager {
-            if(!managerMap.containsKey(uin)) {
-                managerMap[uin] = DataManager(uin)
-            }
-            return managerMap[uin]!!
+        fun manager(uin: ULong): DataManager {
+            return managerMap.getOrPut(uin) { DataManager(uin) }
         }
 
         /**
@@ -45,9 +50,7 @@ class DataManager(val uin: ULong) {
          */
         @JvmStatic
         fun destroy(uin: ULong) {
-            if(managerMap.containsKey(uin)) {
-                managerMap.remove(uin)?.destroy()
-            }
+            managerMap.remove(uin)?.destroy()
         }
     }
 }

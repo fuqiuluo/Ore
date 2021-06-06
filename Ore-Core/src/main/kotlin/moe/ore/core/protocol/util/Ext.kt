@@ -202,3 +202,10 @@ public fun UByte.fixToUHex(): String =
  * 转换结果示例: `FF`, `0E`
  */
 public fun Byte.toUHexString(): String = this.toUByte().fixToUHex()
+
+fun ByteArray.toAsciiHexString() = joinToString("") {
+    if (it in 32..127) it.toInt().toChar().toString() else "{${it.toUByte().toString(16).padStart(2, '0').uppercase()}}"
+}
+
+fun String.chunkedHexToBytes(): ByteArray =
+    this.asSequence().chunked(2).map { (it[0].toString() + it[1]).toUByte(16).toByte() }.toList().toByteArray()

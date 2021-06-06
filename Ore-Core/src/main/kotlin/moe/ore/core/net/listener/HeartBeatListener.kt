@@ -8,7 +8,7 @@ import moe.ore.core.net.BotConnection
 import io.netty.handler.timeout.IdleStateEvent
 import io.netty.handler.timeout.IdleState
 import io.netty.buffer.Unpooled
-import moe.ore.core.net.BotClient
+import moe.ore.core.DataManager
 import java.lang.Exception
 
 /**
@@ -27,12 +27,12 @@ class HeartBeatListener(private val botConnection: BotConnection) : ChannelHandl
                 evt.state() == IdleState.READER_IDLE -> {
                     println("长期没收到服务器数据 或心跳了 是不是要重连一下？ 可能断网了")
                     // todo 长期没收到服务器数据 可以选择重新连接?
-                     botConnection.connect()
+                    botConnection.connect()
                 }
                 evt.state() == IdleState.WRITER_IDLE -> {
                     println("该发心跳包了")
                     //发送心跳包
-                    ctx.writeAndFlush(Unpooled.copiedBuffer(makeHeartBeatPacket(BotClient.getNextSeq())))
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(makeHeartBeatPacket(DataManager.manager(botConnection.uin).recorder.nextSeq())))
                 }
                 evt.state() == IdleState.ALL_IDLE -> {
                     System.err.println("ALL????")

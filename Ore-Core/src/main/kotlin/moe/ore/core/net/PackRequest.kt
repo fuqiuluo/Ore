@@ -35,7 +35,7 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
         }
     }
 
-    private var uin = botClient.getUin()
+    private var uin = botClient.uin
     private val reentrantLock = MutexLock()
     private var requestStyle = true
     private var source: ByteArray? = null
