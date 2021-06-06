@@ -29,15 +29,15 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
     private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
-    private val reConnectionListener: ReConnectionListener = ReConnectionListener(this@BotConnection)
-    private val exceptionListener: ExceptionListener = ExceptionListener(this)
-    private val connectionListener: ConnectionListener = ConnectionListener(this@BotConnection)
+    private val reConnectionAndExceptionListener: ReConnectionAndExceptionListener = ReConnectionAndExceptionListener(this@BotConnection)
+
+    //    max1个线程池 不允许再多
     private val scheduler = Executors.newScheduledThreadPool(1)
 
     @Synchronized
     @Throws(InterruptedException::class)
     fun connect() {
-        channelFuture = init(Bootstrap()).connect().addListener(connectionListener)
+        channelFuture = init(Bootstrap()).connect().addListener(reConnectionAndExceptionListener)
         scheduler.execute {
             try {
                 channelFuture.channel().closeFuture().sync()
@@ -73,8 +73,7 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
         bootstrap.handler(object : ChannelInitializer<SocketChannel>() {
             public override fun initChannel(socketChannel: SocketChannel) {
                 //  注意添加顺序决定执行的先后
-                socketChannel.pipeline().addLast("caughtException", exceptionListener)
-                socketChannel.pipeline().addLast("reConnection", reConnectionListener)
+                socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
                 socketChannel.pipeline().addLast("ping", idleStateHandler)
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
