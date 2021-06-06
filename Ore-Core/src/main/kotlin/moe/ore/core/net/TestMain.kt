@@ -42,23 +42,14 @@ object TestMain {
 //        println(aa1)
 //        println(AA().get())
 
-        val sigInfo = DataManager.manager(1234u).sigInfo
-
-        DataManager.manager(1234u).sigInfo.d2Key = byteArrayOf(1, 2, 3)
-
-        println("C"+sigInfo.d2Key.toAsciiHexString())
-
-        println("B"+DataManager.manager(1234u).sigInfo.d2Key.toAsciiHexString())
-
-        DataManager.manager(1234u).sigInfo.d2Key = byteArrayOf(2, 5, 6)
-
-        println("A"+sigInfo.d2Key.toAsciiHexString())
-
+//        val manager1 = DataManager.init(1234u,"data")
+        val manager = DataManager.manager(1234u)
+        println(manager.dataPath)
+        println(manager.protocol)
+        println(manager.sigInfo)
+        println(manager.deviceInfo.androidId)
         DataManager.destroy(1234u)
-        DataManager.destroy(1234u)
-        DataManager.destroy(1234u)
-        println("D"+sigInfo.d2Key.toAsciiHexString())
-        println("E"+ DataManager.manager(1234u).sigInfo.d2Key.toAsciiHexString())
+        println("E"+ DataManager.manager(1234u).deviceInfo.toByteArray().toAsciiHexString())
     }
 
 }

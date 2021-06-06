@@ -19,14 +19,17 @@ class OreBot(val account: BotAccount) : Ore() {
     /**
      * 事件监听器
      */
-    var oreListener : OreListener? = null
+    var oreListener: OreListener? = null
 
     override fun login() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
 
 
+    }
 
+    fun setDataPath(path: String) {
+        DataManager.init(account.uin, if (path.endsWith("/")) path.substring(0, path.length - 1) else path)
     }
 
     override fun status() = status

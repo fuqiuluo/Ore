@@ -16,11 +16,18 @@ import java.util.*
 import kotlin.math.abs
 
 class DataManager private constructor(uin: ULong) : TarsStructBase() {
+
+    private var path = ""
+
+    private constructor(uin: ULong, path: String) : this(uin) {
+        this.path = path
+    }
+
     /**
      * 数据保存目录
      */
     @JvmField
-    var dataPath: String = File("data/{$uin}.ore").absolutePath
+    var dataPath: String = File(path + File.separator + "$uin.ore").absolutePath
 
     /**
      * 管理器
@@ -37,11 +44,15 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
     /**
      * 模拟的安卓信息
      */
-    private var deviceInfo = DeviceInfo()
+    var deviceInfo = DeviceInfo()
     var protocol: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
     init {
+        if (path.isBlank()) {
+            throw RuntimeException("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
+        }
         if (FileUtil.has(dataPath)) {
+            println(dataPath)
             readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
         }
     }
@@ -80,7 +91,7 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
             }
         }
 
-        var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14));
+        var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14))
         var androidId: String = getRandomAndroidId()
         var imsi: String = ("46002" + System.currentTimeMillis()).substring(0, 15)
         var machineName: String = "M2002J9E"
@@ -90,7 +101,7 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
         var androidSdkVersion: Int = 30
         var wifiSsid: String = "<unknown ssid>"
         var wifiBSsid = "02:00:00:00:00:00"
-        var macAddress = getRandomMacAddress()
+        var macAddress = "02:00:00:00:00:00"
         var netType = NetworkType.WIFI.value
         var apn = if (netType == NetworkType.WIFI.value) {
             "wifi"
@@ -143,7 +154,7 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
             ksid = input.read(ksid, 15, true)
             randKey = input.read(randKey, 16, true)
             guid = input.read(guid, 17, true)
-            tgtgKey = input.read(guid, 17, true)
+            tgtgKey = input.read(tgtgKey, 18, true)
         }
 
         private fun getImei15(imei: String): String {
@@ -196,9 +207,15 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
          */
         @JvmStatic
         fun manager(uin: ULong): DataManager {
-            return managerMap.getOrPut(uin) { DataManager(uin) }
+            return managerMap.getOrElse(uin) { throw RuntimeException("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
         }
 
+        @JvmStatic
+        fun init(uin: ULong, path: String): DataManager {
+            return managerMap.getOrPut(uin) { DataManager(uin, path) }
+        }
+
+        @JvmStatic
         fun flush(uin: ULong) {
             managerMap.remove(uin)?.flush()
         }
@@ -214,16 +231,18 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
         }
     }
 
+    @Override
     override fun writeTo(output: TarsOutputStream) {
         output.write(deviceInfo, 1)
         output.write(sigInfo, 2)
         output.write(protocol.name, 3)
     }
 
+    @Override
     override fun readFrom(input: TarsInputStream) {
         deviceInfo = input.read(deviceInfo, 1, true)
         sigInfo = input.read(sigInfo, 2, true)
-        protocol = ProtocolInternal.ProtocolType.valueOf(input.read("", 3, true))
+        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, true))
     }
 
     fun get_mpasswd(): String {
