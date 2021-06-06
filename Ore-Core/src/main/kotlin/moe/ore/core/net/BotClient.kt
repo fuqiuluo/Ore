@@ -11,21 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * create 2021-05-30 13:18
  */
 class BotClient {
-    companion object {
-        private val seqFactory = AtomicInteger(Random().nextInt(100000))
 
-        @JvmStatic
-        @Synchronized
-        fun getNextSeq(): Int {
-            var incrementAndGet: Int
-            synchronized(this) {
-                incrementAndGet = seqFactory.incrementAndGet()
-                if (incrementAndGet > 1000000) {
-                    seqFactory.set(Random().nextInt(100000) + 60000)
-                }
-            }
-            return incrementAndGet
-        }
+    fun getUin(): Long {
+        TODO("client仅维护必要的uin和一些简单的数据 其余的用管理器")
+        return 1111111L
     }
 
 //    不应该做单例 因为考虑存在多个bot
@@ -59,7 +48,8 @@ class BotClient {
             // TODO: 2021/5/30 一顿操作之后 大概伪代码
             val cmdName = byteBuf.readBytes(10).toString()
             val requestId = byteBuf.readLong()
-            PackRequest.call(cmdName, requestId, byteBuf.array())
+            val uin = byteBuf.readLong()
+            PackRequest.call(uin, cmdName, requestId, byteBuf.array())
 //                try {
 //                    ByteBuf bb = (ByteBuf) msg;
 //                    byte[] respByte = new byte[bb.readableBytes()];

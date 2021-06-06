@@ -14,7 +14,7 @@ import moe.ore.core.protocol.util.*
 import moe.ore.util.TeaUtil
 
 
-class PacketCodec {
+class PacketParser {
 
     /**
      * 这里进来 然后分类给 parseSsoFrame 或者parseOicqResponse 然后给Handler处理(解码后的实体byte)
