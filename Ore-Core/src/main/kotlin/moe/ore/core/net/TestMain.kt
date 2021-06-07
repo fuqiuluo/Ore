@@ -37,14 +37,20 @@ object TestMain {
 //        println(aa)
 //        println(aa1)
 //        println(AA().get())
-        val 授权域名列表 = arrayOf("accounts.qq.com", "aq.qq.com", "buluo.qq.com", "connect.qq.com", "docs.qq.com", "game.qq.com", "gamecenter.qq.com", "graph.qq.com", "haoma.qq.com", "id.qq.com", "imgcache.qq.com", "kg.qq.com", "mail.qq.com", "mma.qq.com", "office.qq.com", "openmobile.qq.com", "ptlogin2.qq.com", "qqweb.qq.com", "qun.qq.com", "qzone.com", "qzone.qq.com", "tenpay.com", "ti.qq.com", "v.qq.com", "vip.qq.com")
+        val listOfAuthorizedDomainNames = arrayOf("accounts.qq.com", "aq.qq.com", "buluo.qq.com", "connect.qq.com", "docs.qq.com", "game.qq.com", "gamecenter.qq.com", "graph.qq.com", "haoma.qq.com", "id.qq.com", "imgcache.qq.com", "kg.qq.com", "mail.qq.com", "mma.qq.com", "office.qq.com", "openmobile.qq.com", "ptlogin2.qq.com", "qqweb.qq.com", "qun.qq.com", "qzone.com", "qzone.qq.com", "tenpay.com", "ti.qq.com", "v.qq.com", "vip.qq.com")
 
-        val manager1 = DataManager.init(1234u,"/Users/Smile/Desktop")
+//        初始化
+        DataManager.init(1234u, "/Users/Smile/Desktop")
+
+//        获取
         val manager = DataManager.manager(1234u)
         println(manager.dataPath)
-        println(manager.protocol)
-        println(manager)
-        manager.deviceInfo.wifiBSsid="jjjjjj"
+        println(manager.protocolInfo)
+        println(manager.wLoginSigInfo.d2Key)
+        println(manager.recorder.nextSeq())
+        manager.deviceInfo.wifiBSsid = "jjjjjj"
+
+//        保存到本地
         DataManager.flush(1234u)
 //        DataManager.destroy(1234u)
 //          DataManager.init(1234u,"/Users/Smile/Desktop")

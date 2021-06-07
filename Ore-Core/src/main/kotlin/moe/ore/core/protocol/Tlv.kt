@@ -3,33 +3,34 @@ package moe.ore.core.protocol
 import moe.ore.core.DataManager
 import moe.ore.util.bytes.ByteBuilder
 
-class Tlv(uin : ULong) {
+class Tlv(val uin: ULong) {
+
     val dataManager = DataManager.manager(uin)
 
     /**
      * 协议信息
      */
-    val protocolInfo = dataManager.protocolInfo
+    val protocolInfo = ProtocolInternal[dataManager.protocolInfo]
 
     fun t1() = buildTlv(0x1) {
         writeBoolean(true)
     }
 
 
-    private fun buildTlv(ver : Int, block : ByteBuilder.() -> Unit) : ByteArray {
+    private fun buildTlv(ver: Int, block: ByteBuilder.() -> Unit): ByteArray {
         val builder = TlvBuilder(ver)
         builder.write(block)
         return builder.toByteArray()
     }
 
-    class TlvBuilder(private val ver : Int) {
+    class TlvBuilder(private val ver: Int) {
         private val bodyBuilder = ByteBuilder()
 
         fun write(block: ByteBuilder.() -> Unit) {
             this.bodyBuilder.block()
         }
 
-        fun toByteArray() : ByteArray {
+        fun toByteArray(): ByteArray {
             val out = bodyBuilder.toByteArray()
             // bodyBuilder.close()
             // 基于内存的流，无需释放
@@ -44,7 +45,7 @@ class Tlv(uin : ULong) {
 
     companion object {
         @JvmStatic
-        fun main(args : Array<String>) {
+        fun main(args: Array<String>) {
         }
     }
 }

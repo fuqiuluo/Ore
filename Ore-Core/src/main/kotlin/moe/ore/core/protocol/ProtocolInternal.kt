@@ -83,5 +83,3 @@ class ProtocolInternal(
         ANDROID_PAD, IOS_IPAD,
     }
 }
-
-fun ProtocolInternal.ProtocolType.info() : ProtocolInternal = ProtocolInternal[this]
