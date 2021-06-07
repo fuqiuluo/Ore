@@ -17,30 +17,14 @@ class Tlv(val uin: ULong) {
     }
 
 
-    private fun buildTlv(ver: Int, block: ByteBuilder.() -> Unit): ByteArray {
-        val builder = TlvBuilder(ver)
-        builder.write(block)
-        return builder.toByteArray()
-    }
-
-    class TlvBuilder(private val ver: Int) {
-        private val bodyBuilder = ByteBuilder()
-
-        fun write(block: ByteBuilder.() -> Unit) {
-            this.bodyBuilder.block()
-        }
-
-        fun toByteArray(): ByteArray {
-            val out = bodyBuilder.toByteArray()
-            // bodyBuilder.close()
-            // 基于内存的流，无需释放
-            val builder = ByteBuilder()
-            builder.writeShort(ver)
-            builder.writeShort(out.size)
-            builder.writeBytes(out)
-            return builder.toByteArray()
-        }
-
+    private fun buildTlv(tlvVer: Int, block: ByteBuilder.() -> Unit): ByteArray {
+        val bodyBuilder = ByteBuilder()
+        val out = ByteBuilder()
+        bodyBuilder.block()
+        out.writeShort(tlvVer)
+        out.writeShort(bodyBuilder.size())
+        out.writeBytes(bodyBuilder.toByteArray())
+        return out.toByteArray()
     }
 
     companion object {
