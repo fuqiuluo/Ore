@@ -175,42 +175,43 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
 //            tgtgKey = input.read(tgtgKey, 18, true)
 //        }
 
-        private fun getImei15(imei: String): String {
-            val imeiChar = imei.toCharArray()
-            var resultInt = 0
-            var i = 0
-            while (i < imeiChar.size) {
-                val a = imeiChar[i].toString().toInt()
-                i++
-                val temp = imeiChar[i].toString().toInt() * 2
-                val b = if (temp < 10) temp else temp - 9
-                resultInt += a + b
-                i++
+        companion object {
+            @JvmStatic
+            private fun getImei15(imei: String): String {
+                val imeiChar = imei.toCharArray()
+                var resultInt = 0
+                var i = 0
+                while (i < imeiChar.size) {
+                    val a = imeiChar[i].toString().toInt()
+                    i++
+                    val temp = imeiChar[i].toString().toInt() * 2
+                    val b = if (temp < 10) temp else temp - 9
+                    resultInt += a + b
+                    i++
+                }
+                resultInt %= 10
+                resultInt = if (resultInt == 0) 0 else 10 - resultInt
+                return imei + resultInt
             }
-            resultInt %= 10
-            resultInt = if (resultInt == 0) 0 else 10 - resultInt
-            return imei + resultInt
-        }
 
-        private fun getRandomAndroidId(): String {
-            return UUID.randomUUID().toString().replace("-", "").substring(0, 16)
-        }
+            @JvmStatic
+            private fun getRandomAndroidId(): String {
+                return UUID.randomUUID().toString().replace("-", "").substring(0, 16)
+            }
 
-        private fun getRandomMacAddress(): String {
-            val randomKey = BytesUtil.randomKey(6)
-//             println(byteArray.contentToString())
-//            还有一种奇怪的生成方法
-//             val seed = SecureRandom.getSeed(6)
-//            println(seed.contentToString())
-            val sb = StringBuilder()
-            val length: Int = randomKey.size
-            for (i in 0 until length) {
-                sb.append(String.format("%02X:", java.lang.Byte.valueOf(randomKey[i])))
+            @JvmStatic
+            private fun getRandomMacAddress(): String {
+                val randomKey = BytesUtil.randomKey(6)
+                val sb = StringBuilder()
+                val length: Int = randomKey.size
+                for (i in 0 until length) {
+                    sb.append(String.format("%02X:", java.lang.Byte.valueOf(randomKey[i])))
+                }
+                if (sb.isNotEmpty()) {
+                    sb.deleteCharAt(sb.length - 1)
+                }
+                return sb.toString()
             }
-            if (sb.isNotEmpty()) {
-                sb.deleteCharAt(sb.length - 1)
-            }
-            return sb.toString()
         }
     }
 
