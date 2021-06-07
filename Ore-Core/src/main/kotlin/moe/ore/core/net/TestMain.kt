@@ -43,9 +43,9 @@ object TestMain {
         val manager = DataManager.manager(1234u)
         println(manager.dataPath)
         println(manager.protocol)
-        println(manager.wLoginSigInfo)
+        println(manager)
         manager.deviceInfo.wifiBSsid="jjjjjj"
-//        DataManager.flush(1234u)
+        DataManager.flush(1234u)
 //        DataManager.destroy(1234u)
 //          DataManager.init(1234u,"/Users/Smile/Desktop")
         println(DataManager.manager(1234u).deviceInfo.imei)

@@ -14,6 +14,22 @@ repositories {
     maven { url 'https://repo.spring.io/milestone' }
     maven{ url "https://kotlin.bintray.com/kotlinx"}
 }
+
+repositories {
+    mavenCentral()
+    google()
+}
+sourceCompatibility = '1.8'
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+
+    }
+}
+
 allprojects {
     group 'moe.ore'
     version '1.0.0'
