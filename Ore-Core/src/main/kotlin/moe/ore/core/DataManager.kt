@@ -8,6 +8,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.info
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -44,7 +45,8 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
      * 模拟的安卓信息
      */
     var deviceInfo = DeviceInfo()
-    var protocol: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+    var protocolType : ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+    var protocolInfo = protocolType.info()
 
     init {
         if (path.isBlank()) {
@@ -75,7 +77,7 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
     override fun writeTo(output: TarsOutputStream) {
         output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
         output.write(ProtoBuf.encodeToByteArray(wLoginSigInfo), 2)
-        output.write(protocol.name, 3)
+        output.write(protocolType.name, 3)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -84,7 +86,7 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
 //        都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
         deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
         wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
-        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
+        protocolType = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
     }
 
     @Serializable

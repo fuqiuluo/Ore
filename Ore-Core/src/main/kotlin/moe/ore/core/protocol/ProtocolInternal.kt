@@ -3,13 +3,40 @@ package moe.ore.core.protocol
 import moe.ore.util.bytes.hex2ByteArray
 import java.util.*
 
-class ProtocolInternal(@JvmField internal var openAppId: Long, @JvmField internal var appId: Long, @JvmField internal var subAppId: Int, @JvmField internal var pingVersion: Int, @JvmField internal var ipVersion: Int, @JvmField internal var ssoVersion: Int, @JvmField internal var msfSsoVersion: Int, @JvmField internal var tgtgVersion: Int, @JvmField internal var mainSigMap: Int, @JvmField internal var miscBitmap: Int, @JvmField internal var subSigMap: Int, @JvmField internal var dbVersion: Int, @JvmField internal var buildTime: Int, @JvmField internal var localId: Int, @JvmField internal var protocolVersion: Int, @JvmField internal var loginType: Int, @JvmField internal var isGuidAvailable: Boolean, @JvmField internal var isGuidFromFileNull: Boolean, @JvmField internal var isGuidChange: Boolean, @JvmField internal var buildVersion: String, @JvmField internal var agreementVersion: String, @JvmField internal var packageName: String, @JvmField internal var packageVersion: String, @JvmField internal var tencentSdkMd5: ByteArray) {
+class ProtocolInternal(
+    @JvmField internal var openAppId: Long,
+    @JvmField internal var appId: Long,
+    @JvmField internal var subAppId: Int,
+    @JvmField internal var pingVersion: Int,
+    @JvmField internal var ipVersion: Int,
+    @JvmField internal var ssoVersion: Int,
+    @JvmField internal var msfSsoVersion: Int,
+    @JvmField internal var tgtgVersion: Int,
+    @JvmField internal var mainSigMap: Int,
+    @JvmField internal var miscBitmap: Int,
+    @JvmField internal var subSigMap: Int,
+    @JvmField internal var dbVersion: Int,
+    @JvmField internal var buildTime: Int,
+    @JvmField internal var localId: Int,
+    @JvmField internal var protocolVersion: Int,
+    @JvmField internal var loginType: Int,
+    @JvmField internal var isGuidAvailable: Boolean,
+    @JvmField internal var isGuidFromFileNull: Boolean,
+    @JvmField internal var isGuidChange: Boolean,
+    @JvmField internal var buildVersion: String,
+    @JvmField internal var agreementVersion: String,
+    @JvmField internal var packageName: String,
+    @JvmField internal var packageVersion: String,
+    @JvmField internal var tencentSdkMd5: ByteArray
+) {
 
     // TODO: 2021/6/6  待优化 这里静态有问题
 
     companion object {
+        @JvmStatic
         private val protocols = EnumMap<ProtocolType, ProtocolInternal>(ProtocolType::class.java)
 
+        @JvmStatic
         operator fun get(protocolType: ProtocolType): ProtocolInternal =
             protocols[protocolType] ?: error("Internal Error: Missing protocol $protocolType")
 
@@ -41,19 +68,20 @@ class ProtocolInternal(@JvmField internal var openAppId: Long, @JvmField interna
                 tencentSdkMd5 = "A6B745BF24A2C277527716F6F36EB68D".hex2ByteArray(),
             )
         }
+
     }
 
     enum class ProtocolType {
         /**
-         * Android 手机. 所有功能都支持.
+         * Android
          */
         ANDROID_PHONE, IOS_PHONE,
 
         /**
-         * Android 平板.
-         *
-         * 注意: 不支持戳一戳事件解析
+         * Android 平板
          */
         ANDROID_PAD, IOS_IPAD,
     }
 }
+
+fun ProtocolInternal.ProtocolType.info() : ProtocolInternal = ProtocolInternal[this]
