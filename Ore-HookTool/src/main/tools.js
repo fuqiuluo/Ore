@@ -21,7 +21,7 @@ function generateAllMethodHookCode(className) {
             if (parameterType) {
                 //todo 待完善测试 目前暂无发现问题但是肯定有替换错的东西
                 // parameterType = parameterType.replace(";", "").replace("class [Ljava.lang.String", "Strings").replace("class [B", "bytes").replace("class [I", "ints").replace("java.lang.String", "String").replace("class ", "");
-                parameterType = parameterType.replace("class ", "");
+                parameterType = parameterType.replace("class ", "").replace("interface ", "");
 
                 parameterType = "\"" + parameterType + "\""
 

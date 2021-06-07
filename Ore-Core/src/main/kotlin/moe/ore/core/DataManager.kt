@@ -1,5 +1,10 @@
 package moe.ore.core
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
@@ -11,35 +16,29 @@ import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 import moe.ore.util.bytes.hex2ByteArray
 import java.io.File
-import java.security.SecureRandom
 import java.util.*
-import kotlin.math.abs
 
-class DataManager private constructor(uin: ULong) : TarsStructBase() {
-
-    private var path = ""
-
-    private constructor(uin: ULong, path: String) : this(uin) {
-        this.path = path
-    }
+class DataManager private constructor(uin: ULong, path: String) : TarsStructBase() {
 
     /**
      * 数据保存目录
      */
     @JvmField
+    @Transient
     var dataPath: String = File(path + File.separator + "$uin.ore").absolutePath
 
     /**
      * 管理器
      */
     @JvmField
+    @Transient
     val recorder = BotRecorder()
 
     /**
      * 保存各种Token
      */
-    @JvmField
-    var sigInfo = WLoginSigInfo()
+//    @JvmField
+    lateinit var wLoginSigInfo: WLoginSigInfo
 
     /**
      * 模拟的安卓信息
@@ -61,7 +60,7 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
      * 销毁
      */
     fun destroy() {
-        FileUtil.saveFile(dataPath, toByteArray())
+        flush()
         println("destroy")
         // TODO: 2021/6/6 销毁之前序列化到本地文件
         // 清空自身类里面的map或存在引用关系的事务
@@ -71,7 +70,8 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
         FileUtil.saveFile(dataPath, toByteArray())
     }
 
-    class DeviceInfo : TarsStructBase() {
+    @Serializable
+    class DeviceInfo {
         class NetworkType(val value: Int) {
             companion object {
                 /**
@@ -94,9 +94,9 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
         var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14))
         var androidId: String = getRandomAndroidId()
         var imsi: String = ("46002" + System.currentTimeMillis()).substring(0, 15)
-        var machineName: String = "M2002J9E"
+        var model: String = "M2002J9E"
         var osType: String = "android"
-        var machineManufacturer: String = "Xiaomi"
+        var brand: String = "Xiaomi"
         var androidVersion: String = "11"
         var androidSdkVersion: Int = 30
         var wifiSsid: String = "<unknown ssid>"
@@ -115,47 +115,65 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
 
         var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
-        override fun writeTo(output: TarsOutputStream) {
-            output.write(imei, 1)
-            output.write(androidId, 2)
-            output.write(imsi, 3)
-            output.write(machineName, 4)
-            output.write(osType, 5)
-            output.write(machineManufacturer, 6)
-            output.write(androidVersion, 7)
-            output.write(androidSdkVersion, 8)
-            output.write(wifiSsid, 9)
-            output.write(wifiBSsid, 10)
-            output.write(macAddress, 11)
-            output.write(netType, 12)
-            output.write(apn, 13)
-            output.write(apnName, 14)
-            output.write(ksid, 15)
-            output.write(randKey, 16)
-            output.write(guid, 17)
-            output.write(tgtgKey, 18)
-        }
 
-        override fun readFrom(input: TarsInputStream) {
-            imei = input.read(imei, 1, true)
-            androidId = input.read(androidId, 2, true)
-            imsi = input.read(imsi, 3, true)
-            machineName = input.read(machineName, 4, true)
-            osType = input.read(osType, 5, true)
-            machineManufacturer = input.read(machineManufacturer, 6, true)
-            androidVersion = input.read(androidVersion, 7, true)
-            androidSdkVersion = input.read(androidSdkVersion, 8, true)
-            wifiSsid = input.read(wifiSsid, 9, true)
-            wifiBSsid = input.read(wifiBSsid, 10, true)
-            macAddress = input.read(macAddress, 11, true)
-            netType = input.read(netType, 12, true)
-            apn = input.read(apn, 13, true)
-            apnName = input.read(apn, 14, true)
-            ksid = input.read(ksid, 15, true)
-            randKey = input.read(randKey, 16, true)
-            guid = input.read(guid, 17, true)
-            tgtgKey = input.read(tgtgKey, 18, true)
-        }
+//        "--begin--":    "该设备文件由账号作为seed自动生成，每个账号生成的文件相同。",
+//        "product":      "MRS4S",
+//        "device":       "HIM188MOE",
+//        "board":        "MIRAI-YYDS",
+//        "brand":        "OICQX",
+//        "model":        "Konata 2020",
+//        "wifi_ssid":    "TP-LINK-${uin.toString(16)}",
+//        "bootloader":   "U-boot",
+//        "android_id":   "OICQX.${hash.readUInt16BE()}${hash[2]}.${hash[3]}${String(uin)[0]}",
+//        "boot_id":      "${uuid}",
+//        "proc_version": "Linux version 4.19.71-${hash.readUInt16BE(4)} (konata@takayama.github.com)",
+//        "mac_address":  "00:50:${hash[6].toString(16).toUpperCase()}:${hash[7].toString(16).toUpperCase()}:${hash[8].toString(16).toUpperCase()}:${hash[9].toString(16).toUpperCase()}",
+//        "ip_address":   "10.0.${hash[10]}.${hash[11]}",
+//        "imei":         "${_genIMEI(uin)}",
+//        "incremental":  "${hash.readUInt32BE(12)}",
+//        "--end--":      "修改后可能需要重新验证设备。"
+//
+//        override fun writeTo(output: TarsOutputStream) {
+//            output.write(imei, 1)
+//            output.write(androidId, 2)
+//            output.write(imsi, 3)
+//            output.write(machineName, 4)
+//            output.write(osType, 5)
+//            output.write(machineManufacturer, 6)
+//            output.write(androidVersion, 7)
+//            output.write(androidSdkVersion, 8)
+//            output.write(wifiSsid, 9)
+//            output.write(wifiBSsid, 10)
+//            output.write(macAddress, 11)
+//            output.write(netType, 12)
+//            output.write(apn, 13)
+//            output.write(apnName, 14)
+//            output.write(ksid, 15)
+//            output.write(randKey, 16)
+//            output.write(guid, 17)
+//            output.write(tgtgKey, 18)
+//        }
+//
+//        override fun readFrom(input: TarsInputStream) {
+//            imei = input.read(imei, 1, true)
+//            androidId = input.read(androidId, 2, true)
+//            imsi = input.read(imsi, 3, true)
+//            machineName = input.read(machineName, 4, true)
+//            osType = input.read(osType, 5, true)
+//            machineManufacturer = input.read(machineManufacturer, 6, true)
+//            androidVersion = input.read(androidVersion, 7, true)
+//            androidSdkVersion = input.read(androidSdkVersion, 8, true)
+//            wifiSsid = input.read(wifiSsid, 9, true)
+//            wifiBSsid = input.read(wifiBSsid, 10, true)
+//            macAddress = input.read(macAddress, 11, true)
+//            netType = input.read(netType, 12, true)
+//            apn = input.read(apn, 13, true)
+//            apnName = input.read(apn, 14, true)
+//            ksid = input.read(ksid, 15, true)
+//            randKey = input.read(randKey, 16, true)
+//            guid = input.read(guid, 17, true)
+//            tgtgKey = input.read(tgtgKey, 18, true)
+//        }
 
         private fun getImei15(imei: String): String {
             val imeiChar = imei.toCharArray()
@@ -217,7 +235,7 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
 
         @JvmStatic
         fun flush(uin: ULong) {
-            managerMap.remove(uin)?.flush()
+            managerMap[uin]?.flush()
         }
 
         /**
@@ -231,31 +249,21 @@ class DataManager private constructor(uin: ULong) : TarsStructBase() {
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun writeTo(output: TarsOutputStream) {
-        output.write(deviceInfo, 1)
-        output.write(sigInfo, 2)
+        output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
+        output.write(ProtoBuf.encodeToByteArray(wLoginSigInfo), 2)
         output.write(protocol.name, 3)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun readFrom(input: TarsInputStream) {
-        deviceInfo = input.read(deviceInfo, 1, true)
-        sigInfo = input.read(sigInfo, 2, true)
-        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, true))
-    }
-
-    fun get_mpasswd(): String {
-        return try {
-            val str = StringBuilder()
-            for (b in SecureRandom.getSeed(16)) {
-                val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
-                str.append(abs.toChar())
-            }
-            str.toString()
-        } catch (unused: Throwable) {
-            "1234567890123456"
-        }
+//        都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
+        deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
+        wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
+        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
     }
 }
 

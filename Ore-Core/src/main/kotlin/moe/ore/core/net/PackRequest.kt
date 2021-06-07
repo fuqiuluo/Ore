@@ -38,7 +38,7 @@ class PackRequest(private val botClient: BotClient, private val cmdName: String,
     private var uin = botClient.uin
     private val reentrantLock = MutexLock()
     private var requestStyle = true
-    private var source: ByteArray? = null
+    private var source: ByteArray? = null  //CompletableDeferred<ByteArray?>()
     private var dataListener: OnDataListener? = null
     private var isCallComplete = false
     private var startTimestamp = 0L

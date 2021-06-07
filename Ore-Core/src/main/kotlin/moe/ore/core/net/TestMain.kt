@@ -1,10 +1,6 @@
 package moe.ore.core.net
 
 import moe.ore.core.DataManager
-import kotlin.Throws
-import java.lang.InterruptedException
-import kotlin.jvm.JvmStatic
-import moe.ore.core.protocol.util.toAsciiHexString
 
 object TestMain {
     @Throws(InterruptedException::class)
@@ -41,15 +37,18 @@ object TestMain {
 //        println(aa)
 //        println(aa1)
 //        println(AA().get())
+        val 授权域名列表 = arrayOf("accounts.qq.com", "aq.qq.com", "buluo.qq.com", "connect.qq.com", "docs.qq.com", "game.qq.com", "gamecenter.qq.com", "graph.qq.com", "haoma.qq.com", "id.qq.com", "imgcache.qq.com", "kg.qq.com", "mail.qq.com", "mma.qq.com", "office.qq.com", "openmobile.qq.com", "ptlogin2.qq.com", "qqweb.qq.com", "qun.qq.com", "qzone.com", "qzone.qq.com", "tenpay.com", "ti.qq.com", "v.qq.com", "vip.qq.com")
 
-//        val manager1 = DataManager.init(1234u,"data")
+        val manager1 = DataManager.init(1234u,"/Users/Smile/Desktop")
         val manager = DataManager.manager(1234u)
         println(manager.dataPath)
         println(manager.protocol)
-        println(manager.sigInfo)
-        println(manager.deviceInfo.androidId)
-        DataManager.destroy(1234u)
-        println("E"+ DataManager.manager(1234u).deviceInfo.toByteArray().toAsciiHexString())
+        println(manager.wLoginSigInfo)
+        manager.deviceInfo.wifiBSsid="jjjjjj"
+//        DataManager.flush(1234u)
+//        DataManager.destroy(1234u)
+//          DataManager.init(1234u,"/Users/Smile/Desktop")
+        println(DataManager.manager(1234u).deviceInfo.imei)
     }
 
 }

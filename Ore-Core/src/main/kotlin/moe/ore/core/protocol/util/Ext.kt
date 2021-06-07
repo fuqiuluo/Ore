@@ -4,6 +4,7 @@ import kotlinx.io.charsets.Charset
 import kotlinx.io.core.*
 import moe.ore.util.TeaUtil
 import java.io.Closeable
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Inet4Address
@@ -209,3 +210,28 @@ fun ByteArray.toAsciiHexString() = joinToString("") {
 
 fun String.chunkedHexToBytes(): ByteArray =
     this.asSequence().chunked(2).map { (it[0].toString() + it[1]).toUByte(16).toByte() }.toList().toByteArray()
+
+
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> ByteArray.read(t: ByteReadPacket.() -> R): R {
+    contract {
+        callsInPlace(t, InvocationKind.EXACTLY_ONCE)
+    }
+    return this.toReadPacket().withUse(t)
+}
+public fun Input.readUShortLVString(): String = String(this.readUShortLVByteArray())
+public fun Input.readUShortLVByteArray(): ByteArray = this.readBytes(this.readUShort().toInt())
+
+public fun File.createFileIfNotExists() {
+    if (!this.exists()) {
+        this.parentFile.mkdirs()
+        this.createNewFile()
+    }
+}
+
+public fun File.resolveCreateFile(relative: String): File = this.resolve(relative).apply { createFileIfNotExists() }
+public fun File.resolveCreateFile(relative: File): File = this.resolve(relative).apply { createFileIfNotExists() }
+
+public fun File.resolveMkdir(relative: String): File = this.resolve(relative).apply { mkdirs() }
+public fun File.resolveMkdir(relative: File): File = this.resolve(relative).apply { mkdirs() }
