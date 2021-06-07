@@ -70,6 +70,23 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
         FileUtil.saveFile(dataPath, toByteArray())
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @Override
+    override fun writeTo(output: TarsOutputStream) {
+        output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
+        output.write(ProtoBuf.encodeToByteArray(wLoginSigInfo), 2)
+        output.write(protocol.name, 3)
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Override
+    override fun readFrom(input: TarsInputStream) {
+//        都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
+        deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
+        wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
+        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
+    }
+
     @Serializable
     class DeviceInfo {
         class NetworkType(val value: Int) {
@@ -248,23 +265,6 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
         fun destroy(uin: ULong) {
             managerMap.remove(uin)?.destroy()
         }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    @Override
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
-        output.write(ProtoBuf.encodeToByteArray(wLoginSigInfo), 2)
-        output.write(protocol.name, 3)
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    @Override
-    override fun readFrom(input: TarsInputStream) {
-//        都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
-        deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
-        wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
-        protocol = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
     }
 }
 
