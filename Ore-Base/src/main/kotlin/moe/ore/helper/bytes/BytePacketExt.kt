@@ -40,6 +40,27 @@
  *
  */
 
+/*
+ * English :
+ *  The project is protected by the MPL open source agreement.
+ * Open source agreement warning that prohibits deletion of project source code files.
+ * The project is prohibited from acting in illegal areas.
+ * All illegal activities arising from the use of this project are the responsibility of the second author, and the original author of the project is not responsible
+ *
+ *  中文：
+ *  该项目由MPL开源协议保护。
+ *  禁止删除项目源代码文件的开源协议警告内容。
+ * 禁止使用该项目在非法领域行事。
+ * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ *
+ * 日本语：
+ * プロジェクトはMPLオープンソース契約によって保護されています。
+ *  オープンソース契約プロジェクトソースコードファイルの削除を禁止する警告。
+ * このプロジェクトは違法地域の演技を禁止しています。
+ * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
+ *
+ */
+
 /*******************************************************************************
  *  2021 Ore Developer Warn
  *
@@ -62,63 +83,48 @@
  * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
  ******************************************************************************/
 
-package moe.ore.core.net
+package moe.ore.helper.bytes
 
-import moe.ore.core.helper.DataManager
+import kotlinx.io.core.BytePacketBuilder
+import moe.ore.util.BytesUtil
 
-object TestMain {
-    @Throws(InterruptedException::class)
-    @JvmStatic
-    fun main(args: Array<String>) {
-//        val reqBody = ByteArray(10)
-//
-//        val botClient: BotClient = BotClient().connect()
-////
-//        var reqV2Simplify = GetTroopListRespV2()
-//        val reqBody = buildJcePacket("friendlist.GetTroopListReqV2", reqV2Simplify)
-//        val result = botClient.newPackRequest("cmda", 1, reqBody).await()
-//        if (Objects.isNull(result)){
-////            处理重试或者提示错误给gui
-//            return
-//        }
-//       val getTroopListRespV2 = useJceByWaiter(result,GetTroopListRespV2())
-//        ........
-//
-//        println("result：" + Arrays.toString(bytes))
-//
-//        botClient.newPackRequest("cmdb", 2, reqBody).async(object : OnDataListener {
-//            override fun onReceive(data: ByteArray?) {
-//                println("result：" + Arrays.toString(data))
-//            }
-//        })
-//        println(Objects.hash("cmdName", "requestId"))
-//        println(Objects.hash("cmdName", "requestId"))
-//        AA().setPa(1,"PackRequest(1)")
-//        var aa = AA()
-//        aa.setPa(2,"PackRequest(2)")
-//        val aa1 = AA();
-//        aa1.setPa(3,"PackRequest(3)")
-//        println(aa)
-//        println(aa1)
-//        println(AA().get())
-        val listOfAuthorizedDomainNames = arrayOf("accounts.qq.com", "aq.qq.com", "buluo.qq.com", "connect.qq.com", "docs.qq.com", "game.qq.com", "gamecenter.qq.com", "graph.qq.com", "haoma.qq.com", "id.qq.com", "imgcache.qq.com", "kg.qq.com", "mail.qq.com", "mma.qq.com", "office.qq.com", "openmobile.qq.com", "ptlogin2.qq.com", "qqweb.qq.com", "qun.qq.com", "qzone.com", "qzone.qq.com", "tenpay.com", "ti.qq.com", "v.qq.com", "vip.qq.com")
+fun createBuilder() = BytePacketBuilder()
 
-//        初始化
-        DataManager.init(1234u, "/Users/Smile/Desktop")
+/**
+ * 转字节组
+ * @receiver BytePacketBuilder
+ * @return ByteArray
+ */
+fun BytePacketBuilder.toByteArray() : ByteArray {
+    val reader = this.build()
+    val array = ByteArray(reader.remaining.toInt())
+    reader.readAvailable(array)
+    return array
+}
 
-//        获取
-        val manager = DataManager.manager(1234u)
-        println(manager.dataPath)
-        println(manager.protocolType)
-        println(manager.wLoginSigInfo.d2Key)
-        println(manager.recorder.nextSeq())
-        manager.deviceInfo.wifiBSsid = "jjjjjj"
+/**
+ * 补充功能代码
+ * @receiver BytePacketBuilder
+ * @param packet BytePacketBuilder
+ */
+fun BytePacketBuilder.writePacket(packet : BytePacketBuilder) = this.writePacket(packet.build())
 
-//        保存到本地
-        DataManager.flush(1234u)
-//        DataManager.destroy(1234u)
-//          DataManager.init(1234u,"/Users/Smile/Desktop")
-        println(DataManager.manager(1234u).deviceInfo.imei)
-    }
+/**
+ * 写布尔型
+ * @receiver BytePacketBuilder
+ * @param z Boolean
+ */
+fun BytePacketBuilder.writeBoolean(z : Boolean) = this.writeByte(if(z) 1 else 0)
 
+/**
+ * 自动转换类型
+ * @receiver BytePacketBuilder
+ * @param i Int
+ */
+fun BytePacketBuilder.writeShort(i: Int) = this.writeShort(i.toShort())
+
+fun BytePacketBuilder.writeBytes(bytes : ByteArray) = this.writeFully(bytes, 0, bytes.size)
+
+fun BytePacketBuilder.writeLongToBuf32(v: ULong) {
+    this.writeBytes(BytesUtil.int64ToBuf32(v.toLong()))
 }
