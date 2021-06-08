@@ -57,4 +57,16 @@ fun BytePacketBuilder.toByteArray() : ByteArray {
     return array
 }
 
+/**
+ * 补充功能代码
+ * @receiver BytePacketBuilder
+ * @param packet BytePacketBuilder
+ */
+fun BytePacketBuilder.writePacket(packet : BytePacketBuilder) = this.writePacket(packet.build())
 
+/**
+ * 写布尔型
+ * @receiver BytePacketBuilder
+ * @param z Boolean
+ */
+fun BytePacketBuilder.writeBoolean(z : Boolean) = this.writeByte(if(z) 1 else 0)
