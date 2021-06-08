@@ -104,58 +104,48 @@
  * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
  ******************************************************************************/
 
-package moe.ore.core.protocol
+package moe.ore.helper.bytes
 
 import kotlinx.io.core.BytePacketBuilder
-import kotlinx.io.core.writeUInt
-import kotlinx.io.core.writeULong
-import moe.ore.core.helper.DataManager
-import moe.ore.helper.bytes.*
-import moe.ore.tars.TarsOutputStream
-import kotlin.random.Random
-import kotlin.random.nextUInt
+import moe.ore.util.BytesUtil
 
-@ExperimentalUnsignedTypes
-class Tlv(val uin: ULong) {
-    val dataManager = DataManager.manager(uin)
+fun createBuilder() = BytePacketBuilder()
 
-    /**
-     * 协议信息
-     */
-    val protocolInfo = ProtocolInternal[dataManager.protocolType]
-
-    fun t1() = buildTlv(0x1) {
-        writeShort(protocolInfo.ipVersion)
-        /**
-         * 这是个随机数
-         */
-        writeUInt(Random.nextUInt())
-        writeULongToBuf32(uin)
-        writeInt(currentTimeSeconds())
-
-    }
-
-
-    private fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
-        val bodyBuilder = BytePacketBuilder()
-        val out = BytePacketBuilder()
-        bodyBuilder.block()
-        out.writeShort(tlvVer.toShort())
-        out.writeShort(bodyBuilder.size.toShort())
-        out.writePacket(bodyBuilder)
-        bodyBuilder.close()
-        return out.toByteArray()
-    }
-
-
+/**
+ * 转字节组
+ * @receiver BytePacketBuilder
+ * @return ByteArray
+ */
+fun BytePacketBuilder.toByteArray() : ByteArray {
+    val reader = this.build()
+    val array = ByteArray(reader.remaining.toInt())
+    reader.readAvailable(array)
+    return array
 }
 
-fun main(args: Array<String>) {
-    DataManager.init(1U, "C:\\Users\\Administrator\\Desktop\\Ore")
-    val t = Tlv(1U)
-    println(t.t1().toHexString())
+/**
+ * 补充功能代码
+ * @receiver BytePacketBuilder
+ * @param packet BytePacketBuilder
+ */
+fun BytePacketBuilder.writePacket(packet : BytePacketBuilder) = this.writePacket(packet.build())
 
-    val out = TarsOutputStream()
-    out.write(10899, 1)
-    println(out.toByteArray().toHexString())
+/**
+ * 写布尔型
+ * @receiver BytePacketBuilder
+ * @param z Boolean
+ */
+fun BytePacketBuilder.writeBoolean(z : Boolean) = this.writeByte(if(z) 1 else 0)
+
+/**
+ * 自动转换类型
+ * @receiver BytePacketBuilder
+ * @param i Int
+ */
+fun BytePacketBuilder.writeShort(i: Int) = this.writeShort(i.toShort())
+
+fun BytePacketBuilder.writeBytes(bytes : ByteArray) = this.writeFully(bytes, 0, bytes.size)
+
+fun BytePacketBuilder.writeULongToBuf32(v: ULong) {
+    this.writeBytes(BytesUtil.int64ToBuf32(v.toLong()))
 }

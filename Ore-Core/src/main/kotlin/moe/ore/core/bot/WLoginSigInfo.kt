@@ -19,6 +19,27 @@
  *
  */
 
+/*
+ * English :
+ *  The project is protected by the MPL open source agreement.
+ * Open source agreement warning that prohibits deletion of project source code files.
+ * The project is prohibited from acting in illegal areas.
+ * All illegal activities arising from the use of this project are the responsibility of the second author, and the original author of the project is not responsible
+ *
+ *  中文：
+ *  该项目由MPL开源协议保护。
+ *  禁止删除项目源代码文件的开源协议警告内容。
+ * 禁止使用该项目在非法领域行事。
+ * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ *
+ * 日本语：
+ * プロジェクトはMPLオープンソース契約によって保護されています。
+ *  オープンソース契約プロジェクトソースコードファイルの削除を禁止する警告。
+ * このプロジェクトは違法地域の演技を禁止しています。
+ * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
+ *
+ */
+
 /*******************************************************************************
  *  2021 Ore Developer Warn
  *
@@ -46,10 +67,7 @@ package moe.ore.core.bot
 import kotlinx.io.core.ByteReadPacket
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import moe.ore.core.protocol.util.read
-import moe.ore.core.protocol.util.readUShortLVByteArray
-import moe.ore.core.protocol.util.readUShortLVString
-import moe.ore.core.protocol.util.toUHexString
+import moe.ore.helper.bytes.toHexString
 
 internal class WFastLoginInfo(val outA1: ByteReadPacket, var adUrl: String = "", var iconUrl: String = "", var profileUrl: String = "", var userJson: String = "") {
     override fun toString(): String {
@@ -60,7 +78,7 @@ internal class WFastLoginInfo(val outA1: ByteReadPacket, var adUrl: String = "",
 @Serializable
 class WLoginSimpleInfo(val uin: Long, val imgType: ByteArray, val imgFormat: ByteArray, val imgUrl: ByteArray, val mainDisplayName: ByteArray) {
     override fun toString(): String {
-        return "WLoginSimpleInfo(uin=$uin, imgType=${imgType.toUHexString()}, imgFormat=${imgFormat.toUHexString()}, imgUrl=${imgUrl.toUHexString()}, mainDisplayName=${mainDisplayName.toUHexString()})"
+        return "WLoginSimpleInfo(uin=$uin, imgType=${imgType.toHexString()}, imgFormat=${imgFormat.toHexString()}, imgUrl=${imgUrl.toHexString()}, mainDisplayName=${mainDisplayName.toHexString()})"
     }
 }
 
@@ -116,7 +134,7 @@ data class WLoginSigInfo(
 
     ) {
     override fun toString(): String {
-        return "WLoginSigInfo(uin=$uin, encryptA1=${encryptA1?.toUHexString()}, noPicSig=${noPicSig?.toUHexString()}, simpleInfo=$simpleInfo, appPri=$appPri, a2ExpiryTime=$a2ExpiryTime, loginBitmap=$loginBitmap, tgt=${tgt.toUHexString()}, a2CreationTime=$a2CreationTime, tgtKey=${tgtKey.toUHexString()}, userStSig=$userStSig, userStKey=${userStKey.toUHexString()}, userStWebSig=$userStWebSig, userA5=$userA5, userA8=$userA8, lsKey=$lsKey, sKey=$sKey, userSig64=$userSig64, openId=${openId.toUHexString()}, openKey=$openKey, vKey=$vKey, accessToken=$accessToken, d2=$d2, d2Key=${d2Key.toUHexString()}, sid=$sid, aqSig=$aqSig, psKey=$psKeyMap, superKey=${superKey.toUHexString()}, payToken=${payToken.toUHexString()}, pf=${pf.toUHexString()}, pfKey=${pfKey.toUHexString()}, da2=${da2.toUHexString()}, wtSessionTicket=$wtSessionTicket, wtSessionTicketKey=${wtSessionTicketKey.toUHexString()}, deviceToken=${deviceToken.toUHexString()})"
+        return "WLoginSigInfo(uin=$uin, encryptA1=${encryptA1?.toHexString()}, noPicSig=${noPicSig?.toHexString()}, simpleInfo=$simpleInfo, appPri=$appPri, a2ExpiryTime=$a2ExpiryTime, loginBitmap=$loginBitmap, tgt=${tgt.toHexString()}, a2CreationTime=$a2CreationTime, tgtKey=${tgtKey.toHexString()}, userStSig=$userStSig, userStKey=${userStKey.toHexString()}, userStWebSig=$userStWebSig, userA5=$userA5, userA8=$userA8, lsKey=$lsKey, sKey=$sKey, userSig64=$userSig64, openId=${openId.toHexString()}, openKey=$openKey, vKey=$vKey, accessToken=$accessToken, d2=$d2, d2Key=${d2Key.toHexString()}, sid=$sid, aqSig=$aqSig, psKey=$psKeyMap, superKey=${superKey.toHexString()}, payToken=${payToken.toHexString()}, pf=${pf.toHexString()}, pfKey=${pfKey.toHexString()}, da2=${da2.toHexString()}, wtSessionTicket=$wtSessionTicket, wtSessionTicketKey=${wtSessionTicketKey.toHexString()}, deviceToken=${deviceToken.toHexString()})"
     }
 
 //    val SIG_RESERVE_LENGTH: Int = 16
@@ -194,30 +212,16 @@ data class WLoginSigInfo(
 internal typealias PSKeyMap = MutableMap<String, KeyWithExpiry>
 internal typealias Pt4TokenMap = MutableMap<String, KeyWithExpiry>
 
-internal fun parsePSKeyMapAndPt4TokenMap(data: ByteArray, creationTime: Long, expireTime: Long, outPSKeyMap: PSKeyMap, outPt4TokenMap: Pt4TokenMap) =
-    data.read {
-        repeat(readShort().toInt()) {
-            val domain = readUShortLVString()
-            val psKey = readUShortLVByteArray()
-            val pt4token = readUShortLVByteArray()
-
-            when {
-                psKey.isNotEmpty() -> outPSKeyMap[domain] = KeyWithExpiry(psKey, creationTime, expireTime)
-                pt4token.isNotEmpty() -> outPt4TokenMap[domain] = KeyWithExpiry(pt4token, creationTime, expireTime)
-            }
-        }
-    }
-
 @Serializable
 open class KeyWithExpiry(@SerialName("data1") override val data: ByteArray, @SerialName("creationTime1") override val creationTime: Long, val expireTime: Long) : KeyWithCreationTime(data, creationTime) {
     override fun toString(): String {
-        return "KeyWithExpiry(data=${data.toUHexString()}, creationTime=$creationTime)"
+        return "KeyWithExpiry(data=${data.toHexString()}, creationTime=$creationTime)"
     }
 }
 
 @Serializable
 open class KeyWithCreationTime(open val data: ByteArray, open val creationTime: Long) {
     override fun toString(): String {
-        return "KeyWithCreationTime(data=${data.toUHexString()}, creationTime=$creationTime)"
+        return "KeyWithCreationTime(data=${data.toHexString()}, creationTime=$creationTime)"
     }
 }
