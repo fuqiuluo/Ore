@@ -1,3 +1,46 @@
+/*
+ * English :
+ *  The project is protected by the MPL open source agreement.
+ * Open source agreement warning that prohibits deletion of project source code files.
+ * The project is prohibited from acting in illegal areas.
+ * All illegal activities arising from the use of this project are the responsibility of the second author, and the original author of the project is not responsible
+ *
+ *  中文：
+ *  该项目由MPL开源协议保护。
+ *  禁止删除项目源代码文件的开源协议警告内容。
+ * 禁止使用该项目在非法领域行事。
+ * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ *
+ * 日本语：
+ * プロジェクトはMPLオープンソース契約によって保護されています。
+ *  オープンソース契約プロジェクトソースコードファイルの削除を禁止する警告。
+ * このプロジェクトは違法地域の演技を禁止しています。
+ * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
+ *
+ */
+
+/*******************************************************************************
+ *  2021 Ore Developer Warn
+ *
+ * English :
+ * The project is protected by the MPL open source agreement.
+ * Open source agreement warning that prohibits deletion of project source code files.
+ * The project is prohibited from acting in illegal areas.
+ * All illegal activities arising from the use of this project are the responsibility of the second author, and the original author of the project is not responsible
+ *
+ * 中文：
+ * 该项目由MPL开源协议保护。
+ * 禁止删除项目源代码文件的开源协议警告内容。
+ * 禁止使用该项目在非法领域行事。
+ * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ *
+ * 日本语：
+ * プロジェクトはMPLオープンソース契約によって保護されています。
+ * オープンソース契約プロジェクトソースコードファイルの削除を禁止する警告。
+ * このプロジェクトは違法地域の演技を禁止しています。
+ * このプロジェクトの使用から生じるすべての違法行為は、2番目の著者の責任であり、プロジェクトの元の著者は責任を負いません。
+ ******************************************************************************/
+
 package moe.ore.core.net
 
 import io.netty.bootstrap.Bootstrap
@@ -23,7 +66,7 @@ import kotlin.random.Random
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotConnection(private val massageListener: MassageListener, val uin: ULong) {
+class BotConnection(private val messageListener: MessageListener, val uin: ULong) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)
@@ -78,7 +121,7 @@ class BotConnection(private val massageListener: MassageListener, val uin: ULong
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
-                socketChannel.pipeline().addLast("receive", massageListener)
+                socketChannel.pipeline().addLast("receive", messageListener)
             }
         })
         val server = oicqServer[Random.nextInt(oicqServer.size)]
