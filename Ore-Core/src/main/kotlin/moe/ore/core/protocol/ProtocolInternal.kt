@@ -25,8 +25,8 @@ import moe.ore.helper.bytes.hex2ByteArray
 import java.util.*
 
 class ProtocolInternal(
-    @JvmField internal var openAppId: Long,
-    @JvmField internal var appId: Long,
+    @JvmField internal var openAppId: Int,
+    @JvmField internal var appId: Int,
     @JvmField internal var subAppId: Int,
     @JvmField internal var pingVersion: Int,
     @JvmField internal var ipVersion: Int,
@@ -96,11 +96,6 @@ class ProtocolInternal(
         /**
          * Android
          */
-        ANDROID_PHONE, IOS_PHONE,
-
-        /**
-         * Android 平板
-         */
-        ANDROID_PAD, IOS_IPAD,
+        ANDROID_PHONE
     }
 }

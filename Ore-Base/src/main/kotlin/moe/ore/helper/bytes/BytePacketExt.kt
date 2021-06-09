@@ -22,9 +22,11 @@
 package moe.ore.helper.bytes
 
 import kotlinx.io.core.*
+import kotlinx.io.streams.outputStream
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
+import java.io.DataOutputStream
 import kotlin.text.toByteArray
 
 fun createBuilder() = BytePacketBuilder()
@@ -62,77 +64,78 @@ fun BytePacketBuilder.writeBoolean(z: Boolean) = this.writeByte(if (z) 1 else 0)
  */
 fun BytePacketBuilder.writeShort(i: Int) = this.writeShort(i.toShort())
 
-fun BytePacketBuilder.writeBytes(bytes : ByteArray) = this.writeFully(bytes, 0, bytes.size)
+fun BytePacketBuilder.writeBytes(bytes: ByteArray) = this.writeFully(bytes)
 
 fun BytePacketBuilder.writeLongToBuf32(v: Long) {
     this.writeBytes(BytesUtil.int64ToBuf32(v))
 }
 
-fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray, add: Int): BytePacketBuilder {
+fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray, add: Int) {
     writeShort(body.size + add)
     writeBytes(body)
-    return this
 }
 
-fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray): BytePacketBuilder {
-    return writeBytesWithShortSize(body, 0)
+fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray) {
+    writeBytesWithShortSize(body, 0)
 }
 
-fun BytePacketBuilder.writeBytesWithSize(body: ByteArray, add: Int): BytePacketBuilder {
+fun BytePacketBuilder.writeBytesWithSize(body: ByteArray, add: Int) {
     writeInt(body.size + add)
     writeBytes(body)
-    return this
 }
 
-fun BytePacketBuilder.writeBytesWithSize(body: ByteArray): BytePacketBuilder {
-    return writeBytesWithSize(body, 0)
+fun BytePacketBuilder.writeBytesWithSize(body: ByteArray) {
+    writeBytesWithSize(body, 0)
 }
 
-fun BytePacketBuilder.writeStringWithSize(str: String): BytePacketBuilder {
-    return writeBytesWithSize(str.toByteArray())
+fun BytePacketBuilder.writeStringWithSize(str: String) {
+    writeBytesWithSize(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithSize(str: String, add: Int): BytePacketBuilder {
-    return writeBytesWithSize(str.toByteArray(), add)
+fun BytePacketBuilder.writeStringWithSize(str: String, add: Int) {
+    writeBytesWithSize(str.toByteArray(), add)
 }
 
-fun BytePacketBuilder.writeStringWithShortSize(str: String): BytePacketBuilder {
-    return writeBytesWithShortSize(str.toByteArray())
+fun BytePacketBuilder.writeStringWithShortSize(str: String) {
+    writeBytesWithShortSize(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithShortSize(str: String, add: Int): BytePacketBuilder {
-    return writeBytesWithShortSize(str.toByteArray(), add)
+fun BytePacketBuilder.writeStringWithShortSize(str: String, add: Int) {
+    writeBytesWithShortSize(str.toByteArray(), add)
 }
 
- fun BytePacketBuilder.md5(): ByteArray {
+fun BytePacketBuilder.md5(): ByteArray {
     return MD5.toMD5Byte(toByteArray())
 }
 
-fun BytePacketBuilder.writeTeaEncrypt(key : ByteArray, block : BytePacketBuilder.() -> Unit) {
+fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {
     val body = createBuilder()
     body.block()
     this.writeBytes(TeaUtil.encrypt(body.toByteArray(), key))
 }
 
-fun BytePacketBuilder.writeShortLVByteArrayLimitedLength(array: ByteArray, maxLength: Int) {
-    if (array.size <= maxLength) {
-        writeShort(array.size.toShort())
-        writeFully(array)
-    } else {
-        writeShort(maxLength.toShort())
-        repeat(maxLength) {
-            writeByte(array[it])
-        }
-    }
+fun BytePacketBuilder.writeString(str: String) {
+    this.writeStringUtf8(str)
 }
 
-internal inline fun BytePacketBuilder.writeShortLVByteArray(byteArray: ByteArray): Int {
+fun BytePacketBuilder.writeLimitedByteArray(array: ByteArray, maxLength: Int) {
+    this.writeFully(array, 0, maxLength)
+}
+
+fun BytePacketBuilder.writeLimitedString(str: String, maxLength: Int) =
+    writeLimitedByteArray(str.toByteArray(), maxLength)
+
+internal fun BytePacketBuilder.writeShortLVByteArray(byteArray: ByteArray): Int {
     this.writeShort(byteArray.size.toShort())
     this.writeFully(byteArray)
     return byteArray.size
 }
 
-internal inline fun BytePacketBuilder.writeIntLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = {it}, builder: BytePacketBuilder.() -> Unit): Int =
+internal inline fun BytePacketBuilder.writeIntLVPacket(
+    tag: UByte? = null,
+    lengthOffset: ((Long) -> Long) = { it },
+    builder: BytePacketBuilder.() -> Unit
+): Int =
     BytePacketBuilder().apply(builder).build().use {
         if (tag != null) writeUByte(tag)
         val length = lengthOffset.invoke(it.remaining).checkSizeOrError(0xFFFFFFFFL)

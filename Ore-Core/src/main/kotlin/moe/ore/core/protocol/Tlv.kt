@@ -26,13 +26,9 @@ import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.bot.writeLoginExtraData
 import moe.ore.core.helper.DataManager
 import moe.ore.helper.bytes.*
-import moe.ore.tars.TarsOutputStream
 import moe.ore.util.MD5
 import kotlin.random.Random
-import kotlin.random.nextUInt
-import moe.ore.util.TeaUtil
 import kotlin.experimental.or
-import kotlin.random.asJavaRandom
 
 @ExperimentalUnsignedTypes
 class Tlv(val uin: Long) {
@@ -51,7 +47,6 @@ class Tlv(val uin: Long) {
         out.writeShort(tlvVer.toShort())
         out.writeShort(bodyBuilder.size.toShort())
         out.writePacket(bodyBuilder)
-        bodyBuilder.close()
         return out.toByteArray()
     }
 
@@ -86,9 +81,10 @@ class Tlv(val uin: Long) {
         writeShort(protocolInfo.dbVersion)
         writeInt(protocolInfo.msfSsoVersion)
         writeInt(protocolInfo.subAppId)
-        writeInt(protocolInfo.appId.toInt())
+        writeInt(protocolInfo.appId)
         writeInt(0)
-        writeInt(protocolInfo.mainSigMap)//mainSigMap
+        writeInt(protocolInfo.mainSigMap)
+        // mainSigMap
     }
 
     fun t104(dt104: ByteArray) = buildTlv(0x104) {
@@ -114,31 +110,29 @@ class Tlv(val uin: Long) {
         writeByte(0.toByte())
         // ver
         writeInt(protocolInfo.miscBitmap)
-        writeInt(protocolInfo.subSigMap).apply {
-            val appidArray = intArrayOf(0x5f5e10e2)
-            writeByte(appidArray.size.toByte())
-            for (appid in appidArray) {
-                writeInt(appid)
-            }
+        writeInt(protocolInfo.subSigMap)
+        val appidArray = intArrayOf(0x5f5e10e2)
+        writeByte(appidArray.size.toByte())
+        for (appid in appidArray) {
+            writeInt(appid)
         }
     }
 
-    fun t1162() = buildTlv(0x116) {
+    fun t116V2() = buildTlv(0x116) {
         writeByte(0.toByte())
         writeInt(0x08F7FF7C)
-        writeInt(66560).apply {
-            val appidArray = intArrayOf(0x5f5e10e2)
-            writeByte(appidArray.size.toByte())
-            for (appid in appidArray) {
-                writeInt(appid)
-            }
+        writeInt(66560)
+        val appidArray = intArrayOf(0x5f5e10e2)
+        writeByte(appidArray.size.toByte())
+        for (appid in appidArray) {
+            writeInt(appid)
         }
     }
 
     fun t106() = buildTlv(0x106) {
         writeTeaEncrypt(dataManager.botAccount.md5PasswordWithQQ()) {
             writeShort(protocolInfo.tgtgVersion)
-            writeInt(Random.nextInt(0, 828922931))
+            writeInt(Random.nextInt())
             writeInt(protocolInfo.msfSsoVersion)
             writeInt(protocolInfo.subAppId)
             writeInt(0)
@@ -152,7 +146,7 @@ class Tlv(val uin: Long) {
             writeInt(0)
             writeBoolean(protocolInfo.isGuidAvailable)
             writeBytes(deviceInfo.guid)
-            writeInt(protocolInfo.appId.toInt())
+            writeInt(protocolInfo.appId)
             writeInt(protocolInfo.loginType)
             writeStringWithShortSize(uin.toString())
             writeShort(0)
@@ -162,7 +156,7 @@ class Tlv(val uin: Long) {
     private fun t124() = buildTlv(0x124) {
         writeBytesWithShortSize(deviceInfo.osType.toByteArray())
         writeStringWithShortSize(deviceInfo.androidVersion)
-        writeShort(deviceInfo.netType)
+        writeShort(deviceInfo.netType.value)
 //        when (Android.apn) {
 //            "5g", "wap", "net", "4gnet", "3gwap", "cncc", "cmcc" -> 1
 //            "wifi" -> 2
@@ -187,7 +181,7 @@ class Tlv(val uin: Long) {
         writeShort(1)
         // version
         writeStringWithShortSize(deviceInfo.apnName)
-        writeShort(deviceInfo.netType)
+        writeShort(deviceInfo.netType.value)
 //    writeShort (when (Android.apn) {
 //        "5g", "wap", "net", "4gnet", "3gwap", "cncc", "cmcc" -> 1
 //        "wifi" -> 2
@@ -227,8 +221,10 @@ class Tlv(val uin: Long) {
     }
 
     fun t16a(noPicSig: ByteArray) = buildTlv(0x16a) {
+        /**
+         * 20 B5 33 79 18 79 9C AB E4 4A 8E F8 0D 66 84 B81F 8C 15 24 AD 46 D6 D7 7A AF 24 6A 09 16 0A 59AF 22 ED 5B 14 A8 B4 78 36 F2 AC 9A 34 61 15 3A
+         */
         writeFully(noPicSig)
-
     }
 
     /**
@@ -237,18 +233,17 @@ class Tlv(val uin: Long) {
     fun t16b() = buildTlv(0x16b) {
         val domains = arrayOf("tenpay.com", "qzone.qq.com", "qun.qq.com", "mail.qq.com", "openmobile.qq.com", "qzone.com", "game.qq.com", "vip.qq.com")
         writeShort(domains.size)
-        writeShort(domains.size)
         for (s in domains) {
-            writeBytesWithShortSize(s.toByteArray())
+            writeStringWithShortSize(s)
         }
     }
 
     private fun t16e() = buildTlv(0x16e) {
-        writeFully(deviceInfo.model.toByteArray())
+        writeString(deviceInfo.model)
     }
 
     fun t174(dt174: ByteArray) = buildTlv(0x174) {
-        writeFully(dt174)
+        writeBytes(dt174)
     }
 
     fun t177() = buildTlv(0x177) {
@@ -258,13 +253,19 @@ class Tlv(val uin: Long) {
     }
 
 
-    fun t17a(i: Int) = buildTlv(0x17a) {
-        writeInt(i)
+    fun t17a() = buildTlv(0x17a) {
+        writeInt(9)
     }
 
     fun t17c(code: String) = buildTlv(0x17c) {
         writeShort(code.length)
-        writeBytes(code.toByteArray())
+        writeString(fun(): String {
+            val newCode = code.replace(" ", "")
+            if (newCode.length == 6) {
+                return newCode
+            }
+            error("验证码不合法")
+        }())
     }
 
     fun t187() = buildTlv(0x187) {
@@ -292,12 +293,12 @@ class Tlv(val uin: Long) {
     }
 
     fun t202() = buildTlv(0x202) {
-        writeShortLVByteArrayLimitedLength(deviceInfo.wifiBSsid.toByteArray(), 16)
-        writeShortLVByteArrayLimitedLength(deviceInfo.wifiBSsid.toByteArray(), 32)
+        writeLimitedString(deviceInfo.wifiBSsid, 16)
+        writeLimitedString(deviceInfo.wifiBSsid, 32)
     }
 
     // TODO: 2021/6/9 Emp用的
-// sigInfo2 = (client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)).md5()
+    // sigInfo2 = (client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)).md5()
     fun t400(sigInfo2: ByteArray) = buildTlv(0x400) {
         writeTeaEncrypt(sigInfo2) {
             writeByte(1) // version
@@ -326,11 +327,25 @@ class Tlv(val uin: Long) {
 
     fun t403(dt403: ByteArray) = buildTlv(0x403) {
         writeBytes(dt403)
-
     }
 
     fun t511() = buildTlv(0x511) {
-        val domains = arrayOf("office.qq.com", "qun.qq.com", "gamecenter.qq.com", "docs.qq.com", "mail.qq.com", "ti.qq.com", "vip.qq.com", "tenpay.qq.com", "qqqweb.qq.com", "qzone.qq.com", "mma.qq.com", "game.qq.com", "openmobile.qq.com", "conect.qq.com" // "y.qq.com",
+        val domains = arrayOf(
+            "office.qq.com",
+            "qun.qq.com",
+            "gamecenter.qq.com",
+            "docs.qq.com",
+            "mail.qq.com",
+            "ti.qq.com",
+            "vip.qq.com",
+            "tenpay.qq.com",
+            "qqqweb.qq.com",
+            "qzone.qq.com",
+            "mma.qq.com",
+            "game.qq.com",
+            "openmobile.qq.com",
+            "conect.qq.com"
+            // "y.qq.com",
             // "v.qq.com"
         )
         writeShort(domains.size)
@@ -349,7 +364,7 @@ class Tlv(val uin: Long) {
                     b = (b or 2.toByte())
                 }
             }
-            writeByte(b)//todo toInt
+            writeByte(b)
             writeStringWithShortSize(domain)
         }
     }
@@ -363,25 +378,11 @@ class Tlv(val uin: Long) {
         writeShort(0)
     }
 
-//    fun t525() = buildTlv(0x525) {
-//        writeShort(1)
-//        writeBytes(t536())
-//    }
-
-    fun t536(loginExtraData: ByteArray) = buildTlv(0x536) {
-        {
-            writeShortLVPacket {
-                writeFully(loginExtraData)
-            }
-        }
-    }
-
     // 1334
     fun t536(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x536) {
         writeShortLVPacket {
-            //com.tencent.loginsecsdk.ProtocolDet#packExtraData
-            writeByte(1) // const
-            writeByte(loginExtraData.size.toByte()) // data count
+            writeByte(1)
+            writeByte(loginExtraData.size.toByte())
             for (extraData in loginExtraData) {
                 writeLoginExtraData(extraData)
             }
@@ -389,23 +390,8 @@ class Tlv(val uin: Long) {
     }
 
     fun t525(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x525) {
-        writeShortLVPacket {
-            writeShort(1)
-            t536(loginExtraData)
-        }
-    }
-
-    fun t525(t536: ByteReadPacket = buildPacket {
-        t536(buildPacket {
-            //com.tencent.loginsecsdk.ProtocolDet#packExtraData
-            writeByte(1) // const
-            writeByte(0) // data count
-        }.readBytes())
-    }) = buildTlv(0x525) {
-        writeShortLVPacket {
-            writeShort(1)
-            writePacket(t536)
-        }
+        writeShort(1)
+        t536(loginExtraData)
     }
 
     private fun t52d() = buildTlv(0x52d) {

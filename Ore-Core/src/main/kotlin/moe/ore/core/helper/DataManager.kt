@@ -41,6 +41,7 @@ import moe.ore.helper.bytes.hex2ByteArray
 import java.io.File
 import java.util.*
 
+@ExperimentalSerializationApi
 class DataManager private constructor(uin: Long, path: String) : TarsStructBase() {
 
     /**
@@ -58,10 +59,10 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
     val recorder = BotRecorder()
 
     lateinit var botAccount: BotAccount
+
     /**
      * 保存各种Token
      */
-//    @JvmField
     lateinit var wLoginSigInfo: WLoginSigInfo
 
     /**
@@ -94,7 +95,6 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
         FileUtil.saveFile(dataPath, toByteArray())
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun writeTo(output: TarsOutputStream) {
         output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
@@ -102,10 +102,9 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
         output.write(protocolType.name, 3)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun readFrom(input: TarsInputStream) {
-//        都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
+        // 都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
         deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
         wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
         protocolType = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
@@ -113,23 +112,21 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
 
     @Serializable
     class DeviceInfo {
-        class NetworkType(val value: Int) {
-            companion object {
-                /**
-                 * 移动网络
-                 */
-                val MOBILE = NetworkType(1)
+        enum class NetworkType(val value: Int) {
+            /**
+             * 移动网络
+             */
+            MOBILE(1),
 
-                /**
-                 * Wifi
-                 */
-                val WIFI = NetworkType(2)
+            /**
+             * Wifi
+             */
+            WIFI(2),
 
-                /**
-                 * 其他任何类型
-                 */
-                val OTHER = NetworkType(0)
-            }
+            /**
+             * 其他任何类型
+             */
+            OTHER(0),
         }
 
         var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14))
@@ -143,12 +140,14 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
         var wifiSsid: String = "<unknown ssid>"
         var wifiBSsid = "02:00:00:00:00:00"
         var macAddress = "02:00:00:00:00:00"
-        var netType = NetworkType.WIFI.value
-        var apn = if (netType == NetworkType.WIFI.value) {
+        var netType: NetworkType = NetworkType.WIFI
+
+        var apn = if (netType == NetworkType.WIFI) {
             "wifi"
         } else {
             "cmnet"
         }
+
         var apnName = "中国移动"
         var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray() //todo t108
         var randKey: ByteArray = BytesUtil.randomKey(16)
@@ -156,67 +155,7 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
 
         var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
-        var clientIp = byteArrayOf(192.toByte(), 168.toByte(), 1, 123)
-
-
-//        "--begin--":    "该设备文件由账号作为seed自动生成，每个账号生成的文件相同。",
-//        "product":      "MRS4S",
-//        "device":       "HIM188MOE",
-//        "board":        "MIRAI-YYDS",
-//        "brand":        "OICQX",
-//        "model":        "Konata 2020",
-//        "wifi_ssid":    "TP-LINK-${uin.toString(16)}",
-//        "bootloader":   "U-boot",
-//        "android_id":   "OICQX.${hash.readUInt16BE()}${hash[2]}.${hash[3]}${String(uin)[0]}",
-//        "boot_id":      "${uuid}",
-//        "proc_version": "Linux version 4.19.71-${hash.readUInt16BE(4)} (konata@takayama.github.com)",
-//        "mac_address":  "00:50:${hash[6].toString(16).toUpperCase()}:${hash[7].toString(16).toUpperCase()}:${hash[8].toString(16).toUpperCase()}:${hash[9].toString(16).toUpperCase()}",
-//        "ip_address":   "10.0.${hash[10]}.${hash[11]}",
-//        "imei":         "${_genIMEI(uin)}",
-//        "incremental":  "${hash.readUInt32BE(12)}",
-//        "--end--":      "修改后可能需要重新验证设备。"
-//
-//        override fun writeTo(output: TarsOutputStream) {
-//            output.write(imei, 1)
-//            output.write(androidId, 2)
-//            output.write(imsi, 3)
-//            output.write(machineName, 4)
-//            output.write(osType, 5)
-//            output.write(machineManufacturer, 6)
-//            output.write(androidVersion, 7)
-//            output.write(androidSdkVersion, 8)
-//            output.write(wifiSsid, 9)
-//            output.write(wifiBSsid, 10)
-//            output.write(macAddress, 11)
-//            output.write(netType, 12)
-//            output.write(apn, 13)
-//            output.write(apnName, 14)
-//            output.write(ksid, 15)
-//            output.write(randKey, 16)
-//            output.write(guid, 17)
-//            output.write(tgtgKey, 18)
-//        }
-//
-//        override fun readFrom(input: TarsInputStream) {
-//            imei = input.read(imei, 1, true)
-//            androidId = input.read(androidId, 2, true)
-//            imsi = input.read(imsi, 3, true)
-//            machineName = input.read(machineName, 4, true)
-//            osType = input.read(osType, 5, true)
-//            machineManufacturer = input.read(machineManufacturer, 6, true)
-//            androidVersion = input.read(androidVersion, 7, true)
-//            androidSdkVersion = input.read(androidSdkVersion, 8, true)
-//            wifiSsid = input.read(wifiSsid, 9, true)
-//            wifiBSsid = input.read(wifiBSsid, 10, true)
-//            macAddress = input.read(macAddress, 11, true)
-//            netType = input.read(netType, 12, true)
-//            apn = input.read(apn, 13, true)
-//            apnName = input.read(apn, 14, true)
-//            ksid = input.read(ksid, 15, true)
-//            randKey = input.read(randKey, 16, true)
-//            guid = input.read(guid, 17, true)
-//            tgtgKey = input.read(tgtgKey, 18, true)
-//        }
+        var clientIp = byteArrayOf(0, 0, 0, 0)
 
         companion object {
             @JvmStatic
@@ -260,11 +199,11 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
 
     companion object {
         private val managerMap = hashMapOf<Long, DataManager>()
+
         private fun checkAccount(uin: Long): Long {
             if ((uin >= 10000L) and (uin <= 4000000000L)) {
                 return uin
-            }
-            throw RuntimeException("老实点 自己uin都能写错吗")
+            } else error("QQ号格式错误")
         }
 
         /**
@@ -275,12 +214,12 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
          */
         @JvmStatic
         fun manager(uin: Long): DataManager {
-            return managerMap.getOrElse(uin) { throw RuntimeException("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
+            return managerMap.getOrElse(checkAccount(uin)) { error("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
         }
 
         @JvmStatic
         fun init(uin: Long, path: String): DataManager {
-            return managerMap.getOrPut(uin) { DataManager(uin, path) }
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path) }
         }
 
         @JvmStatic

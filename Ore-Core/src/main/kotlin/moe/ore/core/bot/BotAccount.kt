@@ -28,25 +28,17 @@ import moe.ore.helper.bytes.writeLongToBuf32
 import moe.ore.util.MD5
 
 data class BotAccount(val uin: Long, val password: String) {
-    private var bytes_md5_password: ByteArray = MD5.toMD5Byte(password)
-    private var bytes_md5_passwordWithQQ: ByteArray
-
-    init {
-        var byte = BytePacketBuilder()
-        byte.writeBytes(bytes_md5_password)
+    private val bytesMd5Password: ByteArray = MD5.toMD5Byte(password)
+    private val bytesMd5PasswordWithQQ: ByteArray = fun(): ByteArray {
+        val byte = BytePacketBuilder()
+        byte.writeBytes(bytesMd5Password)
         byte.writeLongToBuf32(uin)
-        bytes_md5_passwordWithQQ = byte.md5()
+        return byte.md5()
+    }()
 
-    }
+    fun md5Password() = bytesMd5Password
 
-    /**
-     * 获取密码的MD5
-     * @return String
-     */
-    fun md5Password() = bytes_md5_password
-    fun md5PasswordWithQQ() = bytes_md5_passwordWithQQ
-
-
+    fun md5PasswordWithQQ() = bytesMd5PasswordWithQQ
 }
 
 
