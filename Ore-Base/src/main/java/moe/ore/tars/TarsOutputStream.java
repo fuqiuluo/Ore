@@ -44,7 +44,6 @@ package moe.ore.tars;
 
 import io.netty.buffer.ByteBuf;
 import kotlinx.io.core.BytePacketBuilder;
-import kotlinx.io.core.IoBuffer;
 import moe.ore.helper.bytes.BytePacketExtKt;
 import moe.ore.tars.exc.TarsEncodeException;
 import moe.ore.helper.bytes.StringExtKt;
