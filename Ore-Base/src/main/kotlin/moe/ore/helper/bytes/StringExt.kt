@@ -51,3 +51,12 @@ fun String.hex2ByteArray(): ByteArray {
     }
     return bs
 }
+
+fun String.ipToLong(): Long {
+    val ipArray = this.split("\\.".toRegex()).toTypedArray()
+    val ipNums = LongArray(4)
+    for (i in 0..3) {
+        ipNums[i] = ipArray[i].trim { it <= ' ' }.toLong()
+    }
+    return ipNums[0] * 256L * 256L * 256L + ipNums[1] * 256L * 256L + ipNums[2] * 256L + ipNums[3]
+}

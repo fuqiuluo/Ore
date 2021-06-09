@@ -70,6 +70,7 @@ import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.OreBot
+import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
@@ -83,7 +84,7 @@ import moe.ore.helper.bytes.hex2ByteArray
 import java.io.File
 import java.util.*
 
-class DataManager private constructor(uin: ULong, path: String) : TarsStructBase() {
+class DataManager private constructor(uin: Long, path: String) : TarsStructBase() {
 
     /**
      * 数据保存目录
@@ -99,6 +100,7 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
     @Transient
     val recorder = BotRecorder()
 
+    lateinit var botAccount: BotAccount
     /**
      * 保存各种Token
      */
@@ -109,7 +111,7 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
      * 模拟的安卓信息
      */
     var deviceInfo = DeviceInfo()
-    var protocolType : ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+    var protocolType: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
     init {
         if (path.isBlank()) {
@@ -191,11 +193,13 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
             "cmnet"
         }
         var apnName = "中国移动"
-        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray() //t108
+        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray() //todo t108
         var randKey: ByteArray = BytesUtil.randomKey(16)
         var guid: ByteArray = MD5.toMD5Byte((imei.ifEmpty { androidId }) + macAddress)
 
         var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
+
+        var clientIp = byteArrayOf(192.toByte(), 168.toByte(), 1, 123)
 
 
 //        "--begin--":    "该设备文件由账号作为seed自动生成，每个账号生成的文件相同。",
@@ -298,36 +302,42 @@ class DataManager private constructor(uin: ULong, path: String) : TarsStructBase
     }
 
     companion object {
-        private val managerMap = hashMapOf<ULong, DataManager>()
+        private val managerMap = hashMapOf<Long, DataManager>()
+        private fun checkAccount(uin: Long): Long {
+            if ((uin >= 10000L) and (uin <= 4000000000L)) {
+                return uin
+            }
+            throw RuntimeException("老实点 自己uin都能写错吗")
+        }
 
         /**
          * 获取管理器
          *
-         * @param uin ULong
+         * @param uin Long
          * @return DataManger
          */
         @JvmStatic
-        fun manager(uin: ULong): DataManager {
+        fun manager(uin: Long): DataManager {
             return managerMap.getOrElse(uin) { throw RuntimeException("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
         }
 
         @JvmStatic
-        fun init(uin: ULong, path: String): DataManager {
+        fun init(uin: Long, path: String): DataManager {
             return managerMap.getOrPut(uin) { DataManager(uin, path) }
         }
 
         @JvmStatic
-        fun flush(uin: ULong) {
+        fun flush(uin: Long) {
             managerMap[uin]?.flush()
         }
 
         /**
          * 销毁释放
          *
-         * @param uin ULong
+         * @param uin Long
          */
         @JvmStatic
-        fun destroy(uin: ULong) {
+        fun destroy(uin: Long) {
             managerMap.remove(uin)?.destroy()
         }
     }

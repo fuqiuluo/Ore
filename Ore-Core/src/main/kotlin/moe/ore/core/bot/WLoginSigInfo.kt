@@ -68,6 +68,8 @@ import kotlinx.io.core.ByteReadPacket
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import moe.ore.helper.bytes.toHexString
+import java.security.SecureRandom
+import java.util.*
 
 internal class WFastLoginInfo(val outA1: ByteReadPacket, var adUrl: String = "", var iconUrl: String = "", var profileUrl: String = "", var userJson: String = "") {
     override fun toString(): String {
@@ -133,6 +135,9 @@ data class WLoginSigInfo(
     var deviceToken: ByteArray,
 
     ) {
+    var dpwd:ByteArray = get_mpasswd().toByteArray()
+    var randSeed = ByteArray(0)
+    var sigInfo2 = ByteArray(0)//todo sigInfo[2]
     override fun toString(): String {
         return "WLoginSigInfo(uin=$uin, encryptA1=${encryptA1?.toHexString()}, noPicSig=${noPicSig?.toHexString()}, simpleInfo=$simpleInfo, appPri=$appPri, a2ExpiryTime=$a2ExpiryTime, loginBitmap=$loginBitmap, tgt=${tgt.toHexString()}, a2CreationTime=$a2CreationTime, tgtKey=${tgtKey.toHexString()}, userStSig=$userStSig, userStKey=${userStKey.toHexString()}, userStWebSig=$userStWebSig, userA5=$userA5, userA8=$userA8, lsKey=$lsKey, sKey=$sKey, userSig64=$userSig64, openId=${openId.toHexString()}, openKey=$openKey, vKey=$vKey, accessToken=$accessToken, d2=$d2, d2Key=${d2Key.toHexString()}, sid=$sid, aqSig=$aqSig, psKey=$psKeyMap, superKey=${superKey.toHexString()}, payToken=${payToken.toHexString()}, pf=${pf.toHexString()}, pfKey=${pfKey.toHexString()}, da2=${da2.toHexString()}, wtSessionTicket=$wtSessionTicket, wtSessionTicketKey=${wtSessionTicketKey.toHexString()}, deviceToken=${deviceToken.toHexString()})"
     }
@@ -223,5 +228,19 @@ open class KeyWithExpiry(@SerialName("data1") override val data: ByteArray, @Ser
 open class KeyWithCreationTime(open val data: ByteArray, open val creationTime: Long) {
     override fun toString(): String {
         return "KeyWithCreationTime(data=${data.toHexString()}, creationTime=$creationTime)"
+    }
+}
+
+fun get_mpasswd(): String {
+    var seed: ByteArray
+    return try {
+        val str = StringBuilder()
+        for (b in SecureRandom.getSeed(16)) {
+            val abs = Math.abs(b % 26) + if (Random().nextBoolean()) 97 else 65
+            str.append(abs.toChar())
+        }
+        str.toString()
+    } catch (unused: Throwable) {
+        "1234567890123456"
     }
 }

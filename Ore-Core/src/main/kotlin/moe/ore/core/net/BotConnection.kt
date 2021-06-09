@@ -66,7 +66,7 @@ import kotlin.random.Random
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotConnection(private val messageListener: MessageListener, val uin: ULong) {
+class BotConnection(private val messageListener: MessageListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)

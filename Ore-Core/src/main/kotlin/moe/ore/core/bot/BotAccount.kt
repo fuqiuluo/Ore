@@ -43,17 +43,32 @@
 
 package moe.ore.core.bot
 
+import kotlinx.io.core.BytePacketBuilder
+import moe.ore.helper.bytes.md5
+import moe.ore.helper.bytes.writeBytes
+import moe.ore.helper.bytes.writeLongToBuf32
 import moe.ore.util.MD5
 
-data class BotAccount(
-    val uin : ULong,
-    val password : String
-) {
+data class BotAccount(val uin: Long, val password: String) {
+    private var bytes_md5_password: ByteArray = MD5.toMD5Byte(password)
+    private var bytes_md5_passwordWithQQ: ByteArray
+
+    init {
+        var byte = BytePacketBuilder()
+        byte.writeBytes(bytes_md5_password)
+        byte.writeLongToBuf32(uin)
+        bytes_md5_passwordWithQQ = byte.md5()
+
+    }
+
     /**
      * 获取密码的MD5
      * @return String
      */
-    fun md5Password() = MD5.toMD5(password.toByteArray())!!
+    fun md5Password() = bytes_md5_password
+    fun md5PasswordWithQQ() = bytes_md5_passwordWithQQ
 
 
 }
+
+

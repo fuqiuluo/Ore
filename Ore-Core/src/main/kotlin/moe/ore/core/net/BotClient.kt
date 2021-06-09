@@ -51,7 +51,7 @@ import moe.ore.core.net.listener.MessageListener
  * create 2021-05-30 13:18
  * uin 为BotClient唯一身份标识 代表是哪个号的bot实例
  */
-class BotClient(val uin: ULong) {
+class BotClient(val uin: Long) {
 
     private val connection: BotConnection = BotConnection(object : MessageListener() {
         override fun onMassage(ctx: ChannelHandlerContext, msg: Any) {

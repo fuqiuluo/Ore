@@ -63,9 +63,9 @@ class ProtocolInternal(
     @JvmField internal var localId: Int,
     @JvmField internal var protocolVersion: Int,
     @JvmField internal var loginType: Int,
-    @JvmField internal var isGuidAvailable: Boolean,
-    @JvmField internal var isGuidFromFileNull: Boolean,
-    @JvmField internal var isGuidChange: Boolean,
+    @JvmField internal var isGuidFromFileNull: Boolean = false, // 保存到文件的 GUID 是否为 null
+    @JvmField internal var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
+    @JvmField internal var isGuidChanged: Boolean = false, // GUID 是否有变动
     @JvmField internal var buildVersion: String,
     @JvmField internal var agreementVersion: String,
     @JvmField internal var packageName: String,
@@ -103,7 +103,7 @@ class ProtocolInternal(
                 loginType = 1,
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
-                isGuidChange = false,
+                isGuidChanged = false,
                 buildVersion = "6.0.0.2436",
                 agreementVersion = "|454001228437590|A8.4.8.94cf45ad",
                 packageName = "com.tencent.mobileqq",
