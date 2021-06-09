@@ -64,10 +64,13 @@
 
 package moe.ore.core.bot
 
+import kotlinx.io.core.BytePacketBuilder
 import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.writeFully
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import moe.ore.helper.bytes.toHexString
+import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.util.*
 
@@ -135,6 +138,8 @@ data class WLoginSigInfo(
     var deviceToken: ByteArray,
 
     ) {
+    // TODO: 2021/6/9 WtLoginExt.analysisTlv537
+    lateinit var loginExtraData: MutableSet<LoginExtraData>
     var dpwd:ByteArray = get_mpasswd().toByteArray()
     var randSeed = ByteArray(0)
     var sigInfo2 = ByteArray(0)//todo sigInfo[2]
@@ -242,5 +247,27 @@ fun get_mpasswd(): String {
         str.toString()
     } catch (unused: Throwable) {
         "1234567890123456"
+    }
+}
+
+@Serializable
+class LoginExtraData(
+    val uin: Long,
+    val ip: ByteArray,
+    val time: Int,
+    val version: Int
+) {
+    override fun toString(): String {
+        return "LoginExtraData(uin=$uin, ip=${ip.contentToString()}, time=$time, version=$version)"
+    }
+}
+
+internal fun BytePacketBuilder.writeLoginExtraData(loginExtraData: LoginExtraData) {
+    loginExtraData.run {
+        writeLong(uin)
+        writeByte(ip.size.toByte())
+        writeFully(ip)
+        writeInt(time)
+        writeInt(version)
     }
 }

@@ -106,9 +106,9 @@
 
 package moe.ore.core.protocol
 
-import kotlinx.io.core.BytePacketBuilder
-import kotlinx.io.core.toByteArray
-import kotlinx.io.core.writeFully
+import kotlinx.io.core.*
+import moe.ore.core.bot.LoginExtraData
+import moe.ore.core.bot.writeLoginExtraData
 import moe.ore.core.helper.DataManager
 import moe.ore.helper.bytes.*
 import moe.ore.tars.TarsOutputStream
@@ -459,23 +459,49 @@ class Tlv(val uin: Long) {
         writeShort(0)
     }
 
-    fun t525() = buildTlv(0x525) {
-        writeShort(1)
-        writeBytes(t536())
+//    fun t525() = buildTlv(0x525) {
+//        writeShort(1)
+//        writeBytes(t536())
+//    }
+
+    fun t536(loginExtraData: ByteArray) = buildTlv(0x536) {
+        {
+            writeShortLVPacket {
+                writeFully(loginExtraData)
+            }
+        }
     }
 
-    private fun t536() = buildTlv(0x536) {
-        writeHex("""
-    01 03 00 00 00 00 6F E2
-    BD 2E 04 DF 68 5C 58 5F
-    8A F7 FE 20 02 F8 A1 00
-    00 00 00 99 68 42 96 04
-    DF 68 5C 58 5F 8A FD 41
-    20 02 F8 A1 00 00 00 00
-    62 5A BF 50 04 DF 68 5C
-    58 5F 8A FD 42 20 02 F8
-    A1
-    """.trimIndent())
+    // 1334
+    fun t536(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x536) {
+        writeShortLVPacket {
+            //com.tencent.loginsecsdk.ProtocolDet#packExtraData
+            writeByte(1) // const
+            writeByte(loginExtraData.size.toByte()) // data count
+            for (extraData in loginExtraData) {
+                writeLoginExtraData(extraData)
+            }
+        }
+    }
+
+    fun t525(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x525) {
+        writeShortLVPacket {
+            writeShort(1)
+            t536(loginExtraData)
+        }
+    }
+
+    fun t525(t536: ByteReadPacket = buildPacket {
+        t536(buildPacket {
+            //com.tencent.loginsecsdk.ProtocolDet#packExtraData
+            writeByte(1) // const
+            writeByte(0) // data count
+        }.readBytes())
+    }) = buildTlv(0x525) {
+        writeShortLVPacket {
+            writeShort(1)
+            writePacket(t536)
+        }
     }
 
     private fun t52d() = buildTlv(0x52d) {
