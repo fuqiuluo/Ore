@@ -50,10 +50,6 @@ class OreBot(val account: BotAccount, path: String) : Ore() {
 
     }
 
-    fun setDataPath(path: String) {
-        dataManager.dataPath = if (path.endsWith("/")) path.substring(0, path.length - 1) else path
-    }
-
     override fun status() = status
 
     override fun shut() {

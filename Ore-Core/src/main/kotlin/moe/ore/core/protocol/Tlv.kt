@@ -57,7 +57,6 @@ class Tlv(val uin: Long) {
         writeInt(currentTimeSeconds())
         writeFully(deviceInfo.clientIp)
         writeShort(0)
-        toByteArray()
     }
 
     fun t8() = buildTlv(0x8) {
@@ -305,7 +304,7 @@ class Tlv(val uin: Long) {
             writeLong(uin)
             writeFully(deviceInfo.guid)
             writeFully(dataManager.wLoginSigInfo.dpwd)
-            writeInt(protocolInfo.appId.toInt())
+            writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
             // TODO: 2021/6/9  tlvMap[0x403]?.let { bot.client.randSeed = it }

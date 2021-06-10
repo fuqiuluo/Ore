@@ -20,8 +20,17 @@
  */
 
 package moe.ore.helper.bytes
+import kotlin.experimental.xor
 
-fun ByteArray.toHexString() : String = this.joinToString("") {
+fun ByteArray.toHexString(): String = this.joinToString("") {
     (it.toInt() and 0xFF).toString(16).padStart(2, '0')
+}
+
+fun ByteArray.xor(key: ByteArray): ByteArray {
+    val result = ByteArray(this.size)
+    for (i in 0 until this.size) {
+        result[i] = (this[i] xor key[i % key.size] xor ((i and 0xFF).toByte()))
+    }
+    return result
 }
 

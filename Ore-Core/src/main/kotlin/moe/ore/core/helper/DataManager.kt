@@ -38,18 +38,18 @@ import moe.ore.util.BytesUtil
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 import moe.ore.helper.bytes.hex2ByteArray
+import moe.ore.helper.bytes.xor
 import java.io.File
 import java.util.*
 
-@ExperimentalSerializationApi
-class DataManager private constructor(uin: Long, path: String) : TarsStructBase() {
+class DataManager private constructor(uin: Long, path: String, private val safePwd: String) : TarsStructBase() {
 
     /**
      * 数据保存目录
      */
     @JvmField
     @Transient
-    var dataPath: String = File(path + File.separator + "$uin.ore").absolutePath
+    var dataPath: String = File("$path${MD5.toMD5(uin.toString())}.ore").absolutePath
 
     /**
      * 管理器
@@ -95,18 +95,22 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
         FileUtil.saveFile(dataPath, toByteArray())
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun writeTo(output: TarsOutputStream) {
-        output.write(ProtoBuf.encodeToByteArray(deviceInfo), 1)
-        output.write(ProtoBuf.encodeToByteArray(wLoginSigInfo), 2)
+        output.write(xor(ProtoBuf.encodeToByteArray(deviceInfo)), 1)
+        output.write(xor(ProtoBuf.encodeToByteArray(wLoginSigInfo)), 2)
         output.write(protocolType.name, 3)
     }
 
+    private fun xor(value: ByteArray) = if (safePwd.isBlank()) value else value.xor(safePwd.toByteArray())
+
+    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun readFrom(input: TarsInputStream) {
         // 都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
-        deviceInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 1, false))
-        wLoginSigInfo = ProtoBuf.decodeFromByteArray(input.read(ByteArray(0), 2, false))
+        deviceInfo = ProtoBuf.decodeFromByteArray(xor(input.read(ByteArray(0), 1, false)))
+        wLoginSigInfo = ProtoBuf.decodeFromByteArray(xor(input.read(ByteArray(0), 2, false)))
         protocolType = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
     }
 
@@ -219,7 +223,12 @@ class DataManager private constructor(uin: Long, path: String) : TarsStructBase(
 
         @JvmStatic
         fun init(uin: Long, path: String): DataManager {
-            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path) }
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, if (path.endsWith("/")) path else path + File.separator, "") }
+        }
+
+        @JvmStatic
+        fun init(uin: Long, path: String, safePwd: String): DataManager {
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, if (path.endsWith("/")) path else path + File.separator, safePwd) }
         }
 
         @JvmStatic
