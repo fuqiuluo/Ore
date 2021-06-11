@@ -9,7 +9,7 @@
  *  该项目由MPL开源协议保护。
  *  禁止删除项目源代码文件的开源协议警告内容。
  * 禁止使用该项目在非法领域行事。
- * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ * 使用该项目产生的违法行为，由使用者或第二作者全责，原作者免责
  *
  * 日本语：
  * プロジェクトはMPLオープンソース契約によって保護されています。
@@ -27,8 +27,12 @@ import moe.ore.helper.bytes.writeBytes
 import moe.ore.helper.bytes.writeLongToBuf32
 import moe.ore.util.MD5
 
-data class BotAccount(val uin: Long, val password: String) {
+/**
+ * 禁止为Password添加val！！！
+ */
+class BotAccount(val uin: Long, password: String) {
     private val bytesMd5Password: ByteArray = MD5.toMD5Byte(password)
+
     private val bytesMd5PasswordWithQQ: ByteArray = fun(): ByteArray {
         val byte = BytePacketBuilder()
         byte.writeBytes(bytesMd5Password)

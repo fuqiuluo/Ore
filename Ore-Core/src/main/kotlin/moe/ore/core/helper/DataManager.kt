@@ -9,7 +9,7 @@
  *  该项目由MPL开源协议保护。
  *  禁止删除项目源代码文件的开源协议警告内容。
  * 禁止使用该项目在非法领域行事。
- * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ * 使用该项目产生的违法行为，由使用者或第二作者全责，原作者免责
  *
  * 日本语：
  * プロジェクトはMPLオープンソース契約によって保護されています。
@@ -30,6 +30,7 @@ import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WLoginSigInfo
+import moe.ore.core.bot.WtLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
@@ -42,6 +43,7 @@ import moe.ore.helper.bytes.xor
 import java.io.File
 import java.util.*
 
+@ExperimentalSerializationApi
 class DataManager private constructor(uin: Long, path: String, private val safePwd: String) : TarsStructBase() {
 
     /**
@@ -49,7 +51,9 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
      */
     @JvmField
     @Transient
-    var dataPath: String = File("$path${MD5.toMD5(uin.toString())}.ore").absolutePath
+    var dataPath: String = fun(): String {
+        return File(path).absolutePath + File.pathSeparator + MD5.toMD5(uin.toString()) + ".ore"
+    }()
 
     /**
      * 管理器
@@ -63,7 +67,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
     /**
      * 保存各种Token
      */
-    lateinit var wLoginSigInfo: WLoginSigInfo
+    val wLoginSigInfo: WtLoginSigInfo = WtLoginSigInfo(uin)
 
     /**
      * 模拟的安卓信息
@@ -72,11 +76,8 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
     var protocolType: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
     init {
-        if (path.isBlank()) {
-            throw RuntimeException("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
-        }
+        if (path.isBlank()) error("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         if (FileUtil.has(dataPath)) {
-            println(dataPath)
             readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
         }
     }
@@ -95,22 +96,20 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         FileUtil.saveFile(dataPath, toByteArray())
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun writeTo(output: TarsOutputStream) {
         output.write(xor(ProtoBuf.encodeToByteArray(deviceInfo)), 1)
-        output.write(xor(ProtoBuf.encodeToByteArray(wLoginSigInfo)), 2)
+        //  output.write(xor(ProtoBuf.encodeToByteArray(wLoginSigInfo)), 2)
         output.write(protocolType.name, 3)
     }
 
     private fun xor(value: ByteArray) = if (safePwd.isBlank()) value else value.xor(safePwd.toByteArray())
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Override
     override fun readFrom(input: TarsInputStream) {
         // 都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
-        deviceInfo = ProtoBuf.decodeFromByteArray(xor(input.read(ByteArray(0), 1, false)))
-        wLoginSigInfo = ProtoBuf.decodeFromByteArray(xor(input.read(ByteArray(0), 2, false)))
+        deviceInfo = ProtoBuf.decodeFromByteArray(xor(input.read(byteArrayOf(), 1, false)))
+        // wLoginSigInfo = ProtoBuf.decodeFromByteArray(xor(input.read(byteArrayOf(), 2, false)))
         protocolType = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
     }
 
@@ -202,8 +201,10 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
     }
 
     companion object {
+        @JvmStatic
         private val managerMap = hashMapOf<Long, DataManager>()
 
+        @JvmStatic
         private fun checkAccount(uin: Long): Long {
             if ((uin >= 10000L) and (uin <= 4000000000L)) {
                 return uin
@@ -223,12 +224,12 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
         @JvmStatic
         fun init(uin: Long, path: String): DataManager {
-            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, if (path.endsWith("/")) path else path + File.separator, "") }
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path, "") }
         }
 
         @JvmStatic
         fun init(uin: Long, path: String, safePwd: String): DataManager {
-            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, if (path.endsWith("/")) path else path + File.separator, safePwd) }
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path, safePwd) }
         }
 
         @JvmStatic

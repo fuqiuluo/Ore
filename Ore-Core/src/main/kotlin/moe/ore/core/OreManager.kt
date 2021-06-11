@@ -9,7 +9,7 @@
  *  该项目由MPL开源协议保护。
  *  禁止删除项目源代码文件的开源协议警告内容。
  * 禁止使用该项目在非法领域行事。
- * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ * 使用该项目产生的违法行为，由使用者或第二作者全责，原作者免责
  *
  * 日本语：
  * プロジェクトはMPLオープンソース契約によって保護されています。
@@ -21,13 +21,18 @@
 
 package moe.ore.core
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import moe.ore.api.Ore
+import moe.ore.core.bot.BotAccount
+import moe.ore.core.helper.DataManager
+import java.io.File
 
 /**
  * Ore管理器
  *
  * 批量管理已登录QQ
  */
+@ExperimentalSerializationApi
 object OreManager {
     private val botMap = hashMapOf<Long, Ore>()
 
@@ -46,8 +51,15 @@ object OreManager {
      * @param password String
      * @return Ore
      */
-    fun addBot(uin: Long, password : String) : Ore {
+    fun addBot(uin: Long, password: String, path: String = "data/"): Ore {
+        val ore = OreBot(uin)
+        val account = BotAccount(uin, password)
+        val manager = DataManager.init(uin, path)
+        manager.botAccount = account
+
+
         TODO()
     }
+
 
 }

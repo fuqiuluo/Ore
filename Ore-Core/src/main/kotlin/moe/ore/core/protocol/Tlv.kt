@@ -9,7 +9,7 @@
  *  该项目由MPL开源协议保护。
  *  禁止删除项目源代码文件的开源协议警告内容。
  * 禁止使用该项目在非法领域行事。
- * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ * 使用该项目产生的违法行为，由使用者或第二作者全责，原作者免责
  *
  * 日本语：
  * プロジェクトはMPLオープンソース契約によって保護されています。
@@ -22,6 +22,7 @@
 package moe.ore.core.protocol
 
 import kotlinx.io.core.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.bot.writeLoginExtraData
 import moe.ore.core.helper.DataManager
@@ -30,6 +31,7 @@ import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
 
+@ExperimentalSerializationApi
 @ExperimentalUnsignedTypes
 class Tlv(val uin: Long) {
     private val dataManager = DataManager.manager(uin)

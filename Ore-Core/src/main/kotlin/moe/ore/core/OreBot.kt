@@ -9,7 +9,7 @@
  *  该项目由MPL开源协议保护。
  *  禁止删除项目源代码文件的开源协议警告内容。
  * 禁止使用该项目在非法领域行事。
- * 使用该项目产生的违法行为，由第二作者全责，原作者免责
+ * 使用该项目产生的违法行为，由使用者或第二作者全责，原作者免责
  *
  * 日本语：
  * プロジェクトはMPLオープンソース契約によって保護されています。
@@ -27,16 +27,11 @@ import moe.ore.api.listener.OreListener
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
 
-class OreBot(val account: BotAccount, path: String) : Ore() {
+class OreBot(val uin: Long) : Ore() {
     /**
      * 机器人状态
      */
     private var status = OreStatus.NoLogin
-
-    /**
-     * 数据管理器
-     */
-    val dataManager = DataManager.init(account.uin, path)
 
     /**
      * 事件监听器
@@ -55,7 +50,7 @@ class OreBot(val account: BotAccount, path: String) : Ore() {
     override fun shut() {
         // 关闭机器人
         this.status = OreStatus.Destroy
-        DataManager.destroy(account.uin)
+        DataManager.destroy(uin)
 
 
     }
