@@ -44,6 +44,18 @@ package moe.ore.core.net.packet
 
 import moe.ore.core.util.QQUtil
 
+data class ToService(
+    val seq: Int,
+    
+    )
+
+enum class PacketType {
+    /**
+     * 登录包
+     */
+    LoginPacket
+}
+
 data class FromService(
     val seq: Int,
     val commandName: String,
