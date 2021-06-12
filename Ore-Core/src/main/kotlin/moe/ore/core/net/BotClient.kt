@@ -58,7 +58,6 @@ class BotClient(val uin: Long) {
         override fun onMassage(msg: PacketResponse) {
             msg.body.readPacket(uin) { uinStr, from ->
                 check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
-                println(from)
                 val hash = from.hashCode()
                 if (commonHandler.containsKey(hash)) {
                     commonHandler[hash]!!.let {

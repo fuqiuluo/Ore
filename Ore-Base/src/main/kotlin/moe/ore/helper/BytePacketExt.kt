@@ -89,45 +89,37 @@ fun BytePacketBuilder.writeLongToBuf32(v: Long) {
     this.writeBytes(BytesUtil.int64ToBuf32(v))
 }
 
-fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray, add: Int) {
-    writeShort(body.size + add)
+fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray, size: Int = body.size) {
+    writeShort(size)
     writeBytes(body)
 }
 
-fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray) {
-    writeBytesWithShortSize(body, 0)
-}
-
-fun BytePacketBuilder.writeBytesWithSize(body: ByteArray, add: Int) {
-    writeInt(body.size + add)
+fun BytePacketBuilder.writeBytesWithSize(body: ByteArray, size: Int = body.size) {
+    writeInt(size)
     writeBytes(body)
-}
-
-fun BytePacketBuilder.writeBytesWithSize(body: ByteArray) {
-    writeBytesWithSize(body, 0)
 }
 
 fun BytePacketBuilder.writeStringWithSize(str: String) {
     writeBytesWithSize(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithSize(str: String, add: Int) {
-    writeBytesWithSize(str.toByteArray(), add)
+fun BytePacketBuilder.writeStringWithSize(str: String, size: Int) {
+    writeBytesWithSize(str.toByteArray(), size)
 }
 
 fun BytePacketBuilder.writeStringWithShortSize(str: String) {
     writeBytesWithShortSize(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithShortSize(str: String, add: Int) {
-    writeBytesWithShortSize(str.toByteArray(), add)
+fun BytePacketBuilder.writeStringWithShortSize(str: String, size: Int) {
+    writeBytesWithShortSize(str.toByteArray(), size)
 }
 
 fun BytePacketBuilder.md5(): ByteArray {
     return MD5.toMD5Byte(toByteArray())
 }
 
-fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {
+inline fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {
     val body = createBuilder()
     body.block()
     this.writeBytes(TeaUtil.encrypt(body.toByteArray(), key))
@@ -146,6 +138,10 @@ fun BytePacketBuilder.writeLimitedString(str: String, maxLength: Int) =
 
 fun BytePacketBuilder.writeHex(uHex: String) {
     writeBytes(uHex.toByteArray())
+}
+
+inline fun BytePacketBuilder.writeBuilder(block: BytePacketBuilder.() -> Unit) {
+    this.writePacket(createBuilder().apply { this.block() })
 }
 
 fun ByteReadPacket.readString(length: Int) = String(readBytes(length))

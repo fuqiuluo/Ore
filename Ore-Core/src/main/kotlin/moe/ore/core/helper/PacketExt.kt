@@ -21,9 +21,11 @@
 
 package moe.ore.core.helper
 
+import kotlinx.io.core.BytePacketBuilder
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
 import moe.ore.core.net.packet.FromService
+import moe.ore.core.net.packet.PacketType
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
@@ -78,6 +80,35 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
     }
 }
 
-fun buildPacket() {
+/**
+ * 构建第一层，最外面那层
+ */
+fun buildFirstLayer(uin: Long, packetType: PacketType, body: BytePacketBuilder): ByteArray =
+    createBuilder().apply {
+        writeInt(packetType.flag1)
+        writeByte(packetType.flag2)
+        when (packetType) {
+            PacketType.LoginPacket -> {
+                writeBytesWithSize(ByteArrayPool.EMPTY_BYTE_ARRAY, 0 + 4)
+            }
+
+
+        }
+        writeByte(0)
+        val uinStr = uin.toString()
+        writeStringWithSize(uinStr, uinStr.length + 4)
+    }.apply { writePacket(body) }.toByteArray()
+
+
+fun buildSecondLayer(uin: Long, packetType: PacketType): BytePacketBuilder {
+    val builder = createBuilder()
+    val manager = DataManager.manager(uin)
+    when (packetType) {
+        PacketType.LoginPacket -> {
+            builder.writeBuilder {
+
+            }
+        }
+    }
 
 }

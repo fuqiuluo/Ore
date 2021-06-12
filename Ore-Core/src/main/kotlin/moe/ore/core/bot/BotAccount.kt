@@ -24,6 +24,7 @@ package moe.ore.core.bot
 import kotlinx.io.core.BytePacketBuilder
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.md5
+import moe.ore.helper.toHexString
 import moe.ore.helper.writeBytes
 import moe.ore.helper.writeLongToBuf32
 import moe.ore.util.MD5
@@ -36,18 +37,15 @@ class BotAccount(val uin: Long, password: String) {
         QQUtil.checkAccount(uin)
     }
 
-    private val bytesMd5Password: ByteArray = MD5.toMD5Byte(password)
+    val bytesMd5Password: ByteArray by lazy {
+        MD5.toMD5Byte(password)
+    }
 
-    private val bytesMd5PasswordWithQQ: ByteArray = fun(): ByteArray {
+    val bytesMd5PasswordWithQQ: ByteArray by lazy {
         val byte = BytePacketBuilder()
         byte.writeBytes(bytesMd5Password)
-        byte.writeLongToBuf32(uin)
-        return byte.md5()
-    }()
-
-    fun md5Password() = bytesMd5Password
-
-    fun md5PasswordWithQQ() = bytesMd5PasswordWithQQ
+        byte.writeLong(uin)
+        byte.md5()
+    }
 }
-
 

@@ -42,18 +42,26 @@
 
 package moe.ore.core.net.packet
 
+import moe.ore.core.net.BotClient
 import moe.ore.core.util.QQUtil
 
-data class ToService(
-    val seq: Int,
-    
-    )
+class ToService(val seq: Int, commandName: String, body: ByteArray) {
+    var packetType: PacketType = PacketType.LoginPacket
 
-enum class PacketType {
+
+}
+
+enum class PacketType(val flag1: Int, val flag2: Byte) {
     /**
      * 登录包
      */
-    LoginPacket
+    LoginPacket(0xa, 0x2)
+
+}
+
+fun ToService.sendTo(client: BotClient) {
+
+
 }
 
 data class FromService(

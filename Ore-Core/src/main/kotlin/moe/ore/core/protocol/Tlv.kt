@@ -129,7 +129,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t106() = buildTlv(0x106) {
-        writeTeaEncrypt(dataManager.botAccount.md5PasswordWithQQ()) {
+        writeTeaEncrypt(dataManager.botAccount.bytesMd5PasswordWithQQ) {
             writeShort(protocolInfo.tgtgVersion)
             writeInt(Random.nextInt())
             writeInt(protocolInfo.msfSsoVersion)
@@ -140,7 +140,7 @@ class Tlv(val uin: Long) {
             writeInt(currentTimeSeconds())
             writeFully(deviceInfo.clientIp)
             writeByte(1.toByte())
-            writeBytes(dataManager.botAccount.md5Password())
+            writeBytes(dataManager.botAccount.bytesMd5Password)
             writeBytes(deviceInfo.tgtgKey)
             writeInt(0)
             writeBoolean(protocolInfo.isGuidAvailable)
@@ -153,14 +153,9 @@ class Tlv(val uin: Long) {
     }
 
     private fun t124() = buildTlv(0x124) {
-        writeBytesWithShortSize(deviceInfo.osType.toByteArray())
+        writeStringWithShortSize(deviceInfo.osType)
         writeStringWithShortSize(deviceInfo.androidVersion)
         writeShort(deviceInfo.netType.value)
-//        when (Android.apn) {
-//            "5g", "wap", "net", "4gnet", "3gwap", "cncc", "cmcc" -> 1
-//            "wifi" -> 2
-//            else -> 0
-//        }
         writeStringWithShortSize(deviceInfo.apnName)
         writeStringWithSize(deviceInfo.apn)
     }
@@ -171,9 +166,9 @@ class Tlv(val uin: Long) {
         writeBoolean(protocolInfo.isGuidAvailable)
         writeBoolean(protocolInfo.isGuidChanged)
         writeInt(0x01000000)
-        writeStringWithShortSize(deviceInfo.model, 32)
-        writeBytesWithShortSize(deviceInfo.guid, 16)
-        writeStringWithShortSize(deviceInfo.brand, 16)
+        writeLimitedString(deviceInfo.model, 32)
+        writeLimitedByteArray(deviceInfo.guid, 16)
+        writeLimitedString(deviceInfo.brand, 16)
     }
 
     fun t141() = buildTlv(0x141) {
@@ -181,11 +176,6 @@ class Tlv(val uin: Long) {
         // version
         writeStringWithShortSize(deviceInfo.apnName)
         writeShort(deviceInfo.netType.value)
-//    writeShort (when (Android.apn) {
-//        "5g", "wap", "net", "4gnet", "3gwap", "cncc", "cmcc" -> 1
-//        "wifi" -> 2
-//        else -> 0
-//    })
         writeStringWithShortSize(deviceInfo.apn)
     }
 
@@ -263,7 +253,7 @@ class Tlv(val uin: Long) {
             if (newCode.length == 6) {
                 return newCode
             }
-            error("验证码不合法")
+            runtimeError("验证码不合法")
         }())
     }
 
@@ -293,7 +283,7 @@ class Tlv(val uin: Long) {
 
     fun t202() = buildTlv(0x202) {
         writeLimitedString(deviceInfo.wifiBSsid, 16)
-        writeLimitedString(deviceInfo.wifiBSsid, 32)
+        writeLimitedString("\"${deviceInfo.wifiSsid}\"", 32)
     }
 
     // TODO: 2021/6/9 Emp用的

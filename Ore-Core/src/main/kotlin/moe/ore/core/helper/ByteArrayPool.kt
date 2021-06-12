@@ -103,7 +103,7 @@ class ByteArrayPool(private val mSizeLimit: Int = DEFAULT_SIZE) {
          */
         const val MIN_BUF_SIZE = 64
 
-        private val EMPTY_BYTE_ARRAY = ByteArray(0)
+        val EMPTY_BYTE_ARRAY = ByteArray(0)
 
         @JvmStatic
         val BUF_COMPARATOR = kotlin.Comparator<ByteArray> { o1, o2 ->
