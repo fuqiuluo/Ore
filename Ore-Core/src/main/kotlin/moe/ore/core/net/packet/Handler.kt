@@ -19,19 +19,48 @@
  *
  */
 
-package moe.ore.core.util
+package moe.ore.core.net.packet
 
-object QQUtil {
-    @JvmStatic
-    fun checkAccount(uin: Long): Long {
-        check((uin >= 10000L) or (uin <= 4000000000L)) { "QQ号格式错误" }
-        return uin
+import moe.ore.core.util.QQUtil
+import java.util.concurrent.ArrayBlockingQueue
+
+abstract class LongHandler(commandName: String) : Handler(0, commandName)
+
+class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
+    /**
+     * 堵塞器
+     */
+    private val queue = ArrayBlockingQueue<Boolean>(1)
+
+    /**
+     * 等待返回包
+     * @return Boolean
+     */
+    fun wait(): Boolean = queue.take()
+
+    override fun check(from: FromService): Boolean {
+        val ret = (from.seq == seq) and (from.commandName == commandName)
+        queue.put(ret)
+        return ret
     }
+}
 
-    @JvmStatic
-    fun hash(seq: Int, commandName: String): Int {
-        var result = seq
-        result = 31 * result + commandName.hashCode()
-        return result
+abstract class Handler(
+    val seq: Int,
+    val commandName: String
+) {
+
+    abstract fun check(from: FromService): Boolean
+
+    override fun hashCode(): Int = QQUtil.hash(seq, commandName)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Handler) return false
+
+        if (seq != other.seq) return false
+        if (commandName != other.commandName) return false
+
+        return true
     }
 }

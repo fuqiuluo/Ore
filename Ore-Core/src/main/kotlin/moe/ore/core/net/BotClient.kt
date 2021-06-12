@@ -21,19 +21,12 @@
 
 package moe.ore.core.net
 
-import kotlinx.io.core.ByteReadPacket
-import kotlinx.io.core.discardExact
-import kotlinx.io.core.readBytes
-import moe.ore.api.OreStatus
-import moe.ore.core.OreManager
-import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.readPacket
 import moe.ore.core.net.decoder.PacketResponse
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
-import moe.ore.helper.readString
-import moe.ore.helper.reader
-import moe.ore.util.TeaUtil
+import moe.ore.core.net.packet.Handler
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @author 飞翔的企鹅
@@ -41,6 +34,20 @@ import moe.ore.util.TeaUtil
  * uin 为BotClient唯一身份标识 代表是哪个号的bot实例
  */
 class BotClient(val uin: Long) {
+    /**
+     * 普通接包器
+     *
+     * 只接一次包，例如返回包这种
+     */
+    private val commonHandler = ConcurrentHashMap<Int, Handler>()
+
+    /**
+     * 特殊接包器
+     *
+     * 例如监听群消息的包，持续监听
+     */
+    private val specialHandler = ConcurrentHashMap<String, Handler>()
+
     var listener: ClientListener? = null
 
     private val connection: BotConnection = BotConnection(object : UsefulListener() {
@@ -49,12 +56,38 @@ class BotClient(val uin: Long) {
         }
 
         override fun onMassage(msg: PacketResponse) {
-            msg.body.readPacket(uin) {
-                check(uin.toString() == "uinStr") { "QQ号和ClientQQ号不一致，请检查发包" }
-
+            msg.body.readPacket(uin) { uinStr, from ->
+                check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
+                println(from)
+                val hash = from.hashCode()
+                if (commonHandler.containsKey(hash)) {
+                    commonHandler[hash]!!.let {
+                        if (it.check(from)) {
+                            unRegisterCommonHandler(it.hashCode())
+                        }
+                    }
+                } else if (specialHandler.containsKey(from.commandName)) {
+                    specialHandler[from.commandName]!!.check(from)
+                }
             }
         }
     }, uin)
+
+    fun registerCommonHandler(handler: Handler) {
+        commonHandler[handler.hashCode()] = handler
+    }
+
+    fun registerSpecialHandler(handler: Handler) {
+        specialHandler[handler.commandName] = handler
+    }
+
+    fun unRegisterCommonHandler(hash: Int) {
+        commonHandler.remove(hash)
+    }
+
+    fun unRegisterSpecialHandler(name: String) {
+        specialHandler.remove(name)
+    }
 
     fun send(requestBody: ByteArray): Boolean {
         return connection.send(requestBody)
@@ -63,9 +96,5 @@ class BotClient(val uin: Long) {
     fun connect(): BotClient {
         connection.connect()
         return this
-    }
-
-    fun newPackRequest(cmdName: String, requestId: Long, requestBody: ByteArray): PackRequest {
-        return PackRequest(this, cmdName, requestId, requestBody)
     }
 }

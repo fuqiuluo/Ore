@@ -23,6 +23,7 @@ package moe.ore.core.helper
 
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
+import moe.ore.core.net.packet.FromService
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
@@ -30,7 +31,7 @@ import okhttp3.internal.closeQuietly
 
 val DEFAULT_TEA_KEY = ByteArray(16)
 
-inline fun ByteArray.readPacket(uin: Long, block: () -> Unit) {
+inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromService) -> Unit) {
     val manager = DataManager.manager(uin)
     this.reader {
         val packetType = readInt()
@@ -66,8 +67,8 @@ inline fun ByteArray.readPacket(uin: Long, block: () -> Unit) {
                         else -> runtimeError("unknown encode type.")
                     }.let {
                         // msfSSoSeq , commandName, uinStr, it (body)
-
-
+                        val from = FromService(msfSSoSeq, commandName, body)
+                        block(uinStr, from)
                     }
                 }
                 this.closeQuietly()
