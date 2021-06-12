@@ -43,7 +43,6 @@ import moe.ore.helper.bytes.xor
 import java.io.File
 import java.util.*
 
-@ExperimentalSerializationApi
 class DataManager private constructor(uin: Long, path: String, private val safePwd: String) : TarsStructBase() {
 
     /**
@@ -67,7 +66,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
     /**
      * 保存各种Token
      */
-    val wLoginSigInfo: WtLoginSigInfo = WtLoginSigInfo(uin)
+    val wLoginSigInfo: WtLoginSigInfo = WtLoginSigInfo()
 
     /**
      * 模拟的安卓信息
@@ -98,19 +97,14 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
     @Override
     override fun writeTo(output: TarsOutputStream) {
-        output.write(xor(ProtoBuf.encodeToByteArray(deviceInfo)), 1)
-        //  output.write(xor(ProtoBuf.encodeToByteArray(wLoginSigInfo)), 2)
-        output.write(protocolType.name, 3)
+
     }
 
     private fun xor(value: ByteArray) = if (safePwd.isBlank()) value else value.xor(safePwd.toByteArray())
 
     @Override
     override fun readFrom(input: TarsInputStream) {
-        // 都设为不是必须 因为考虑后面添加字段 然后初始化读取老版本保存的信息里面没有新的字段会导致报错
-        deviceInfo = ProtoBuf.decodeFromByteArray(xor(input.read(byteArrayOf(), 1, false)))
-        // wLoginSigInfo = ProtoBuf.decodeFromByteArray(xor(input.read(byteArrayOf(), 2, false)))
-        protocolType = ProtocolInternal.ProtocolType.valueOf(input.readString(3, false))
+
     }
 
     @Serializable
@@ -152,7 +146,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         }
 
         var apnName = "中国移动"
-        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray() //todo t108
+        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
         var randKey: ByteArray = BytesUtil.randomKey(16)
         var guid: ByteArray = MD5.toMD5Byte((imei.ifEmpty { androidId }) + macAddress)
 

@@ -21,9 +21,49 @@
 
 package moe.ore.core.protocol.pb
 
-import kotlinx.serialization.protobuf.ProtoNumber
+import kotlinx.serialization.Serializable
 
+@Serializable
+data class DeviceReport(
+    var bootloader: ByteArray,
+    var version: ByteArray,
+    var codename: ByteArray,
+    var incremental: ByteArray,
+    var fingerprint: ByteArray,
+    var bootId: ByteArray,
+    var androidId: ByteArray,
+    var baseband: ByteArray,
+    var innerVer: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-class DeviceReport {
+        other as DeviceReport
 
+        if (!bootloader.contentEquals(other.bootloader)) return false
+        if (!version.contentEquals(other.version)) return false
+        if (!codename.contentEquals(other.codename)) return false
+        if (!incremental.contentEquals(other.incremental)) return false
+        if (!fingerprint.contentEquals(other.fingerprint)) return false
+        if (!bootId.contentEquals(other.bootId)) return false
+        if (!androidId.contentEquals(other.androidId)) return false
+        if (!baseband.contentEquals(other.baseband)) return false
+        if (!innerVer.contentEquals(other.innerVer)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = bootloader.contentHashCode()
+        result = 31 * result + version.contentHashCode()
+        result = 31 * result + codename.contentHashCode()
+        result = 31 * result + incremental.contentHashCode()
+        result = 31 * result + fingerprint.contentHashCode()
+        result = 31 * result + bootId.contentHashCode()
+        result = 31 * result + androidId.contentHashCode()
+        result = 31 * result + baseband.contentHashCode()
+        result = 31 * result + innerVer.contentHashCode()
+        return result
+    }
 }

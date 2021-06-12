@@ -27,9 +27,7 @@ object TestMain {
     @Throws(InterruptedException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val manager = DataManager.init(137236033, "C:\\Users\\Administrator\\Desktop\\Ore")
-        manager.wLoginSigInfo.d2Key = ByteArray(16)
-        manager.flush()
+
 
     }
 

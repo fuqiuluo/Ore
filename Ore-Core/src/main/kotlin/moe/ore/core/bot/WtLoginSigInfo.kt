@@ -21,13 +21,26 @@
 
 package moe.ore.core.bot
 
-import kotlinx.serialization.Serializable
+import java.security.SecureRandom
+import java.util.*
+import kotlin.math.abs
 
-@Serializable
-data class WtLoginSigInfo(
-    val uin: Long = 0,
+class WtLoginSigInfo {
+    // TODO form T403
+    var randSeed: ByteArray? = null
 
-
-    ) {
+    /**
+     * 每次初始化都随机
+     */
+    val dpwd: ByteArray = try {
+        val str = StringBuilder()
+        for (b in SecureRandom.getSeed(16)) {
+            val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
+            str.append(abs.toChar())
+        }
+        str.toString()
+    } catch (unused: Throwable) {
+        "1234567890123456"
+    }.toByteArray()
 
 }

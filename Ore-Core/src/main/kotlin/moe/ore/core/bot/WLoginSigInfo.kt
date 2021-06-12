@@ -233,13 +233,3 @@ class LoginExtraData(
         return "LoginExtraData(uin=$uin, ip=${ip.contentToString()}, time=$time, version=$version)"
     }
 }
-
-internal fun BytePacketBuilder.writeLoginExtraData(loginExtraData: LoginExtraData) {
-    loginExtraData.run {
-        writeLong(uin)
-        writeByte(ip.size.toByte())
-        writeFully(ip)
-        writeInt(time)
-        writeInt(version)
-    }
-}

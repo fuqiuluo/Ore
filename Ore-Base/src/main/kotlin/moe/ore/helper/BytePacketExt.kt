@@ -131,28 +131,6 @@ internal fun BytePacketBuilder.writeShortLVByteArray(byteArray: ByteArray): Int 
     return byteArray.size
 }
 
-internal inline fun BytePacketBuilder.writeIntLVPacket(
-    tag: UByte? = null,
-    lengthOffset: ((Long) -> Long) = { it },
-    builder: BytePacketBuilder.() -> Unit
-): Int =
-    BytePacketBuilder().apply(builder).build().use {
-        if (tag != null) writeUByte(tag)
-        val length = lengthOffset.invoke(it.remaining).checkSizeOrError(0xFFFFFFFFL)
-        writeInt(length.toInt())
-        writePacket(it)
-        return length.toInt()
-    }
-
-inline fun BytePacketBuilder.writeShortLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = {it}, builder: BytePacketBuilder.() -> Unit): Int =
-    BytePacketBuilder().apply(builder).build().use {
-        if (tag != null) writeUByte(tag)
-        val length = lengthOffset.invoke(it.remaining).checkSizeOrError(0xFFFFFFFFL)
-        writeUShort(length.toUShort())
-        writePacket(it)
-        return length.toInt()
-    }
-
 internal fun BytePacketBuilder.writeShortLVString(str: String) = writeShortLVByteArray(str.toByteArray())
 
 fun BytePacketBuilder.writeHex(uHex: String) {

@@ -19,23 +19,13 @@
  *
  */
 
-package moe.ore.api.listener
+package moe.ore.core.helper
 
-import moe.ore.api.Ore
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 
-/**
- * 机器人事件监听器
- */
-interface OreListener {
-
-    /**
-     * 开始登录
-     */
-    fun onLoginStart()
-
-    /**
-     * 登录结束
-     */
-    fun onLoginFinish()
-
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T> encodeProtobuf(value: T): ByteArray {
+    return ProtoBuf.encodeToByteArray(value)
 }

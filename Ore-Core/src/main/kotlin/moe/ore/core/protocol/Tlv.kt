@@ -22,17 +22,15 @@
 package moe.ore.core.protocol
 
 import kotlinx.io.core.*
-import kotlinx.serialization.ExperimentalSerializationApi
 import moe.ore.core.bot.LoginExtraData
-import moe.ore.core.bot.writeLoginExtraData
 import moe.ore.core.helper.DataManager
+import moe.ore.core.helper.encodeProtobuf
+import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.bytes.*
 import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
 
-@ExperimentalSerializationApi
-@ExperimentalUnsignedTypes
 class Tlv(val uin: Long) {
     private val dataManager = DataManager.manager(uin)
     private var deviceInfo = dataManager.deviceInfo
@@ -309,8 +307,7 @@ class Tlv(val uin: Long) {
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
-            // TODO: 2021/6/9  tlvMap[0x403]?.let { bot.client.randSeed = it }
-            writeFully(dataManager.wLoginSigInfo.randSeed)
+            writeFully(dataManager.wLoginSigInfo.randSeed!!)
         }
     }
 
@@ -379,25 +376,39 @@ class Tlv(val uin: Long) {
         writeShort(0)
     }
 
-    // 1334
-    fun t536(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x536) {
-        writeShortLVPacket {
-            writeByte(1)
-            writeByte(loginExtraData.size.toByte())
-            for (extraData in loginExtraData) {
-                writeLoginExtraData(extraData)
-            }
+    fun t536(loginExtraData: Collection<LoginExtraData> = listOf()) = buildTlv(0x536) {
+        writeByte(1)
+        writeByte(loginExtraData.size.toByte())
+        for (extraData in loginExtraData) {
+            writeLong(uin)
+            writeByte(extraData.ip.size.toByte())
+            writeFully(extraData.ip)
+            writeInt(extraData.time)
+            writeInt(extraData.version)
         }
     }
 
-    fun t525(loginExtraData: Collection<LoginExtraData>) = buildTlv(0x525) {
+    fun t525(loginExtraData: Collection<LoginExtraData> = listOf()) = buildTlv(0x525) {
         writeShort(1)
-        t536(loginExtraData)
+        writeBytes(t536(loginExtraData))
     }
 
     private fun t52d() = buildTlv(0x52d) {
-        TODO("DeviceReport()")
-//        writeBytes(DeviceReport())
+        writeBytes(
+            encodeProtobuf(
+                DeviceReport(
+                    bootloader = "unknown".toByteArray(),
+                    version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(),
+                    codename = "REL".toByteArray(),
+                    incremental = "20.8.13".toByteArray(),
+                    fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(),
+                    bootId = "".toByteArray(),
+                    androidId = deviceInfo.androidId.toByteArray(),
+                    baseband = "".toByteArray(),
+                    innerVer = "21.2.4".toByteArray()
+                )
+            )
+        )
     }
 
     fun t542() = buildTlv(0x542) {
@@ -434,11 +445,5 @@ class Tlv(val uin: Long) {
 
     fun t193(ticket: String) = buildTlv(0x193) {
         writeBytes(ticket.toByteArray())
-    }
-
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-        }
     }
 }
