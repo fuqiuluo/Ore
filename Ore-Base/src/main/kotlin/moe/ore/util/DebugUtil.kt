@@ -38,7 +38,7 @@ object DebugUtil {
      */
     @JvmStatic
     fun <T> forcedConvert(source : T?, any: Any?) : T? {
-        return any as T?
+        return any as? T
     }
 
     @JvmStatic

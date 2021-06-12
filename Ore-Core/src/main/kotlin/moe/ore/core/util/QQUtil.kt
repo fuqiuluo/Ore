@@ -19,35 +19,12 @@
  *
  */
 
-package moe.ore.core.bot
+package moe.ore.core.util
 
-import kotlinx.io.core.BytePacketBuilder
-import moe.ore.core.util.QQUtil
-import moe.ore.helper.md5
-import moe.ore.helper.writeBytes
-import moe.ore.helper.writeLongToBuf32
-import moe.ore.util.MD5
-
-/**
- * 禁止为Password添加val！！！
- */
-class BotAccount(val uin: Long, password: String) {
-    init {
-        QQUtil.checkAccount(uin)
+object QQUtil {
+    @JvmStatic
+    fun checkAccount(uin: Long): Long {
+        check((uin >= 10000L) or (uin <= 4000000000L)) { "QQ号格式错误" }
+        return uin
     }
-
-    private val bytesMd5Password: ByteArray = MD5.toMD5Byte(password)
-
-    private val bytesMd5PasswordWithQQ: ByteArray = fun(): ByteArray {
-        val byte = BytePacketBuilder()
-        byte.writeBytes(bytesMd5Password)
-        byte.writeLongToBuf32(uin)
-        return byte.md5()
-    }()
-
-    fun md5Password() = bytesMd5Password
-
-    fun md5PasswordWithQQ() = bytesMd5PasswordWithQQ
 }
-
-

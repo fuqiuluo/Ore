@@ -42,8 +42,7 @@ abstract class UsefulListener : ChannelHandlerAdapter() {
     }
 
     override fun channelActive(ctx: ChannelHandlerContext?) {
-        println("连接成功")
-        ctx?.close()
+        this.onConnect()
     }
 
     protected abstract fun onConnect()

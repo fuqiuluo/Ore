@@ -21,41 +21,96 @@
 
 package moe.ore.core.helper
 
-import kotlinx.io.pool.DefaultPool
+import java.util.*
+import kotlin.collections.ArrayList
 
-/**
- * 缓存 [ByteArray] 实例的 [ObjectPool]
- */
-object ByteArrayPool : DefaultPool<ByteArray>(256) {
+class ByteArrayPool(private val mSizeLimit: Int = DEFAULT_SIZE) {
+    init {
+        check(mSizeLimit > 0) { "wrong size" }
+    }
+
+    private val mBuffersByLastUse = LinkedList<ByteArray>()
+    private val mBuffersBySize = ArrayList<ByteArray>(64)
+
+    private var mCurrentSize = 0
+
     /**
-     * 每一个 [ByteArray] 的大小
+     * 借一个出去用用
+     *
+     * @param len Int
+     * @return ByteArray
      */
-    const val BUFFER_SIZE: Int = 8192 * 8
-
-    override fun produceInstance(): ByteArray = ByteArray(BUFFER_SIZE)
-
-    override fun clearInstance(instance: ByteArray): ByteArray = instance
-
-    fun checkBufferSize(size: Int) {
-        require(size <= BUFFER_SIZE) { "sizePerPacket is too large. Maximum buffer size=$BUFFER_SIZE" }
-    }
-
-    fun checkBufferSize(size: Long) {
-        require(size <= BUFFER_SIZE) { "sizePerPacket is too large. Maximum buffer size=$BUFFER_SIZE" }
+    @Synchronized
+    fun getBuf(len: Int): ByteArray {
+        if (len <= 0) return EMPTY_BYTE_ARRAY
+        repeat(mBuffersBySize.size) {
+            val buf = mBuffersBySize[it]
+            if (buf.size >= len) {
+                mCurrentSize -= buf.size
+                mBuffersBySize.removeAt(it)
+                mBuffersByLastUse.removeAt(it)
+                return buf
+            }
+        }
+        return ByteArray(len)
     }
 
     /**
-     * 请求一个大小至少为 [requestedSize] 的 [ByteArray] 实例.
-     */ // 不要写为扩展函数. 它需要优先于 kotlinx.io 的扩展函数 resolve
-    inline fun <R> useInstance(requestedSize: Int = 0, block: (ByteArray) -> R): R {
-        if (requestedSize > BUFFER_SIZE) {
-            return ByteArray(requestedSize).run(block)
+     * 还回来
+     * @param buf ByteArray
+     */
+    @Synchronized
+    fun returnBuf(buf: ByteArray) {
+        if ((buf.isEmpty()) and (buf.size <= mSizeLimit) and (buf.size >= MIN_BUF_SIZE)) {
+            mBuffersByLastUse.add(buf)
+            var pos = Collections.binarySearch(mBuffersBySize, buf, BUF_COMPARATOR)
+            if (pos < 0) {
+                pos = -pos - 1
+            }
+            mBuffersBySize.add(pos, buf)
+            mCurrentSize += buf.size
+            trim()
         }
-        val instance = borrow()
-        try {
-            return block(instance)
-        } finally {
-            recycle(instance)
+    }
+
+    /**
+     * 有借有还
+     *
+     * 借出去给你用，自动还回来
+     */
+    fun <T> loanAndReturn(len: Int, block: ByteArray.() -> T?): T? {
+        val buf = getBuf(len)
+        val ret = buf.block()
+        returnBuf(buf)
+        return ret
+    }
+
+    @Synchronized
+    private fun trim() {
+        while (mCurrentSize > mSizeLimit) {
+            mCurrentSize -= mBuffersByLastUse.removeAt(0).size
+        }
+    }
+
+    companion object {
+        /**
+         * 一个池子最大多大
+         */
+        const val DEFAULT_SIZE = 1024 * 64
+
+        /**
+         * 最小的字节组大小
+         */
+        const val MIN_BUF_SIZE = 64
+
+        private val EMPTY_BYTE_ARRAY = ByteArray(0)
+
+        @JvmStatic
+        val BUF_COMPARATOR = kotlin.Comparator<ByteArray> { o1, o2 ->
+            /**
+             * 进行排序，小的在上面
+             */
+            return@Comparator o1.size - o2.size
         }
     }
 }

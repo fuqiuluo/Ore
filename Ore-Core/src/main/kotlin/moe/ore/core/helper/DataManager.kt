@@ -27,6 +27,7 @@ import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.BotRecorder
 import moe.ore.core.bot.WtLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.util.QQUtil.checkAccount
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -34,6 +35,7 @@ import moe.ore.util.BytesUtil
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 import moe.ore.helper.hex2ByteArray
+import moe.ore.helper.runtimeError
 import moe.ore.helper.xor
 import java.io.File
 import java.util.*
@@ -70,7 +72,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
     var protocolType: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
     init {
-        if (path.isBlank()) error("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
+        if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         if (FileUtil.has(dataPath)) {
             readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
         }
@@ -193,13 +195,6 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         @JvmStatic
         private val managerMap = hashMapOf<Long, DataManager>()
 
-        @JvmStatic
-        private fun checkAccount(uin: Long): Long {
-            if ((uin >= 10000L) and (uin <= 4000000000L)) {
-                return uin
-            } else error("QQ号格式错误")
-        }
-
         /**
          * 获取管理器
          *
@@ -208,7 +203,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
          */
         @JvmStatic
         fun manager(uin: Long): DataManager {
-            return managerMap.getOrElse(checkAccount(uin)) { error("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
+            return managerMap.getOrElse(checkAccount(uin)) { runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化") }
         }
 
         @JvmStatic

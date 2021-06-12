@@ -21,8 +21,11 @@
 
 package moe.ore.helper
 
+inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
+    throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
 
-@PublishedApi
-internal fun Long.checkSizeOrError(max: Long): Long =
-    if (this >= max) error("value $this is greater than its expected maximum value $max")
-    else this
+fun printlnArgs(vararg any: Any?) {
+    println()
+
+    any.forEach { println(it) }
+}

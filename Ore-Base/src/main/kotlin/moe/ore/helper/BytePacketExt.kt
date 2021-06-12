@@ -147,3 +147,15 @@ fun BytePacketBuilder.writeLimitedString(str: String, maxLength: Int) =
 fun BytePacketBuilder.writeHex(uHex: String) {
     writeBytes(uHex.toByteArray())
 }
+
+fun ByteReadPacket.readString(length: Int) = String(readBytes(length))
+
+fun ByteArray.toByteReadPacket() = ByteReadPacket(this)
+
+inline fun ByteArray.reader(block: ByteReadPacket.() -> Unit) {
+    this.toByteReadPacket().block()
+}
+
+fun ByteReadPacket.readByteReadPacket(length: Int): ByteReadPacket {
+    return readBytes(length).toByteReadPacket()
+}

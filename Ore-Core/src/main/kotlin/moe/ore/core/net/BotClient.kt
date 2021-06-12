@@ -22,13 +22,18 @@
 package moe.ore.core.net
 
 import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
 import moe.ore.api.OreStatus
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
+import moe.ore.core.helper.readPacket
 import moe.ore.core.net.decoder.PacketResponse
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
+import moe.ore.helper.readString
+import moe.ore.helper.reader
+import moe.ore.util.TeaUtil
 
 /**
  * @author 飞翔的企鹅
@@ -44,13 +49,11 @@ class BotClient(val uin: Long) {
         }
 
         override fun onMassage(msg: PacketResponse) {
-            val reader = ByteReadPacket(msg.body)
-            val teaKey: ByteArray = when (OreManager.getBot(uin)!!.status()) {
-                OreStatus.NoLogin -> ByteArray(16)
-                else -> DataManager.manager(uin).wLoginSigInfo.d2Key!!
+            msg.body.readPacket(uin) {
+                check(uin.toString() == "uinStr") { "QQ号和ClientQQ号不一致，请检查发包" }
+
+
             }
-
-
         }
     }, uin)
 
@@ -67,4 +70,7 @@ class BotClient(val uin: Long) {
         return PackRequest(this, cmdName, requestId, requestBody)
     }
 
+    companion object {
+        private val DEFAULT_TEA_KEY = ByteArray(1)
+    }
 }

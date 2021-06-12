@@ -59,7 +59,8 @@ class ReConnectionAndExceptionListener(private val botConnection: BotConnection)
 
     @Override
     override fun operationComplete(channelFuture: ChannelFuture) {
-        println("ChannelFutureListener掉线了...")
+        // println("ChannelFutureListener掉线了...")
+        // TODO 不是掉线了，是与服务器连接状态发生变化，就会触发这个
         if (!channelFuture.isSuccess) {
             // reconnect()
         } else {

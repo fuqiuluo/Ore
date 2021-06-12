@@ -27,10 +27,29 @@ import moe.ore.api.listener.OreListener
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
+import moe.ore.core.net.listener.ClientListener
+import moe.ore.helper.runtimeError
 
 class OreBot(val uin: Long) : Ore() {
+    val client: BotClient = BotClient(uin).apply {
+        this.listener = object : ClientListener {
+            override fun onConnect() {
+                when (this@OreBot.status()) {
+                    OreStatus.NoLogin -> {
+                        // 登录
 
-    val client: BotClient = BotClient(uin)
+
+                    }
+                    OreStatus.Online -> {
+                        // 重连
+
+
+                    }
+                    else -> runtimeError("未知的错误操作")
+                }
+            }
+        }
+    }
 
     /**
      * 机器人状态
@@ -46,8 +65,6 @@ class OreBot(val uin: Long) : Ore() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
         client.connect()
-
-
     }
 
     override fun status() = status
@@ -56,7 +73,6 @@ class OreBot(val uin: Long) : Ore() {
         // 关闭机器人
         this.status = OreStatus.Destroy
         DataManager.destroy(uin)
-
 
     }
 }
