@@ -59,8 +59,7 @@ class BotDecoder : ByteToMessageDecoder() {
         if (channelBuffer.readableBytes() < length) {
             return null
         }
-        val bytes = ByteArray(length)
-        channelBuffer.readBytes(bytes)
+        val bytes = ByteArray(length).also { channelBuffer.readBytes(it) }
         return PacketResponse(bytes, charsetName)
     }
 }

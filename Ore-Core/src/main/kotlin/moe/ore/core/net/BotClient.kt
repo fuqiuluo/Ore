@@ -52,7 +52,6 @@ class BotClient(val uin: Long) {
             msg.body.readPacket(uin) {
                 check(uin.toString() == "uinStr") { "QQ号和ClientQQ号不一致，请检查发包" }
 
-
             }
         }
     }, uin)
@@ -68,9 +67,5 @@ class BotClient(val uin: Long) {
 
     fun newPackRequest(cmdName: String, requestId: Long, requestBody: ByteArray): PackRequest {
         return PackRequest(this, cmdName, requestId, requestBody)
-    }
-
-    companion object {
-        private val DEFAULT_TEA_KEY = ByteArray(1)
     }
 }

@@ -22,41 +22,56 @@
 package moe.ore.core.helper
 
 import kotlinx.io.core.discardExact
-import moe.ore.helper.readByteReadPacket
-import moe.ore.helper.readString
-import moe.ore.helper.reader
+import kotlinx.io.core.readBytes
+import moe.ore.helper.*
 import moe.ore.util.TeaUtil
+import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
+
+val DEFAULT_TEA_KEY = ByteArray(16)
 
 inline fun ByteArray.readPacket(uin: Long, block: () -> Unit) {
     val manager = DataManager.manager(uin)
     this.reader {
-        val keyType = readInt()
-        val packetType = readByte().toInt()
-
-
-
+        val packetType = readInt()
+        // 貌似没有什么鸟用
+        val keyType = readByte().toInt()
         discardExact(1)
         // 不知道是什么奇怪的玩意 skip 吧
         val uinStr = readString(readInt() - 4)
-        TeaUtil.decrypt(ByteArray(remaining.toInt()).also { readAvailable(it) }, byteArrayOf()).reader {
-            val headReader = readByteReadPacket(readInt() - 4)
-            val bodyReader = readByteReadPacket(readInt() - 4)
-            if (bodyReader.remaining > 0) {
-                val msfSSoSeq = headReader.readInt()
+        ByteArrayPool.loanAndReturn(remaining.toInt()) {
+            TeaUtil.decrypt(
+                this.apply { readAvailable(this) }, when (keyType) {
+                    1 -> manager.wLoginSigInfo.d2Key!!
+                    2 -> DEFAULT_TEA_KEY
+                    else -> runtimeError("unknown key type : $keyType")
+                }
+            ).reader {
+                val headReader = readByteReadPacket(-4)
+                val body = readBytes(readInt() - 4)
+                if (body.isNotEmpty()) {
+                    val msfSSoSeq = headReader.readInt()
+                    if (headReader.readInt() != 0) {
+                        headReader.discardExact(headReader.readInt() - 4)
+                        // 一个奇怪的Token
+                    } else {
+                        headReader.discardExact(4)
+                    }
+                    val commandName = headReader.readString(headReader.readInt() - 4)
+                    // val randomSeed =
+                    headReader.discardExact(headReader.readInt() - 4)
+                    when (headReader.readInt()) {
+                        0, 4 -> body
+                        1 -> ZipUtil.unCompress(body)
+                        else -> runtimeError("unknown encode type.")
+                    }.let {
+                        // msfSSoSeq , commandName, uinStr, it (body)
 
 
-            } else {
-                /**
-                 * Body 为空的包不需要处理 因为不需要
-                 *
-                 * 是否需要释放呢?
-                 *
-                 * Answer ： 会被GC掉
-                 */
+                    }
+                }
                 this.closeQuietly()
                 headReader.closeQuietly()
-                bodyReader.closeQuietly()
             }
         }
     }

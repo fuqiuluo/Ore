@@ -112,5 +112,20 @@ class ByteArrayPool(private val mSizeLimit: Int = DEFAULT_SIZE) {
              */
             return@Comparator o1.size - o2.size
         }
+
+        @JvmStatic
+        private val default = ByteArrayPool()
+
+        @JvmName("getBufDefault")
+        @JvmStatic
+        fun getBuf(len: Int) = default.getBuf(len)
+
+        @JvmName("returnBufDefault")
+        @JvmStatic
+        fun returnBuf(buf: ByteArray) = default.returnBuf(buf)
+
+        @JvmName("loanAndReturnDefault")
+        @JvmStatic
+        fun <T> loanAndReturn(len: Int, block: ByteArray.() -> T?): T? = default.loanAndReturn(len, block)
     }
 }
