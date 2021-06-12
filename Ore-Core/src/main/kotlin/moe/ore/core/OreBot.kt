@@ -26,8 +26,12 @@ import moe.ore.api.OreStatus
 import moe.ore.api.listener.OreListener
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
+import moe.ore.core.net.BotClient
 
 class OreBot(val uin: Long) : Ore() {
+
+    val client: BotClient = BotClient(uin)
+
     /**
      * 机器人状态
      */
@@ -41,6 +45,7 @@ class OreBot(val uin: Long) : Ore() {
     override fun login() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
+        client.connect()
 
 
     }
@@ -54,4 +59,9 @@ class OreBot(val uin: Long) : Ore() {
 
 
     }
+}
+
+fun main() {
+    val ore = OreManager.addBot(1372362033, "18qq8q", "C:\\")
+    ore.login()
 }

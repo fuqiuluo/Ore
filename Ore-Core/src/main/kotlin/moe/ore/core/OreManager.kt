@@ -32,7 +32,6 @@ import java.io.File
  *
  * 批量管理已登录QQ
  */
-@ExperimentalSerializationApi
 object OreManager {
     private val botMap = hashMapOf<Long, Ore>()
 
@@ -56,9 +55,7 @@ object OreManager {
         val account = BotAccount(uin, password)
         val manager = DataManager.init(uin, path)
         manager.botAccount = account
-
-
-        TODO()
+        return ore
     }
 
 

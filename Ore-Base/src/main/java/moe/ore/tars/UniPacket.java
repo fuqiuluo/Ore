@@ -43,7 +43,7 @@
 package moe.ore.tars;
 
 import kotlinx.io.core.BytePacketBuilder;
-import moe.ore.helper.bytes.BytePacketExtKt;
+import moe.ore.helper.BytePacketExtKt;
 import moe.ore.protocol.tars.RequestPacket;
 
 import java.nio.charset.StandardCharsets;

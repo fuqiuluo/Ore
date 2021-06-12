@@ -44,13 +44,17 @@ import kotlin.random.Random
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-class BotConnection(private val messageListener: MessageListener, val uin: Long) {
+class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)
-    private val heartBeatListener: HeartBeatListener = HeartBeatListener(this@BotConnection)
-    private val idleStateHandler: IdleStateHandler = IdleStateHandler(5, 3, 10, TimeUnit.SECONDS)
-    private val reConnectionAndExceptionListener: ReConnectionAndExceptionListener = ReConnectionAndExceptionListener(this@BotConnection)
+    private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
+
+    // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
+    private val idleStateHandler: IdleStateHandler =
+        IdleStateHandler(1000 * (60 + 10), 1000 * 60, 1000 * (60 + 20), TimeUnit.MILLISECONDS)
+    private val reConnectionAndExceptionListener: ReConnectionAndExceptionListener =
+        ReConnectionAndExceptionListener(this)
 
     //    max1个线程池 不允许再多
     private val scheduler = Executors.newScheduledThreadPool(1)
@@ -86,7 +90,6 @@ class BotConnection(private val messageListener: MessageListener, val uin: Long)
 
     private fun init(bootstrap: Bootstrap): Bootstrap {
         if (nioEventLoopGroup.isShutdown) {
-            // TODO: 2021/6/6 待测试
             nioEventLoopGroup = NioEventLoopGroup()
         }
         bootstrap.group(nioEventLoopGroup)
@@ -94,12 +97,12 @@ class BotConnection(private val messageListener: MessageListener, val uin: Long)
         bootstrap.handler(object : ChannelInitializer<SocketChannel>() {
             public override fun initChannel(socketChannel: SocketChannel) {
                 //  注意添加顺序决定执行的先后
-                socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
+                // TODO socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
                 socketChannel.pipeline().addLast("ping", idleStateHandler)
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
-                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
+                // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
-                socketChannel.pipeline().addLast("receive", messageListener)
+                socketChannel.pipeline().addLast("receive", usefulListener)
             }
         })
         val server = oicqServer[Random.nextInt(oicqServer.size)]

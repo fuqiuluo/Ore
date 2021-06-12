@@ -21,13 +21,10 @@
 
 package moe.ore.core.bot
 
-import kotlinx.io.core.BytePacketBuilder
 import kotlinx.io.core.ByteReadPacket
-import kotlinx.io.core.writeFully
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import moe.ore.helper.bytes.toHexString
-import java.nio.ByteBuffer
+import moe.ore.helper.toHexString
 import java.security.SecureRandom
 import java.util.*
 import kotlin.math.abs

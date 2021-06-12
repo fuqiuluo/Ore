@@ -22,9 +22,9 @@
 package moe.ore.core.bot
 
 import kotlinx.io.core.BytePacketBuilder
-import moe.ore.helper.bytes.md5
-import moe.ore.helper.bytes.writeBytes
-import moe.ore.helper.bytes.writeLongToBuf32
+import moe.ore.helper.md5
+import moe.ore.helper.writeBytes
+import moe.ore.helper.writeLongToBuf32
 import moe.ore.util.MD5
 
 /**

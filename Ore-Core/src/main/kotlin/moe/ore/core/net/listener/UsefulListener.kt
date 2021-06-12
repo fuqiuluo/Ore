@@ -25,6 +25,7 @@ import kotlin.Throws
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandler.Sharable
+import moe.ore.core.net.decoder.PacketResponse
 import java.lang.Exception
 
 /**
@@ -32,12 +33,22 @@ import java.lang.Exception
  * create 2021-05-30 13:18
  */
 @Sharable
-abstract class MessageListener : ChannelHandlerAdapter() {
+abstract class UsefulListener : ChannelHandlerAdapter() {
     @Throws(Exception::class)
-    override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-
-
+    override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
+        msg?.let {
+            this.onMassage(msg as PacketResponse)
+        }
     }
 
-    protected abstract fun onMassage(ctx: ChannelHandlerContext, msg: Any)
+    override fun channelActive(ctx: ChannelHandlerContext?) {
+        println("连接成功")
+        ctx?.close()
+    }
+
+    protected abstract fun onConnect()
+
+    protected abstract fun onMassage(msg: PacketResponse)
+
+
 }

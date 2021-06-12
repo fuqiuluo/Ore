@@ -26,6 +26,9 @@ import java.util.*
 import kotlin.math.abs
 
 class WtLoginSigInfo {
+    var d2: ByteArray? = null
+    var d2Key: ByteArray? = null
+
     // TODO form T403
     var randSeed: ByteArray? = null
 

@@ -21,7 +21,7 @@
 
 package moe.ore.core.protocol
 
-import moe.ore.helper.bytes.hex2ByteArray
+import moe.ore.helper.hex2ByteArray
 import java.util.*
 
 class ProtocolInternal(

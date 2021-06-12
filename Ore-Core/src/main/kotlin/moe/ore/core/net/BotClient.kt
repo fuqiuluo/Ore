@@ -21,26 +21,36 @@
 
 package moe.ore.core.net
 
-import io.netty.buffer.ByteBuf
-import io.netty.channel.ChannelHandlerContext
-import moe.ore.core.net.listener.MessageListener
+import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.readBytes
+import moe.ore.api.OreStatus
+import moe.ore.core.OreManager
+import moe.ore.core.helper.DataManager
+import moe.ore.core.net.decoder.PacketResponse
+import moe.ore.core.net.listener.ClientListener
+import moe.ore.core.net.listener.UsefulListener
+
 /**
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  * uin 为BotClient唯一身份标识 代表是哪个号的bot实例
  */
 class BotClient(val uin: Long) {
+    var listener: ClientListener? = null
 
-    private val connection: BotConnection = BotConnection(object : MessageListener() {
-        override fun onMassage(ctx: ChannelHandlerContext, msg: Any) {
-            println("channelRead = $ctx, msg = $msg")
+    private val connection: BotConnection = BotConnection(object : UsefulListener() {
+        override fun onConnect() {
+            listener?.onConnect()
+        }
 
-            val byteBuf = msg as ByteBuf
-            // TODO: 2021/5/30 一顿操作之后 大概伪代码
-            val cmdName = byteBuf.readBytes(10).toString()
-            val requestId = byteBuf.readLong()
-            val uin = byteBuf.readLong()
-            PackRequest.call(uin, cmdName, requestId, byteBuf.array())
+        override fun onMassage(msg: PacketResponse) {
+            val reader = ByteReadPacket(msg.body)
+            val teaKey: ByteArray = when (OreManager.getBot(uin)!!.status()) {
+                OreStatus.NoLogin -> ByteArray(16)
+                else -> DataManager.manager(uin).wLoginSigInfo.d2Key!!
+            }
+
+
         }
     }, uin)
 

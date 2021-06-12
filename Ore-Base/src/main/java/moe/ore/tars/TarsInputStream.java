@@ -23,9 +23,9 @@ package moe.ore.tars;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import moe.ore.helper.ByteArrayExtKt;
 import moe.ore.tars.exc.TarsDecodeException;
 import moe.ore.util.DebugUtil;
-import moe.ore.helper.bytes.ByteArrayExtKt;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;

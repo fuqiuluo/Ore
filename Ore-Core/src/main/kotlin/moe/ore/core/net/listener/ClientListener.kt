@@ -19,10 +19,11 @@
  *
  */
 
-package moe.ore.helper
+package moe.ore.core.net.listener
 
-
-@PublishedApi
-internal fun Long.checkSizeOrError(max: Long): Long =
-    if (this >= max) error("value $this is greater than its expected maximum value $max")
-    else this
+interface ClientListener {
+    /**
+     * 连接成功的事件
+     */
+    fun onConnect()
+}

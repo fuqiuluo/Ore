@@ -21,15 +21,10 @@
 
 package moe.ore.core.helper
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.BotRecorder
-import moe.ore.core.bot.WLoginSigInfo
 import moe.ore.core.bot.WtLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.tars.TarsInputStream
@@ -38,8 +33,8 @@ import moe.ore.tars.TarsStructBase
 import moe.ore.util.BytesUtil
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
-import moe.ore.helper.bytes.hex2ByteArray
-import moe.ore.helper.bytes.xor
+import moe.ore.helper.hex2ByteArray
+import moe.ore.helper.xor
 import java.io.File
 import java.util.*
 

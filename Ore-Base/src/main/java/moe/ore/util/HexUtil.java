@@ -43,8 +43,8 @@
 
 package moe.ore.util;
 
-import moe.ore.helper.bytes.ByteArrayExtKt;
-import moe.ore.helper.bytes.StringExtKt;
+import moe.ore.helper.ByteArrayExtKt;
+import moe.ore.helper.StringExtKt;
 
 public class HexUtil {
 

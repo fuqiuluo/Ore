@@ -26,7 +26,7 @@ import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.encodeProtobuf
 import moe.ore.core.protocol.pb.DeviceReport
-import moe.ore.helper.bytes.*
+import moe.ore.helper.*
 import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or

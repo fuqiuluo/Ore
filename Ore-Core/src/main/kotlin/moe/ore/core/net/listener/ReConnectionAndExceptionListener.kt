@@ -44,7 +44,7 @@ class ReConnectionAndExceptionListener(private val botConnection: BotConnection)
     @Override
     override fun channelInactive(ctx: ChannelHandlerContext) {
         System.err.println("ChannelHandlerAdapter掉线了...")
-        reconnect()
+        // reconnect()
     }
 
     @Override
@@ -53,7 +53,7 @@ class ReConnectionAndExceptionListener(private val botConnection: BotConnection)
         System.err.println("exceptionCaught..")
         cause?.printStackTrace()
         ctx.close()
-        reconnect()
+        // reconnect()
         // TODO: 2021/6/1 有待测试异常之后的重连
     }
 
@@ -61,7 +61,7 @@ class ReConnectionAndExceptionListener(private val botConnection: BotConnection)
     override fun operationComplete(channelFuture: ChannelFuture) {
         println("ChannelFutureListener掉线了...")
         if (!channelFuture.isSuccess) {
-            reconnect()
+            // reconnect()
         } else {
             System.err.println("服务端链接成功...")
         }

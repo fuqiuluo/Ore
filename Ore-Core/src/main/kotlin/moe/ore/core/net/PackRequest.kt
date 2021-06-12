@@ -21,7 +21,7 @@
 
 package moe.ore.core.net
 
-import moe.ore.helper.bytes.toHexString
+import moe.ore.helper.toHexString
 import java.util.concurrent.TimeUnit
 import java.util.Objects
 import java.util.concurrent.ConcurrentHashMap
