@@ -130,7 +130,7 @@ fun BytePacketBuilder.writeString(str: String) {
 }
 
 fun BytePacketBuilder.writeLimitedByteArray(array: ByteArray, maxLength: Int) {
-    this.writeFully(array, 0, maxLength)
+    this.writeFully(array, 0, if (array.size >= maxLength) maxLength else array.size)
 }
 
 fun BytePacketBuilder.writeLimitedString(str: String, maxLength: Int) =
