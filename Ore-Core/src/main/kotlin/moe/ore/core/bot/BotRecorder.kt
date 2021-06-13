@@ -25,7 +25,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class BotRecorder {
-    private val seqFactory = AtomicInteger(0)
+    private val seqFactory = AtomicInteger(Random().nextInt(100000))
 
     @Synchronized
     fun nextSeq(): Int {

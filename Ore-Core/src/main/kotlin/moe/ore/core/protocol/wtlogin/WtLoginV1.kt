@@ -32,7 +32,7 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
-            writeShort(25)
+            writeShort(24)
             writeBytes(tlv.t18())
             writeBytes(tlv.t1())
             writeBytes(tlv.t106())

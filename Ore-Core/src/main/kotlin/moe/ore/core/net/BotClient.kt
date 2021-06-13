@@ -92,8 +92,8 @@ class BotClient(val uin: Long) {
         return specialHandler.remove(name)
     }
 
-    fun send(requestBody: ByteArray): Boolean {
-        return connection.send(requestBody)
+    fun send(requestBody: ByteArray) {
+        connection.send(requestBody)
     }
 
     fun connect(): BotClient {

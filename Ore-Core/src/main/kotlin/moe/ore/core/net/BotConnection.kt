@@ -24,6 +24,7 @@ package moe.ore.core.net
 import io.netty.bootstrap.Bootstrap
 import kotlin.Throws
 import io.netty.buffer.Unpooled
+import io.netty.channel.Channel
 import java.util.concurrent.Executors
 import io.netty.channel.ChannelFuture
 import java.lang.InterruptedException
@@ -35,9 +36,11 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.ChannelOption
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
 import moe.ore.helper.toHexString
+import moe.ore.util.DebugUtil
 import java.net.InetSocketAddress
 import kotlin.random.Random
 
@@ -47,7 +50,7 @@ import kotlin.random.Random
  */
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
-    private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
+    private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup(DebugUtil.getIoThreadPoolSize())
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
@@ -63,10 +66,15 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     @Synchronized
     @Throws(InterruptedException::class)
     fun connect() {
-        channelFuture = init(Bootstrap()).connect().addListener(reConnectionAndExceptionListener)
+        val server = oicqServer[Random.nextInt(oicqServer.size)]
+        println("TencentServer: $server")
+
+        channelFuture = init(Bootstrap()).connect(server.first, server.second)
         scheduler.execute {
             try {
-                channelFuture.channel().closeFuture().sync()
+                channelFuture
+                    .addListener(usefulListener)
+                    .sync()
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             } finally {
@@ -76,39 +84,51 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         }
     }
 
-    fun send(bytes: ByteArray): Boolean {
+    fun send(bytes: ByteArray) {
         // println("Send: " + bytes.toHexString())
-        val channel = channelFuture.channel()
-        if (channel.isActive && !nioEventLoopGroup.isShutdown) {
-            channel.writeAndFlush(Unpooled.copiedBuffer(bytes))
-            return true
-        }
-        return false
+        channelFuture.channel().writeAndFlush(
+            Unpooled.copiedBuffer(bytes)
+        )
     }
 
     companion object {
-        private val oicqServer = arrayOf("msfwifi.3g.qq.com" to 8080, "14.215.138.110" to 8080, "113.96.12.224" to 8080, "157.255.13.77" to 14000, "120.232.18.27" to 443, "183.3.235.162" to 14000, "163.177.89.195" to 443, "183.232.94.44" to 80, "203.205.255.224" to 8080, "203.205.255.221" to 8080, "msfwifiv6.3g.qq.com" to 8080, "[240e:ff:f101:10::109]" to 14000)
+        private val oicqServer = arrayOf(
+            "msfwifi.3g.qq.com" to 8080,
+            "14.215.138.110" to 8080,
+            "113.96.12.224" to 8080,
+            "157.255.13.77" to 14000,
+            "120.232.18.27" to 443,
+            "183.3.235.162" to 14000,
+            "163.177.89.195" to 443,
+            "183.232.94.44" to 80,
+            "203.205.255.224" to 8080,
+            "203.205.255.221" to 8080,
+            "msfwifiv6.3g.qq.com" to 8080
+        )
     }
 
     private fun init(bootstrap: Bootstrap): Bootstrap {
         if (nioEventLoopGroup.isShutdown) {
             nioEventLoopGroup = NioEventLoopGroup()
         }
-        bootstrap.group(nioEventLoopGroup)
-        bootstrap.channel(NioSocketChannel::class.java).option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE).option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000).option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
-        bootstrap.handler(object : ChannelInitializer<SocketChannel>() {
-            public override fun initChannel(socketChannel: SocketChannel) {
-                //  注意添加顺序决定执行的先后
-                // TODO socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
-                socketChannel.pipeline().addLast("ping", idleStateHandler)
-                socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
-                // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
-                socketChannel.pipeline().addLast("decoder", BotDecoder())
-                socketChannel.pipeline().addLast("handler", usefulListener)
-            }
-        })
-        val server = oicqServer[Random.nextInt(oicqServer.size)]
-        println("TencentServer: $server")
-        return bootstrap.remoteAddress(InetSocketAddress(server.first, server.second))
+        bootstrap
+            .group(nioEventLoopGroup)
+            .option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+            .channel(NioSocketChannel::class.java as Class<out Channel>?)
+            .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
+            .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
+            .handler(object : ChannelInitializer<SocketChannel>() {
+                public override fun initChannel(socketChannel: SocketChannel) {
+                    //  注意添加顺序决定执行的先后
+                    // TODO socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
+                    // socketChannel.pipeline().addLast("ping", idleStateHandler)
+                    // socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
+                    // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
+                    socketChannel.pipeline().addLast("decoder", BotDecoder())
+                    socketChannel.pipeline().addLast("handler", usefulListener)
+                }
+            })
+        return bootstrap
     }
 }

@@ -41,7 +41,7 @@ class Tlv(val uin: Long) {
      */
     private val protocolInfo = ProtocolInternal[dataManager.protocolType]
 
-    private fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
+    private inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
         val bodyBuilder = BytePacketBuilder()
         val out = BytePacketBuilder()
         bodyBuilder.block()

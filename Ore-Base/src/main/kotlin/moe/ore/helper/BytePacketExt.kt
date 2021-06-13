@@ -145,7 +145,7 @@ fun BytePacketBuilder.writeLimitedStringWithShortSize(str: String, maxLength: In
     writeLimitedByteArrayWithSize(str.toByteArray(), maxLength, size)
 
 fun BytePacketBuilder.writeHex(uHex: String) {
-    writeBytes(uHex.toByteArray())
+    writeBytes(uHex.hex2ByteArray())
 }
 
 fun ByteReadPacket.readString(length: Int) = String(readBytes(length))
