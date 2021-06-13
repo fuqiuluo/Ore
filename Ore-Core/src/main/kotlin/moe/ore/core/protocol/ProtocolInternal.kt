@@ -45,7 +45,7 @@ class ProtocolInternal(
     @JvmField internal var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
     @JvmField internal var isGuidChanged: Boolean = false, // GUID 是否有变动
     @JvmField internal var buildVersion: String,
-    @JvmField internal var agreementVersion: String,
+    @JvmField internal var protocolDetail: String,
     @JvmField internal var packageName: String,
     @JvmField internal var packageVersion: String,
     @JvmField internal var tencentSdkMd5: ByteArray
@@ -63,7 +63,8 @@ class ProtocolInternal(
 
         init {
             protocols[ProtocolType.ANDROID_PHONE] = ProtocolInternal(
-                openAppId = 715019303, //8.8.0
+                openAppId = 715019303,
+                // 8.8.0
                 appId = 0x2002f77f,
                 subAppId = 16,
                 pingVersion = 1,
@@ -71,7 +72,7 @@ class ProtocolInternal(
                 ssoVersion = 1536,
                 msfSsoVersion = 12,
                 tgtgVersion = 4,
-                mainSigMap = 16724722,//8.8.0
+                mainSigMap = 16724722,
                 miscBitmap = 0x0af7ff7c,
                 subSigMap = 66560,
                 dbVersion = 1,
@@ -83,7 +84,7 @@ class ProtocolInternal(
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
                 buildVersion = "6.0.0.2436",
-                agreementVersion = "|454001228437590|A8.4.8.94cf45ad",
+                protocolDetail = "|454001228437590|A8.4.8.94cf45ad",
                 packageName = "com.tencent.mobileqq",
                 packageVersion = "8.4.8",
                 tencentSdkMd5 = "A6B745BF24A2C277527716F6F36EB68D".hex2ByteArray(),

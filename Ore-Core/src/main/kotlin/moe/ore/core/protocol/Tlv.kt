@@ -288,8 +288,8 @@ class Tlv(val uin: Long) {
 
     // TODO: 2021/6/9 Emp用的
     // sigInfo2 = (client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)).md5()
-    fun t400(sigInfo2: ByteArray) = buildTlv(0x400) {
-        writeTeaEncrypt(sigInfo2) {
+    fun t400(t400Key: ByteArray) = buildTlv(0x400) {
+        writeTeaEncrypt(t400Key) {
             writeByte(1) // version
             writeLong(uin)
             writeFully(deviceInfo.guid)

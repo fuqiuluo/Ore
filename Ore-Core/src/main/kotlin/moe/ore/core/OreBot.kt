@@ -28,6 +28,7 @@ import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
+import moe.ore.core.protocol.wtlogin.WtLoginV1
 import moe.ore.helper.runtimeError
 
 class OreBot(val uin: Long) : Ore() {
@@ -37,6 +38,7 @@ class OreBot(val uin: Long) : Ore() {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
+                        WtLoginV1(uin).sendTo(this@apply)
 
 
                     }

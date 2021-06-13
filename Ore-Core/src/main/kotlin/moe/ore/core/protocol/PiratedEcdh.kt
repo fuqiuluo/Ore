@@ -19,47 +19,18 @@
  *
  */
 
-package moe.ore.core.bot
+package moe.ore.core.protocol
 
-import java.security.SecureRandom
-import java.util.*
-import kotlin.math.abs
-
-class WtLoginSigInfo {
-    var d2: ByteArray? = null
-    var d2Key: ByteArray? = null
-
-    // form T403
-    var randSeed: ByteArray? = null
-
-    /**
-     * 每次初始化都随机
-     */
-    val dpwd: ByteArray = try {
-        val str = StringBuilder()
-        for (b in SecureRandom.getSeed(16)) {
-            val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
-            str.append(abs.toChar())
-        }
-        str.toString()
-    } catch (unused: Throwable) {
-        "1234567890123456"
-    }.toByteArray()
-
-    // from t16a
-    var noPicSig: ByteArray? = null
-
-    // 用t106和t10c计算得到
-    var enA1: ByteArray? = null
-
-
-}
+import moe.ore.helper.hex2ByteArray
 
 /**
- * 有时间限制的TOKEN
- *
- * 所有的Key有1个月的保质期，但是随时间迁移key的权力会越来越小 ————> 需要刷新(emp)
+ * ECDH固定 非常规协议操作 跳过ECDH
+ * 所以可以固定ECDH
  */
-class TokenWithTimeLimit {
 
-}
+const val ECDH_VERSION = 2.toByte()
+
+val ECDH_PUBLIC_KEY =
+    "04803E9940F3FD8E6474C3CC6994A2F972B1DA6BFDE8DDB4E775E36AB4E439DB8EA7A0E6CAFC722089F4921DFEAEFBA0F56932F3E6AA3ECF81154FD230AF32B18F".hex2ByteArray()
+
+val ECDH_SHARE_KEY = "3F539B2549AB1F71421F2C3A66298D05".hex2ByteArray()

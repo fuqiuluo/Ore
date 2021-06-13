@@ -26,7 +26,9 @@ import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.PacketType
+import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
+import moe.ore.util.BytesUtil
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
@@ -83,32 +85,73 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
 /**
  * 构建第一层，最外面那层
  */
-fun buildFirstLayer(uin: Long, packetType: PacketType, body: BytePacketBuilder): ByteArray =
-    createBuilder().apply {
-        writeInt(packetType.flag1)
-        writeByte(packetType.flag2)
-        when (packetType) {
-            PacketType.LoginPacket -> {
-                writeBytesWithSize(ByteArrayPool.EMPTY_BYTE_ARRAY, 0 + 4)
+fun buildFirstLayer(uin: Long, packetType: PacketType, body: BytePacketBuilder): ByteArray {
+    return createBuilder().apply {
+        writeBodyWithSize {
+            writeInt(packetType.flag1)
+            writeByte(packetType.flag2)
+            when (packetType) {
+                PacketType.LoginPacket -> {
+                    writeBytesWithSize(ByteArrayPool.EMPTY_BYTE_ARRAY, 0 + 4)
+                }
+
             }
-
-
+            writeByte(0)
+            val uinStr = uin.toString()
+            writeStringWithSize(uinStr, uinStr.length + 4)
+            writePacket(body)
         }
-        writeByte(0)
-        val uinStr = uin.toString()
-        writeStringWithSize(uinStr, uinStr.length + 4)
-    }.apply { writePacket(body) }.toByteArray()
+    }.toByteArray()
+}
 
-
-fun buildSecondLayer(uin: Long, packetType: PacketType): BytePacketBuilder {
+fun buildSecondLayer(
+    uin: Long,
+    commandName: String,
+    body: ByteArray,
+    packetType: PacketType,
+    seq: Int
+): BytePacketBuilder {
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
+    val protocolInfo = ProtocolInternal[manager.protocolType]
+    val deviceInfo = manager.deviceInfo
     when (packetType) {
         PacketType.LoginPacket -> {
-            builder.writeBuilder {
-
+            builder.writeBodyWithSize {
+                writeInt(seq)
+                writeInt(protocolInfo.appId)
+                writeInt(protocolInfo.appId)
+                writeInt(16777216)
+                writeInt(0)
+                writeInt(0) // Token Type 如果有Token就是256
+                writeInt(0 + 4) // Token Size
+                commandName.let {
+                    writeStringWithSize(it, it.length + 4)
+                }
+                BytesUtil.randomKey(4).let {
+                    writeBytesWithSize(it, it.size + 4)
+                }
+                deviceInfo.androidId.let {
+                    writeStringWithSize(it, it.length + 4)
+                }
+                deviceInfo.ksid.let {
+                    writeBytesWithSize(it, it.size + 4)
+                }
+                protocolInfo.protocolDetail.let {
+                    writeStringWithShortSize(it, it.length + 2)
+                }
+                // 非常规组包，跳过部分异常
+                // writeInt(4)
             }
         }
     }
+    builder.writeInt(body.size + 4)
+    builder.writeBytes(body)
+    return builder
+}
 
+private inline fun BytePacketBuilder.writeBodyWithSize(block: BytePacketBuilder.() -> Unit) {
+    val builder = createBuilder().apply { this.block() }
+    this.writeInt(builder.size + 4)
+    this.writePacket(builder)
 }

@@ -140,10 +140,6 @@ fun BytePacketBuilder.writeHex(uHex: String) {
     writeBytes(uHex.toByteArray())
 }
 
-inline fun BytePacketBuilder.writeBuilder(block: BytePacketBuilder.() -> Unit) {
-    this.writePacket(createBuilder().apply { this.block() })
-}
-
 fun ByteReadPacket.readString(length: Int) = String(readBytes(length))
 
 fun ByteArray.toByteReadPacket() = ByteReadPacket(this)
