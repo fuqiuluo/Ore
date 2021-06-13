@@ -30,6 +30,7 @@ class BotDecoder : ByteToMessageDecoder() {
     private val charsetName = "UTF-8"
 
     override fun decode(ctx: ChannelHandlerContext, byteBuf: ByteBuf, list: MutableList<Any>) {
+        // println("Start")
         do {
             val saveReaderIndex = byteBuf.readerIndex()
             val msg = decodeResponse(byteBuf)

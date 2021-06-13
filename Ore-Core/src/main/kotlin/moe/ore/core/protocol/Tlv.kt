@@ -282,8 +282,8 @@ class Tlv(val uin: Long) {
     }
 
     fun t202() = buildTlv(0x202) {
-        writeLimitedString(deviceInfo.wifiBSsid, 16)
-        writeLimitedString("\"${deviceInfo.wifiSsid}\"", 32)
+        writeLimitedStringWithShortSize(deviceInfo.wifiBSsid, 16)
+        writeLimitedStringWithShortSize("\"${deviceInfo.wifiSsid}\"", 32)
     }
 
     // TODO: 2021/6/9 Emp用的

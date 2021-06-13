@@ -37,6 +37,7 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
+import moe.ore.helper.toHexString
 import java.net.InetSocketAddress
 import kotlin.random.Random
 
@@ -76,6 +77,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     }
 
     fun send(bytes: ByteArray): Boolean {
+        println("Send: " + bytes.toHexString())
         val channel = channelFuture.channel()
         if (channel.isActive && !nioEventLoopGroup.isShutdown) {
             channel.writeAndFlush(Unpooled.copiedBuffer(bytes))
@@ -102,10 +104,11 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
-                socketChannel.pipeline().addLast("receive", usefulListener)
+                socketChannel.pipeline().addLast("handler", usefulListener)
             }
         })
         val server = oicqServer[Random.nextInt(oicqServer.size)]
+        println("TencentServer: $server")
         return bootstrap.remoteAddress(InetSocketAddress(server.first, server.second))
     }
 }
