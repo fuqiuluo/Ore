@@ -133,8 +133,16 @@ fun BytePacketBuilder.writeLimitedByteArray(array: ByteArray, maxLength: Int) {
     this.writeFully(array, 0, if (array.size >= maxLength) maxLength else array.size)
 }
 
+fun BytePacketBuilder.writeLimitedByteArrayWithSize(array: ByteArray, maxLength: Int, size: Int = array.size) {
+    writeShort(size)
+    this.writeFully(array, 0, if (array.size >= maxLength) maxLength else array.size)
+}
+
 fun BytePacketBuilder.writeLimitedString(str: String, maxLength: Int) =
     writeLimitedByteArray(str.toByteArray(), maxLength)
+
+fun BytePacketBuilder.writeLimitedStringWithShortSize(str: String, maxLength: Int, size: Int = str.toByteArray().size) =
+    writeLimitedByteArrayWithSize(str.toByteArray(), maxLength, size)
 
 fun BytePacketBuilder.writeHex(uHex: String) {
     writeBytes(uHex.toByteArray())
