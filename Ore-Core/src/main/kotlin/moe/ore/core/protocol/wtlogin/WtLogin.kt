@@ -44,7 +44,7 @@ abstract class WtLogin(val uin: Long, val commandName: String, val commandId: In
             createBuilder().apply {
                 writeByte(0x2)
                 val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
-                writeShort(tlvBody.size + 3 + 52 + ECDH_PUBLIC_KEY.size)
+                writeShort(tlvBody.size + 4 + 52 + ECDH_PUBLIC_KEY.size)
                 writeShort(8001)
                 writeShort(commandId)
                 writeShort(1)
