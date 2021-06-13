@@ -27,6 +27,7 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.encodeProtobuf
 import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.*
+import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
@@ -430,7 +431,12 @@ class Tlv(val uin: Long) {
     00 10 D8 44 E7 DC BB E2 
     17 CB 9C 77 7F B0 FF B7 
     B7 42
-    """.trimIndent())
+    """.trimIndent()
+        )
+    }
+
+    fun t545() = buildTlv(0x545) {
+        writeBytes(BytesUtil.randomKey(16))
     }
 
     fun t193(ticket: String) = buildTlv(0x193) {

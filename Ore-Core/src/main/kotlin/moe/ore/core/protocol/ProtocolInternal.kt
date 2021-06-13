@@ -65,7 +65,7 @@ class ProtocolInternal(
             protocols[ProtocolType.ANDROID_PHONE] = ProtocolInternal(
                 openAppId = 715019303,
                 // 8.8.0
-                appId = 0x2002f77f,
+                appId = 0x2002F789,
                 subAppId = 16,
                 pingVersion = 1,
                 ipVersion = 0x1,

@@ -32,17 +32,19 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
-            writeShort(23)
+            writeShort(25)
             writeBytes(tlv.t18())
             writeBytes(tlv.t1())
             writeBytes(tlv.t106())
             writeBytes(tlv.t116())
             writeBytes(tlv.t100())
             writeBytes(tlv.t107())
-            writeBytes(tlv.t108(device.ksid))
+            // writeBytes(tlv.t108(device.ksid))
+            // 第一次登录不需要
             writeBytes(tlv.t142())
             writeBytes(tlv.t144())
             writeBytes(tlv.t145())
+            writeBytes(tlv.t147())
             writeBytes(tlv.t154(seq))
             // writeBytes(tlv.t16b())
             // 非常规协议操作，易导致环境异常
@@ -54,13 +56,14 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             // writeBytes(tlv.t400())
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
-            writeBytes(tlv.t191())
+            writeBytes(tlv.t194())
             writeBytes(tlv.t202())
             writeBytes(tlv.t177())
             writeBytes(tlv.t516())
             writeBytes(tlv.t521())
             writeBytes(tlv.t525())
             writeBytes(tlv.t544())
+            writeBytes(tlv.t545())
         }.toByteArray()
     }
 }

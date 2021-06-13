@@ -77,7 +77,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     }
 
     fun send(bytes: ByteArray): Boolean {
-        println("Send: " + bytes.toHexString())
+        // println("Send: " + bytes.toHexString())
         val channel = channelFuture.channel()
         if (channel.isActive && !nioEventLoopGroup.isShutdown) {
             channel.writeAndFlush(Unpooled.copiedBuffer(bytes))
