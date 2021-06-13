@@ -50,7 +50,7 @@ class BotDecoder : ByteToMessageDecoder() {
         if (channelBuffer.readableBytes() < 4) {
             return null
         }
-        println("My Name")
+        // println("My Name")
         val length = channelBuffer.readInt() - 4
         if (length > 10 * 1024 * 1024 || length <= 0) {
             throw RuntimeException(

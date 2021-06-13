@@ -44,40 +44,42 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
         discardExact(1)
         // 不知道是什么奇怪的玩意 skip 吧
         val uinStr = readString(readInt() - 4)
-        ByteArrayPool.loanAndReturn(remaining.toInt()) {
-            TeaUtil.decrypt(
-                this.apply { readAvailable(this) }, when (keyType) {
-                    1 -> manager.wLoginSigInfo.d2Key!!
-                    2 -> DEFAULT_TEA_KEY
-                    else -> runtimeError("unknown key type : $keyType")
-                }
-            ).reader {
-                val headReader = readByteReadPacket(-4)
-                val body = readBytes(readInt() - 4)
-                if (body.isNotEmpty()) {
-                    val msfSSoSeq = headReader.readInt()
-                    if (headReader.readInt() != 0) {
-                        headReader.discardExact(headReader.readInt() - 4)
-                        // 一个奇怪的Token
-                    } else {
-                        headReader.discardExact(4)
-                    }
-                    val commandName = headReader.readString(headReader.readInt() - 4)
-                    // val randomSeed =
-                    headReader.discardExact(headReader.readInt() - 4)
-                    when (headReader.readInt()) {
-                        0, 4 -> body
-                        1 -> ZipUtil.unCompress(body)
-                        else -> runtimeError("unknown encode type.")
-                    }.let {
-                        // msfSSoSeq , commandName, uinStr, it (body)
-                        val from = FromService(msfSSoSeq, commandName, body)
-                        block(uinStr, from)
-                    }
-                }
-                this.closeQuietly()
-                headReader.closeQuietly()
+
+        // println(remaining) 剩余字节数
+        // println(size) 总字节数
+
+        TeaUtil.decrypt(
+            ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
+                1 -> manager.wLoginSigInfo.d2Key!!
+                2 -> DEFAULT_TEA_KEY
+                else -> runtimeError("unknown key type : $keyType")
             }
+        ).reader {
+            val headReader = readByteReadPacket(readInt() - 4)
+            val body = readBytes(readInt() - 4)
+            if (body.isNotEmpty()) {
+                val msfSSoSeq = headReader.readInt()
+                if (headReader.readInt() != 0) {
+                    headReader.discardExact(headReader.readInt() - 4)
+                    // 一个奇怪的Token
+                } else {
+                    headReader.discardExact(4)
+                }
+                val commandName = headReader.readString(headReader.readInt() - 4)
+                // val randomSeed =
+                headReader.discardExact(headReader.readInt() - 4)
+                when (headReader.readInt()) {
+                    0, 4 -> body
+                    1 -> ZipUtil.unCompress(body)
+                    else -> runtimeError("unknown encode type.")
+                }.let {
+                    // msfSSoSeq , commandName, uinStr, it (body)
+                    val from = FromService(msfSSoSeq, commandName, body)
+                    block(uinStr, from)
+                }
+            }
+            this.closeQuietly()
+            headReader.closeQuietly()
         }
     }
 }

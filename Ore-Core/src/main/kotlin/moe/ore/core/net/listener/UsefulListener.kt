@@ -38,7 +38,7 @@ import java.lang.Exception
 abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
-        println("SB一个")
+        // println("SB一个")
         msg?.let {
             this.onMassage(msg as PacketResponse)
         }
