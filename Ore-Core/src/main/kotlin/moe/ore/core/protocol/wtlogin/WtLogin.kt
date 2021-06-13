@@ -67,7 +67,7 @@ abstract class WtLogin(
             writeByte(3)
             writeByte(encryptType.toByte())
             writeInt(0)
-            writeInt(2)
+            writeByte(2)
             writeInt(0)
             writeInt(0)
             writeByte(2)
