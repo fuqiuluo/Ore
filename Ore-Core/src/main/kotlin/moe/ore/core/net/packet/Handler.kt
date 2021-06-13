@@ -22,6 +22,7 @@
 package moe.ore.core.net.packet
 
 import moe.ore.core.util.QQUtil
+import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 
 abstract class LongHandler(commandName: String) : Handler(0, commandName)
@@ -31,15 +32,31 @@ class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
      * 堵塞器
      */
     private val queue = ArrayBlockingQueue<Boolean>(1)
+    private var isOver = false
+    var fromService: FromService? = null
 
     /**
      * 等待返回包
      * @return Boolean
      */
-    fun wait(): Boolean = queue.take()
+    fun wait(timeout: Long = 5 * 1000): Boolean {
+        Timer().apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    this@apply.cancel()
+                    queue.put(false)
+                }
+            }, timeout)
+        }
+        val ret = queue.take()
+        this.isOver = true
+        return ret
+    }
 
     override fun check(from: FromService): Boolean {
-        val ret = (from.seq == seq) and (from.commandName == commandName)
+        val ret = ((from.seq == seq) and (from.commandName == commandName)).also {
+            if (it) this.fromService = from
+        }
         queue.put(ret)
         return ret
     }

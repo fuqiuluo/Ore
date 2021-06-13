@@ -26,6 +26,7 @@ import moe.ore.core.net.decoder.PacketResponse
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.net.packet.Handler
+import moe.ore.core.net.packet.SingleHandler
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -59,6 +60,7 @@ class BotClient(val uin: Long) {
             msg.body.readPacket(uin) { uinStr, from ->
                 check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
                 val hash = from.hashCode()
+                println(from)
                 if (commonHandler.containsKey(hash)) {
                     commonHandler[hash]!!.let {
                         if (it.check(from)) {
@@ -72,20 +74,22 @@ class BotClient(val uin: Long) {
         }
     }, uin)
 
-    fun registerCommonHandler(handler: Handler) {
+    fun registerCommonHandler(handler: Handler): SingleHandler {
         commonHandler[handler.hashCode()] = handler
+        return handler as SingleHandler
     }
 
-    fun registerSpecialHandler(handler: Handler) {
+    fun registerSpecialHandler(handler: Handler): Handler {
         specialHandler[handler.commandName] = handler
+        return handler
     }
 
-    fun unRegisterCommonHandler(hash: Int) {
-        commonHandler.remove(hash)
+    fun unRegisterCommonHandler(hash: Int): SingleHandler? {
+        return commonHandler.remove(hash) as SingleHandler?
     }
 
-    fun unRegisterSpecialHandler(name: String) {
-        specialHandler.remove(name)
+    fun unRegisterSpecialHandler(name: String): Handler? {
+        return specialHandler.remove(name)
     }
 
     fun send(requestBody: ByteArray): Boolean {

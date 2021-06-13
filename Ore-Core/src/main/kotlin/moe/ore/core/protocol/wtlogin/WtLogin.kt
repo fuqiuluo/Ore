@@ -23,6 +23,8 @@ package moe.ore.core.protocol.wtlogin
 
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
+import moe.ore.core.net.packet.ToService
+import moe.ore.core.net.packet.sendTo
 import moe.ore.core.protocol.ECDH_PUBLIC_KEY
 import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.core.protocol.ECDH_VERSION
@@ -30,49 +32,60 @@ import moe.ore.core.protocol.Tlv
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 
-abstract class WtLogin(val uin: Long, val commandName: String, val commandId: Int, val encryptType: Int) {
+abstract class WtLogin(
+    val uin: Long,
+    private val commandName: String,
+    private val commandId: Int,
+    private val encryptType: Int
+) {
     private val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 
     abstract fun build(seq: Int): ByteArray
 
-    fun sendTo(botClient: BotClient) {
+    fun sendTo(botClient: BotClient): Int {
         val seq = manager.recorder.nextSeq()
+        val body = makeBody(seq)
+        val to = ToService(seq, commandName, body)
+        to.sendTo(botClient)
+
+        return seq
+    }
+
+    private fun makeBody(seq: Int): ByteArray {
         val builder = createBuilder()
-        with(builder) {
-            createBuilder().apply {
-                writeByte(0x2)
-                val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
-                writeShort(tlvBody.size + 4 + 52 + ECDH_PUBLIC_KEY.size)
-                writeShort(8001)
-                writeShort(commandId)
-                writeShort(1)
-                writeLongToBuf32(uin)
+        builder.writePacket(createBuilder().apply {
+            writeByte(0x2)
+            val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
+            writeShort(tlvBody.size + 4 + 52 + ECDH_PUBLIC_KEY.size)
+            writeShort(8001)
+            writeShort(commandId)
+            writeShort(1)
+            writeLongToBuf32(uin)
 
-                writeByte(3)
-                writeByte(encryptType.toByte())
-                writeInt(0)
-                writeInt(2)
-                writeInt(0)
-                writeInt(0)
-                writeByte(2)
-                writeByte(1)
-                // 03 87 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
+            writeByte(3)
+            writeByte(encryptType.toByte())
+            writeInt(0)
+            writeInt(2)
+            writeInt(0)
+            writeInt(0)
+            writeByte(2)
+            writeByte(1)
+            // 03 87 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
 
-                writeBytes(device.randKey)
-                writeShort(305)
-                writeShort(ECDH_VERSION.toShort())
-                writeBytesWithShortSize(ECDH_PUBLIC_KEY)
-                writeBytes(tlvBody)
+            writeBytes(device.randKey)
+            writeShort(305)
+            writeShort(ECDH_VERSION.toShort())
+            writeBytesWithShortSize(ECDH_PUBLIC_KEY)
+            writeBytes(tlvBody)
 
-                writeByte(0x3)
-            }.let {
-                writeInt(it.size + 4)
-                writePacket(it)
-            }
-        }
-        println(builder.toByteArray().toHexString())
+            writeByte(0x3)
+        })
+        return builder.toByteArray()
+    }
 
+    companion object {
+        const val LOGIN = "wtlogin.login"
     }
 }

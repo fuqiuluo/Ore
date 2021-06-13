@@ -85,7 +85,7 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
 /**
  * 构建第一层，最外面那层
  */
-fun buildFirstLayer(uin: Long, packetType: PacketType, body: BytePacketBuilder): ByteArray {
+fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: ByteArray): ByteArray {
     return createBuilder().apply {
         writeBodyWithSize {
             writeInt(packetType.flag1)
@@ -99,7 +99,8 @@ fun buildFirstLayer(uin: Long, packetType: PacketType, body: BytePacketBuilder):
             writeByte(0)
             val uinStr = uin.toString()
             writeStringWithSize(uinStr, uinStr.length + 4)
-            writePacket(body)
+
+            writeBytes(TeaUtil.encrypt(body, key))
         }
     }.toByteArray()
 }
@@ -110,7 +111,7 @@ fun buildSecondLayer(
     body: ByteArray,
     packetType: PacketType,
     seq: Int
-): BytePacketBuilder {
+): ByteArray {
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
     val protocolInfo = ProtocolInternal[manager.protocolType]
@@ -144,10 +145,12 @@ fun buildSecondLayer(
                 // writeInt(4)
             }
         }
+
+
     }
     builder.writeInt(body.size + 4)
     builder.writeBytes(body)
-    return builder
+    return builder.toByteArray()
 }
 
 private inline fun BytePacketBuilder.writeBodyWithSize(block: BytePacketBuilder.() -> Unit) {

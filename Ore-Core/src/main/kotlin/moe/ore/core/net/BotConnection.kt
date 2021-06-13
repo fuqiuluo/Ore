@@ -78,7 +78,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     fun send(bytes: ByteArray): Boolean {
         val channel = channelFuture.channel()
         if (channel.isActive && !nioEventLoopGroup.isShutdown) {
-            channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(bytes))
+            channel.writeAndFlush(Unpooled.copiedBuffer(bytes))
             return true
         }
         return false
