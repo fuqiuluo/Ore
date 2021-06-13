@@ -24,9 +24,11 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.protocol.ECDH_PUBLIC_KEY
+import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.core.protocol.ECDH_VERSION
 import moe.ore.core.protocol.Tlv
 import moe.ore.helper.*
+import moe.ore.util.TeaUtil
 
 abstract class WtLogin(val uin: Long, val commandName: String, val commandId: Int, val encryptType: Int) {
     private val manager = DataManager.manager(uin)
@@ -41,7 +43,7 @@ abstract class WtLogin(val uin: Long, val commandName: String, val commandId: In
         with(builder) {
             createBuilder().apply {
                 writeByte(0x2)
-                val tlvBody = build(seq)
+                val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
                 writeShort(tlvBody.size + 3 + 52 + ECDH_PUBLIC_KEY.size)
                 writeShort(8001)
                 writeShort(commandId)
