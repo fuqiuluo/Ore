@@ -72,8 +72,8 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.subAppId)
         writeInt(0)
         writeLongToBuf32(uin)
-        writeShort(0)
-        writeShort(0)
+        writeInt(0)
+        // TODO 默认开始是0，回滚（rollback）一次就+1
     }
 
 
@@ -89,6 +89,30 @@ class Tlv(val uin: Long) {
 
     fun t104(dt104: ByteArray) = buildTlv(0x104) {
         writeBytes(dt104)
+    }
+
+    fun t106() = buildTlv(0x106) {
+        writeTeaEncrypt(dataManager.botAccount.bytesMd5PasswordWithQQ) {
+            writeShort(protocolInfo.tgtgVersion)
+            writeInt(Random.nextInt())
+            writeInt(protocolInfo.msfSsoVersion)
+            writeInt(protocolInfo.subAppId)
+            writeInt(0)
+            writeInt(0)
+            writeLongToBuf32(uin)
+            writeInt(currentTimeSeconds())
+            writeFully(deviceInfo.clientIp)
+            writeByte(1.toByte())
+            writeBytes(dataManager.botAccount.bytesMd5Password)
+            writeBytes(deviceInfo.tgtgKey)
+            writeInt(0)
+            writeBoolean(protocolInfo.isGuidAvailable)
+            writeBytes(deviceInfo.guid)
+            writeInt(protocolInfo.appId)
+            writeInt(protocolInfo.loginType)
+            writeStringWithShortSize(uin.toString())
+            writeShort(0)
+        }
     }
 
     fun t107() = buildTlv(0x107) {
@@ -126,30 +150,6 @@ class Tlv(val uin: Long) {
         writeByte(appidArray.size.toByte())
         for (appid in appidArray) {
             writeInt(appid)
-        }
-    }
-
-    fun t106() = buildTlv(0x106) {
-        writeTeaEncrypt(dataManager.botAccount.bytesMd5PasswordWithQQ) {
-            writeShort(protocolInfo.tgtgVersion)
-            writeInt(Random.nextInt())
-            writeInt(protocolInfo.msfSsoVersion)
-            writeInt(protocolInfo.subAppId)
-            writeInt(0)
-            writeInt(0)
-            writeLongToBuf32(uin)
-            writeInt(currentTimeSeconds())
-            writeFully(deviceInfo.clientIp)
-            writeByte(1.toByte())
-            writeBytes(dataManager.botAccount.bytesMd5Password)
-            writeBytes(deviceInfo.tgtgKey)
-            writeInt(0)
-            writeBoolean(protocolInfo.isGuidAvailable)
-            writeBytes(deviceInfo.guid)
-            writeInt(protocolInfo.appId)
-            writeInt(protocolInfo.loginType)
-            writeStringWithShortSize(uin.toString())
-            writeShort(0)
         }
     }
 

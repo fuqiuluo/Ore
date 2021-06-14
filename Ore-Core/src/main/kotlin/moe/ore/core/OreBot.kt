@@ -33,17 +33,23 @@ import moe.ore.core.protocol.wtlogin.LoginHelper
 import moe.ore.core.protocol.wtlogin.WtLogin
 import moe.ore.core.protocol.wtlogin.WtLoginV1
 import moe.ore.helper.runtimeError
+import moe.ore.helper.thread.ThreadManager
 import okhttp3.internal.wait
 import java.util.*
 
 class OreBot(val uin: Long) : Ore() {
+    /**
+     * 机器人产生的线程全放这里
+     */
+    val threadManager: ThreadManager = ThreadManager.getInstance(uin)
+
     val client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
             override fun onConnect() {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
-                        LoginHelper(uin, this@apply, oreListener).invoke()
+                        threadManager.addTask(LoginHelper(uin, this@apply, oreListener))
                     }
                     OreStatus.Online -> {
                         // 重连
@@ -77,6 +83,7 @@ class OreBot(val uin: Long) : Ore() {
     override fun shut() {
         // 关闭机器人
         this.status = OreStatus.Destroy
+        threadManager.shutdown()
         DataManager.destroy(uin)
 
     }

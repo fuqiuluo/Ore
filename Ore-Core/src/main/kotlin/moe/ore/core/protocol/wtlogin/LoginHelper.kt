@@ -21,9 +21,12 @@
 
 package moe.ore.core.protocol.wtlogin
 
+import kotlinx.io.core.discardExact
+import kotlinx.io.core.readBytes
 import moe.ore.api.listener.OreListener
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.SingleHandler
+import moe.ore.helper.toByteReadPacket
 import moe.ore.helper.toHexString
 
 /**
@@ -32,21 +35,43 @@ import moe.ore.helper.toHexString
  * @property oreListener OreListener?
  * @constructor
  */
-class LoginHelper(private val uin: Long, private val client: BotClient, private val oreListener: OreListener?) {
-    fun invoke() {
+class LoginHelper(private val uin: Long, private val client: BotClient, private val oreListener: OreListener?) :
+    Thread() {
+
+    override fun run() {
+        invoke()
+    }
+
+    private fun invoke() {
         handle(WtLoginV1(uin).sendTo(client))
     }
 
     private fun handle(seq: Int) {
         val handler = client.registerCommonHandler(SingleHandler(seq, WtLogin.LOGIN))
-        println("开始登录接包")
         if (handler.wait()) {
-            val packet = handler.fromService!!
-            println("接到包：" + packet.body.toHexString())
+            handler.fromService!!.body.readLoginPacket {
+
+            }
+
+
         } else {
             // 等待返回包超时
 
         }
     }
 
+    companion object {
+        @JvmStatic
+        private inline fun ByteArray.readLoginPacket(block: () -> Unit) {
+            val reader = this.toByteReadPacket()
+            reader.discardExact(1 + 2 + 2 + 2 + 2)
+            // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)
+            val uin = reader.readInt().toLong()
+            reader.discardExact(2)
+            // 00 00 (dis)
+            val result = reader.readByte().toInt() and 0xff
+
+            println("result[$uin] : $result")
+        }
+    }
 }

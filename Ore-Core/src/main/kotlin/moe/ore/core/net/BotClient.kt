@@ -60,10 +60,11 @@ class BotClient(val uin: Long) {
             msg.body.readPacket(uin) { uinStr, from ->
                 check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
                 val hash = from.hashCode()
-                println(from)
+                // println(from)
                 if (commonHandler.containsKey(hash)) {
                     commonHandler[hash]!!.let {
                         if (it.check(from)) {
+                            // println("注销")
                             unRegisterCommonHandler(it.hashCode())
                         }
                     }
