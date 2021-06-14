@@ -68,7 +68,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     fun connect() {
         val server = oicqServer[Random.nextInt(oicqServer.size)]
         println("TencentServer: $server")
-
         channelFuture = init(Bootstrap()).connect(server.first, server.second)
         scheduler.execute {
             try {
@@ -94,13 +93,15 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     companion object {
         private val oicqServer = arrayOf(
             "msfwifi.3g.qq.com" to 8080,
-            "14.215.138.110" to 8080,
+            // "14.215.138.110" to 8080,
+            // 这个服务器，连不上
             "113.96.12.224" to 8080,
             "157.255.13.77" to 14000,
             "120.232.18.27" to 443,
             "183.3.235.162" to 14000,
             "163.177.89.195" to 443,
-            "183.232.94.44" to 80,
+            // "183.232.94.44" to 80,
+            // 不可接通的服务器
             "203.205.255.224" to 8080,
             "203.205.255.221" to 8080,
             "msfwifiv6.3g.qq.com" to 8080

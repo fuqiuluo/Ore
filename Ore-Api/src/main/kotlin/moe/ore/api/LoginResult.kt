@@ -19,24 +19,16 @@
  *
  */
 
-package moe.ore.api.listener
+package moe.ore.api
 
-import moe.ore.api.LoginResult
-import moe.ore.api.Ore
-
-/**
- * 机器人事件监听器
- */
-interface OreListener {
+enum class LoginResult {
+    /**
+     * 服务器响应超时
+     */
+    ServerTimeout,
 
     /**
-     * 开始登录
+     * 密码错误
      */
-    fun onLoginStart()
-
-    /**
-     * 登录结束
-     */
-    fun onLoginFinish(result: LoginResult)
-
+    PasswordWrong
 }

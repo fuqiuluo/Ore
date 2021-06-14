@@ -52,7 +52,7 @@ abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
 
     override fun operationComplete(future: ChannelFuture?) {
         if (future != null && future.isSuccess) {
-            println("成功接入服务器")
+            // println("成功接入服务器")
             this.onConnect()
         }
     }

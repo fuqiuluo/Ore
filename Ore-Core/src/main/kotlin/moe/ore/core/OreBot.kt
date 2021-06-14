@@ -22,6 +22,7 @@
 package moe.ore.core
 
 import kotlinx.io.core.readBytes
+import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.OreListener
@@ -71,11 +72,6 @@ class OreBot(val uin: Long) : Ore() {
      */
     private var status = OreStatus.NoLogin
 
-    /**
-     * 事件监听器
-     */
-    var oreListener: OreListener? = null
-
     override fun login() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
@@ -94,7 +90,17 @@ class OreBot(val uin: Long) : Ore() {
 }
 
 fun main() {
-    val ore = OreManager.addBot(1372362033, "18qq8q", "C:\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
+    ore.oreListener = object : OreListener {
+        override fun onLoginStart() {
+            println("登录开始了，呼呼呼！！！")
+        }
+
+        override fun onLoginFinish(result: LoginResult) {
+            println("登录结果：$result")
+        }
+
+    }
     ore.login()
 
 

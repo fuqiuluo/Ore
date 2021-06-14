@@ -21,11 +21,18 @@
 
 package moe.ore.api
 
+import moe.ore.api.listener.OreListener
+
 
 /**
  * Ore实体对象接口文件
  */
 abstract class Ore {
+    /**
+     * 事件监听器
+     */
+    var oreListener: OreListener? = null
+
 
     /**
      * 登录
