@@ -24,10 +24,13 @@ package moe.ore.core.protocol.wtlogin
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
 import moe.ore.api.listener.OreListener
+import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.SingleHandler
+import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.helper.toByteReadPacket
 import moe.ore.helper.toHexString
+import moe.ore.util.TeaUtil
 
 /**
  * 登录器
@@ -37,6 +40,9 @@ import moe.ore.helper.toHexString
  */
 class LoginHelper(private val uin: Long, private val client: BotClient, private val oreListener: OreListener?) :
     Thread() {
+
+    private val manager = DataManager.manager(uin)
+    private val device = manager.deviceInfo
 
     override fun run() {
         invoke()
@@ -49,7 +55,7 @@ class LoginHelper(private val uin: Long, private val client: BotClient, private 
     private fun handle(seq: Int) {
         val handler = client.registerCommonHandler(SingleHandler(seq, WtLogin.LOGIN))
         if (handler.wait()) {
-            handler.fromService!!.body.readLoginPacket {
+            handler.fromService!!.body.readLoginPacket(device.randKey) {
 
             }
 
@@ -62,7 +68,7 @@ class LoginHelper(private val uin: Long, private val client: BotClient, private 
 
     companion object {
         @JvmStatic
-        private inline fun ByteArray.readLoginPacket(block: () -> Unit) {
+        private inline fun ByteArray.readLoginPacket(randKey: ByteArray, block: () -> Unit) {
             val reader = this.toByteReadPacket()
             reader.discardExact(1 + 2 + 2 + 2 + 2)
             // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)
@@ -70,8 +76,11 @@ class LoginHelper(private val uin: Long, private val client: BotClient, private 
             reader.discardExact(2)
             // 00 00 (dis)
             val result = reader.readByte().toInt() and 0xff
+            // 235 协议版本过低
+            val teaKey = if (result == 180) randKey else ECDH_SHARE_KEY
+            val restu = TeaUtil.decrypt(reader.readBytes(reader.remaining.toInt() - 1), teaKey)
 
-            println("result[$uin] : $result")
+            println("result[$uin] : $result||" + String(restu))
         }
     }
 }

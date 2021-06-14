@@ -123,9 +123,9 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
             OTHER(0),
         }
 
-        var imei: String = getImei15(("86" + System.currentTimeMillis()).substring(0, 14))
-        var androidId: String = getRandomAndroidId()
-        var imsi: String = ("46002" + System.currentTimeMillis()).substring(0, 15)
+        var imei: String = " 867109044454073"
+        var androidId: String = "53f156a0b5b89966"
+        var imsi: String = "460023785098616"
         var model: String = "M2002J9E"
         var osType: String = "android"
         var brand: String = "Xiaomi"
@@ -143,14 +143,15 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         }
 
         var apnName = "中国移动"
-        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
+        var ksid: ByteArray = byteArrayOf()
         var randKey: ByteArray = BytesUtil.randomKey(16)
 
         // %4;7t>;28<fc.5*6
-        var guid: ByteArray = MD5.toMD5Byte((imei.ifEmpty { androidId }) + macAddress)
+        var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
 
         var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
+        // expamel 1, 0, 0, 127 是倒过来的哦！
         var clientIp = byteArrayOf(0, 0, 0, 0)
 
         companion object {

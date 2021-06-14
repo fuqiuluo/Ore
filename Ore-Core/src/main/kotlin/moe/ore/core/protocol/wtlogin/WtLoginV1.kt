@@ -24,6 +24,7 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
+import moe.ore.helper.writeHex
 
 /**
  * GetStWithPassword
@@ -32,7 +33,7 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
-            writeShort(24)
+            writeShort(25)
             writeBytes(tlv.t18())
             writeBytes(tlv.t1())
             writeBytes(tlv.t106())
@@ -40,19 +41,23 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             writeBytes(tlv.t100())
             writeBytes(tlv.t107())
             // writeBytes(tlv.t108(device.ksid))
-            // 第一次登录不需要
             writeBytes(tlv.t142())
             writeBytes(tlv.t144())
             writeBytes(tlv.t145())
             writeBytes(tlv.t147())
             writeBytes(tlv.t154(seq))
-            // writeBytes(tlv.t16b())
-            // 非常规协议操作，易导致环境异常
-            // 该TLV作用未知
             writeBytes(tlv.t141())
             writeBytes(tlv.t8())
             writeBytes(tlv.t511())
             writeBytes(tlv.t187())
+
+            // writeHex("04000048D1387BC477015873D624BB495618F37A3096BCB21757E66741E1E5E090E6DD293C402D0003B169879C5B95BB5A21028062CD406335AFE249A508144C26A18A42B3FF12D1A1EB95E8")
+
+
+            writeBytes(tlv.t16b())
+            // 非常规协议操作，易导致环境异常
+            // 该TLV作用未知
+
             // writeBytes(tlv.t400())
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
