@@ -94,7 +94,7 @@ fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: Byt
             writeByte(packetType.flag2)
             when (packetType) {
                 PacketType.LoginPacket -> {
-                    writeBytesWithSize(ByteArrayPool.EMPTY_BYTE_ARRAY, 0 + 4)
+                    writeInt(0 + 4)
                 }
 
             }
@@ -126,7 +126,7 @@ fun buildSecondLayer(
                 writeInt(protocolInfo.appId)
                 writeInt(16777216)
                 writeInt(0)
-                writeInt(256) // Token Type 如果无Token就是256
+                writeInt(0) // Token Type 如果有Token就是256
                 writeInt(0 + 4) // Token Size
                 commandName.let {
                     writeStringWithSize(it, it.length + 4)
@@ -144,7 +144,7 @@ fun buildSecondLayer(
                     writeStringWithShortSize(it, it.length + 2)
                 }
                 // 非常规组包，跳过部分异常
-                writeInt(4)
+                // writeInt(4)
             }
         }
 

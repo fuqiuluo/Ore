@@ -33,35 +33,36 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
-            writeShort(25)
+            writeShort(27)
             writeBytes(tlv.t18())
             writeBytes(tlv.t1())
             writeBytes(tlv.t106())
             writeBytes(tlv.t116())
             writeBytes(tlv.t100())
             writeBytes(tlv.t107())
-            // writeBytes(tlv.t108(device.ksid))
+            writeBytes(tlv.t108(device.ksid))
             writeBytes(tlv.t142())
             writeBytes(tlv.t144())
             writeBytes(tlv.t145())
             writeBytes(tlv.t147())
             writeBytes(tlv.t154(seq))
+            writeBytes(tlv.t16b())
+            // 非常规协议操作，易导致环境异常
+            // 该TLV作用未知
             writeBytes(tlv.t141())
             writeBytes(tlv.t8())
             writeBytes(tlv.t511())
             writeBytes(tlv.t187())
 
-            writeBytes(tlv.t16b())
-            // 非常规协议操作，易导致环境异常
-            // 该TLV作用未知
-
             // writeHex("04000048D1387BC477015873D624BB495618F37A3096BCB21757E66741E1E5E090E6DD293C402D0003B169879C5B95BB5A21028062CD406335AFE249A508144C26A18A42B3FF12D1A1EB95E8")
+            // 加上一个不知道真假的TLV400可以过部分假锁
 
             // writeBytes(tlv.t400())
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
-            writeBytes(tlv.t194())
+            writeBytes(tlv.t191())
             writeBytes(tlv.t202())
+            writeBytes(tlv.t194())
             writeBytes(tlv.t177())
             writeBytes(tlv.t516())
             writeBytes(tlv.t521())
