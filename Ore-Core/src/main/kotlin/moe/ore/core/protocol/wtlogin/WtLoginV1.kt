@@ -61,8 +61,11 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
             writeBytes(tlv.t191())
+            // t191 提交可以回退协议 使得可以在原本设备异常的环境下登录
+            // t191 QQ8.7.5开始 t191不会再发送
             writeBytes(tlv.t202())
             writeBytes(tlv.t194())
+            // 可有可无的TLV 对协议本身无影响
             writeBytes(tlv.t177())
             writeBytes(tlv.t516())
             writeBytes(tlv.t521())
