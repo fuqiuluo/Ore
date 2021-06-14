@@ -49,7 +49,7 @@ abstract class WtLogin(
         val body = makeBody(seq)
         val to = ToService(seq, commandName, body)
         to.sendTo(botClient)
-
+        // println("是否发包堵塞呢？")
         return seq
     }
 
@@ -57,9 +57,12 @@ abstract class WtLogin(
         val builder = createBuilder()
         builder.writePacket(createBuilder().apply {
             writeByte(0x2)
+
             val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
-            writeShort(tlvBody.size + 4 + 52 + ECDH_PUBLIC_KEY.size)
-            writeShort(8001)
+            // println(tlvBody.toHexString())
+
+            writeShort(tlvBody.size + 4 + 49 + ECDH_PUBLIC_KEY.size)
+            writeShort(0x1f41)
             writeShort(commandId)
             writeShort(1)
             writeLongToBuf32(uin)
@@ -72,7 +75,7 @@ abstract class WtLogin(
             writeInt(0)
             writeByte(2)
             writeByte(1)
-            // 03 87 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
+            // 03 87 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
 
             writeBytes(device.randKey)
             writeShort(305)

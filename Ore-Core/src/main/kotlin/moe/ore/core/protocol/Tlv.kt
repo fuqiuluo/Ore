@@ -27,6 +27,7 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.encodeProtobuf
 import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.*
+import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
@@ -40,7 +41,7 @@ class Tlv(val uin: Long) {
      */
     private val protocolInfo = ProtocolInternal[dataManager.protocolType]
 
-    private fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
+    private inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
         val bodyBuilder = BytePacketBuilder()
         val out = BytePacketBuilder()
         bodyBuilder.block()
@@ -71,8 +72,8 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.subAppId)
         writeInt(0)
         writeLongToBuf32(uin)
-        writeShort(0)
-        writeShort(0)
+        writeInt(0)
+        // 默认开始是0，回滚（rollback）一次就+1
     }
 
 
@@ -88,44 +89,6 @@ class Tlv(val uin: Long) {
 
     fun t104(dt104: ByteArray) = buildTlv(0x104) {
         writeBytes(dt104)
-    }
-
-    fun t107() = buildTlv(0x107) {
-        writeShort(0)
-        writeByte(0.toByte())
-        writeShort(0)
-        writeByte(1.toByte())
-    }
-
-    fun t108(ksid: ByteArray?) = buildTlv(0x108) {
-        writeBytes(ksid ?: "BF F3 F1 1C 63 EE 2C B1 7D 96 77 02 A3 6E 25 12".hex2ByteArray())
-    }
-
-    private fun t109() = buildTlv(0x109) {
-        writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
-    }
-
-    fun t116() = buildTlv(0x116) {
-        writeByte(0.toByte())
-        // ver
-        writeInt(protocolInfo.miscBitmap)
-        writeInt(protocolInfo.subSigMap)
-        val appidArray = intArrayOf(0x5f5e10e2)
-        writeByte(appidArray.size.toByte())
-        for (appid in appidArray) {
-            writeInt(appid)
-        }
-    }
-
-    fun t116V2() = buildTlv(0x116) {
-        writeByte(0.toByte())
-        writeInt(0x08F7FF7C)
-        writeInt(66560)
-        val appidArray = intArrayOf(0x5f5e10e2)
-        writeByte(appidArray.size.toByte())
-        for (appid in appidArray) {
-            writeInt(appid)
-        }
     }
 
     fun t106() = buildTlv(0x106) {
@@ -152,6 +115,33 @@ class Tlv(val uin: Long) {
         }
     }
 
+    fun t107() = buildTlv(0x107) {
+        writeShort(0)
+        writeByte(0.toByte())
+        writeShort(0)
+        writeByte(1.toByte())
+    }
+
+    fun t108(ksid: ByteArray?) = buildTlv(0x108) {
+        writeBytes(ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
+    }
+
+    private fun t109() = buildTlv(0x109) {
+        writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
+    }
+
+    fun t116() = buildTlv(0x116) {
+        writeByte(0.toByte())
+        // ver
+        writeInt(protocolInfo.miscBitmap)
+        writeInt(protocolInfo.subSigMap)
+        val appidArray = intArrayOf(0x5f5e10e2)
+        writeByte(appidArray.size.toByte())
+        for (appid in appidArray) {
+            writeInt(appid)
+        }
+    }
+
     private fun t124() = buildTlv(0x124) {
         writeStringWithShortSize(deviceInfo.osType)
         writeStringWithShortSize(deviceInfo.androidVersion)
@@ -166,9 +156,9 @@ class Tlv(val uin: Long) {
         writeBoolean(protocolInfo.isGuidAvailable)
         writeBoolean(protocolInfo.isGuidChanged)
         writeInt(0x01000000)
-        writeLimitedString(deviceInfo.model, 32)
-        writeLimitedByteArray(deviceInfo.guid, 16)
-        writeLimitedString(deviceInfo.brand, 16)
+        writeStringWithShortSize(deviceInfo.model)
+        writeBytesWithShortSize(deviceInfo.guid)
+        writeStringWithShortSize(deviceInfo.brand)
     }
 
     fun t141() = buildTlv(0x141) {
@@ -282,8 +272,8 @@ class Tlv(val uin: Long) {
     }
 
     fun t202() = buildTlv(0x202) {
-        writeLimitedStringWithShortSize(deviceInfo.wifiBSsid, 16)
-        writeLimitedStringWithShortSize("\"${deviceInfo.wifiSsid}\"", 32)
+        writeBytesWithShortSize(MD5.toMD5Byte(deviceInfo.wifiBSsid))
+        writeStringWithShortSize(deviceInfo.wifiSsid)
     }
 
     // TODO: 2021/6/9 Emp用的
@@ -366,7 +356,7 @@ class Tlv(val uin: Long) {
         writeShort(0)
     }
 
-    fun t536(loginExtraData: Collection<LoginExtraData> = listOf()) = buildTlv(0x536) {
+    private fun t536(loginExtraData: Collection<LoginExtraData> = listOf()) = buildTlv(0x536) {
         writeByte(1)
         writeByte(loginExtraData.size.toByte())
         for (extraData in loginExtraData) {
@@ -407,30 +397,11 @@ class Tlv(val uin: Long) {
     }
 
     fun t544() = buildTlv(0x544) {
-        writeHex("""
-    00 00 07 D9 00 00 00 00 
-    00 2E 00 20 15 97 BF B2 
-    50 07 9C 86 AF 7A FB 53 
-    64 4F 39 97 E9 0A 15 91 
-    83 AD F1 20 CC 89 F8 75 
-    28 63 5C 3E 00 08 00 00 
-    00 00 00 00 50 C9 00 03 
-    01 00 00 00 04 00 00 00 
-    03 00 00 00 01 75 37 33 
-    F4 38 29 75 6F 47 67 32 
-    76 48 33 70 00 14 63 6F 
-    6D 2E 74 65 6E 63 65 6E 
-    74 2E 6D 6F 62 69 6C 65 
-    71 71 41 36 42 37 34 35 
-    42 46 32 34 41 32 43 32 
-    37 37 35 32 37 37 31 36 
-    46 36 46 33 36 45 42 36 
-    38 44 05 E7 AD 8C 00 00 
-    00 00 00 00 02 00 00 01 
-    00 10 D8 44 E7 DC BB E2 
-    17 CB 9C 77 7F B0 FF B7 
-    B7 42
-    """.trimIndent())
+        writeHex("68656861000000010100000000000000010000030800000000e4e359180000000100000096000100080000017a08916e720002000a3647446268424863434d00030004010000010005000401000001000400040000000000060004010000040007000401000002000800040100000300090020da19f01ef1921f8e5934a4315c5530724269608f163986384080b91fe202d8f0000a00107af1515ceec23e30d9df87e3b4815266000b0010b68e356ed5e54e1525124f89e9aa2471")
+    }
+
+    fun t545() = buildTlv(0x545) {
+        writeHex("613664343731333466346264656366613138653866303266313030303165353135333131")
     }
 
     fun t193(ticket: String) = buildTlv(0x193) {

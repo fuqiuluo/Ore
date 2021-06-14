@@ -19,25 +19,16 @@
  *
  */
 
-package moe.ore.core.bot
+package moe.ore.api
 
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+enum class LoginResult {
+    /**
+     * 服务器响应超时
+     */
+    ServerTimeout,
 
-class BotRecorder {
-    private val seqFactory = AtomicInteger(Random().nextInt(100000))
-
-    @Synchronized
-    fun nextSeq(): Int {
-        var incrementAndGet: Int
-        synchronized(this) {
-            incrementAndGet = seqFactory.incrementAndGet()
-            if (incrementAndGet > 1000000) {
-                seqFactory.set(Random().nextInt(100000) + 60000)
-            }
-        }
-        return incrementAndGet
-    }
-
-
+    /**
+     * 密码错误
+     */
+    PasswordWrong
 }

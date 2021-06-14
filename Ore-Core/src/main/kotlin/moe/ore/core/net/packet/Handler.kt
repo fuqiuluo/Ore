@@ -37,14 +37,16 @@ class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
 
     /**
      * 等待返回包
+     *
+     * !!!等包间隔起步10秒
      * @return Boolean
      */
-    fun wait(timeout: Long = 5 * 1000): Boolean {
+    fun wait(timeout: Long = 20 * 1000): Boolean {
         Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
                     this@apply.cancel()
-                    queue.put(false)
+                    queue.add(false)
                 }
             }, timeout)
         }
@@ -54,10 +56,13 @@ class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
     }
 
     override fun check(from: FromService): Boolean {
+        // 已经Over了，但是因为线程安全注销删掉halder，所以说这里是个安全验证
+        if (isOver) return true
         val ret = ((from.seq == seq) and (from.commandName == commandName)).also {
             if (it) this.fromService = from
         }
-        queue.put(ret)
+        // println("拿到了：$ret")
+        queue.add(ret)
         return ret
     }
 }

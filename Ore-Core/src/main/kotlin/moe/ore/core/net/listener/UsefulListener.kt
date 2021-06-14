@@ -21,6 +21,8 @@
 
 package moe.ore.core.net.listener
 
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelFutureListener
 import kotlin.Throws
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelHandlerAdapter
@@ -33,16 +35,26 @@ import java.lang.Exception
  * create 2021-05-30 13:18
  */
 @Sharable
-abstract class UsefulListener : ChannelHandlerAdapter() {
+abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
+        // println("SB一个")
         msg?.let {
             this.onMassage(msg as PacketResponse)
         }
     }
 
     override fun channelActive(ctx: ChannelHandlerContext?) {
-        this.onConnect()
+        // println(System.currentTimeMillis())
+        // this.onConnect()
+        // 握手成功 并沒有载入服务器
+    }
+
+    override fun operationComplete(future: ChannelFuture?) {
+        if (future != null && future.isSuccess) {
+            // println("成功接入服务器")
+            this.onConnect()
+        }
     }
 
     protected abstract fun onConnect()

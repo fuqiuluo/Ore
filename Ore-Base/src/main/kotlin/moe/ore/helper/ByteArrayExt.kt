@@ -42,6 +42,7 @@
 
 package moe.ore.helper
 
+import moe.ore.util.BytesUtil
 import kotlin.experimental.xor
 
 fun ByteArray.toHexString(): String = this.joinToString("") {
@@ -56,3 +57,4 @@ fun ByteArray.xor(key: ByteArray): ByteArray {
     return result
 }
 
+fun ByteArray.sub(offset: Int, length: Int) = BytesUtil.subByte(this, offset, length)

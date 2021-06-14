@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'moe.ore.base'
-version '1.0.0'
+version '1.0.1'
 
 /**
  * 子模块需要的声明

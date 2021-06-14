@@ -21,6 +21,8 @@
 
 package moe.ore.core
 
+import kotlinx.io.core.readBytes
+import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.OreListener
@@ -32,18 +34,27 @@ import moe.ore.core.net.packet.SingleHandler
 import moe.ore.core.protocol.wtlogin.LoginHelper
 import moe.ore.core.protocol.wtlogin.WtLogin
 import moe.ore.core.protocol.wtlogin.WtLoginV1
+import moe.ore.helper.hex2ByteArray
 import moe.ore.helper.runtimeError
+import moe.ore.helper.thread.ThreadManager
+import moe.ore.helper.toByteReadPacket
+import moe.ore.helper.toHexString
 import okhttp3.internal.wait
 import java.util.*
 
 class OreBot(val uin: Long) : Ore() {
+    /**
+     * 机器人产生的线程全放这里
+     */
+    val threadManager: ThreadManager = ThreadManager.getInstance(uin)
+
     val client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
             override fun onConnect() {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
-                        LoginHelper(uin, this@apply, oreListener).invoke()
+                        threadManager.addTask(LoginHelper(uin, this@apply, oreListener))
                     }
                     OreStatus.Online -> {
                         // 重连
@@ -61,11 +72,6 @@ class OreBot(val uin: Long) : Ore() {
      */
     private var status = OreStatus.NoLogin
 
-    /**
-     * 事件监听器
-     */
-    var oreListener: OreListener? = null
-
     override fun login() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
@@ -77,12 +83,25 @@ class OreBot(val uin: Long) : Ore() {
     override fun shut() {
         // 关闭机器人
         this.status = OreStatus.Destroy
+        threadManager.shutdown()
         DataManager.destroy(uin)
 
     }
 }
 
 fun main() {
-    val ore = OreManager.addBot(1372362033, "18qq8q", "C:\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
+    ore.oreListener = object : OreListener {
+        override fun onLoginStart() {
+            println("登录开始了，呼呼呼！！！")
+        }
+
+        override fun onLoginFinish(result: LoginResult) {
+            println("登录结果：$result")
+        }
+
+    }
     ore.login()
+
+
 }

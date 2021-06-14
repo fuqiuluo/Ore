@@ -21,6 +21,7 @@
 
 package moe.ore.api.listener
 
+import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 
 /**
@@ -36,6 +37,6 @@ interface OreListener {
     /**
      * 登录结束
      */
-    fun onLoginFinish()
+    fun onLoginFinish(result: LoginResult)
 
 }

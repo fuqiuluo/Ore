@@ -24,6 +24,7 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
+import moe.ore.helper.writeHex
 
 /**
  * GetStWithPassword
@@ -32,7 +33,7 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
-            writeShort(23)
+            writeShort(27)
             writeBytes(tlv.t18())
             writeBytes(tlv.t1())
             writeBytes(tlv.t106())
@@ -43,24 +44,34 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             writeBytes(tlv.t142())
             writeBytes(tlv.t144())
             writeBytes(tlv.t145())
+            writeBytes(tlv.t147())
             writeBytes(tlv.t154(seq))
-            // writeBytes(tlv.t16b())
+            writeBytes(tlv.t16b())
             // 非常规协议操作，易导致环境异常
             // 该TLV作用未知
             writeBytes(tlv.t141())
             writeBytes(tlv.t8())
             writeBytes(tlv.t511())
             writeBytes(tlv.t187())
+
+            // writeHex("04000048D1387BC477015873D624BB495618F37A3096BCB21757E66741E1E5E090E6DD293C402D0003B169879C5B95BB5A21028062CD406335AFE249A508144C26A18A42B3FF12D1A1EB95E8")
+            // 加上一个不知道真假的TLV400可以过部分假锁
+
             // writeBytes(tlv.t400())
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
             writeBytes(tlv.t191())
+            // t191 提交可以回退协议 使得可以在原本设备异常的环境下登录
+            // t191 QQ8.7.5开始 t191不会再发送
             writeBytes(tlv.t202())
+            writeBytes(tlv.t194())
+            // 可有可无的TLV 对协议本身无影响
             writeBytes(tlv.t177())
             writeBytes(tlv.t516())
             writeBytes(tlv.t521())
             writeBytes(tlv.t525())
             writeBytes(tlv.t544())
+            writeBytes(tlv.t545())
         }.toByteArray()
     }
 }
