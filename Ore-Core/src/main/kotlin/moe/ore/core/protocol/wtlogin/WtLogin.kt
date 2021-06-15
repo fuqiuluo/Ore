@@ -38,7 +38,7 @@ abstract class WtLogin(
     private val commandId: Int,
     private val encryptType: Int
 ) {
-    private val manager = DataManager.manager(uin)
+    val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 

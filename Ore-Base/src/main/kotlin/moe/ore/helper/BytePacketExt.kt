@@ -119,6 +119,10 @@ fun BytePacketBuilder.md5(): ByteArray {
     return MD5.toMD5Byte(toByteArray())
 }
 
+fun ByteArray.md5(): ByteArray {
+    return MD5.toMD5Byte(this)
+}
+
 inline fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {
     val body = createBuilder()
     body.block()
