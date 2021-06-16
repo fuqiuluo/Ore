@@ -31,10 +31,9 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.SingleHandler
 import moe.ore.core.protocol.ECDH_SHARE_KEY
-import moe.ore.helper.md5
-import moe.ore.helper.toByteReadPacket
-import moe.ore.helper.toHexString
+import moe.ore.helper.*
 import moe.ore.util.TeaUtil
+import okhttp3.internal.toHexString
 
 /**
  * 登录器
@@ -56,17 +55,76 @@ class LoginHelper(private val uin: Long, private val client: BotClient, private 
         handle(WtLoginV1(uin).sendTo(client))
     }
 
+    fun analysisTlv161(t161: ByteArray) {
+        val tlv = t161.toByteReadPacket().withUse { parseTlv(this) }
+        println(tlv.keys.map { "0x" + it.toHexString() })
+        tlv[0x173]?.let { analysisTlv173(it) }
+        tlv[0x17f]?.let { analysisTlv17f(it) }
+//        tlv[0x172]?.let { rollbackSig = it }
+    }
+
+    object A {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val byteArrayOf = byteArrayOf(0, 1, 1, 114, 0, 24, -36, -81, 48, -9, 83, 2, -89, -18, -33, -2, 99, 63, 76, 118, -112, 118, 114, 118, 72, -41, -2, 35, -21, 89)
+            val tlv = byteArrayOf.toByteReadPacket().apply { }.withUse { parseTlv(this) }
+            println(tlv.keys.map { "0x" + it.toHexString() })
+        }
+    }
+
+    /**
+     * server host
+     */
+    fun analysisTlv173(t173: ByteArray) {
+        t173.reader {
+            val type = readByte()
+            val host = readString(readUShort().toInt())
+            val port = readShort()
+
+            println("服务器: host=$host, port=$port, type=$type")
+            // SEE oicq_request.java at method analysisT173
+        }
+    }
+
+    /**
+     * ipv6 address
+     */
+    fun analysisTlv17f(t17f: ByteArray) {
+        t17f.reader {
+            val type = readByte()
+            val host = readString(readUShort().toInt())
+            val port = readShort()
+
+            println("服务器 ipv6: host=$host, port=$port, type=$type")
+            // SEE oicq_request.java at method analysisT17f
+        }
+    }
+
     private fun handle(seq: Int) {
         val handler = client.registerCommonHandler(SingleHandler(seq, WtLogin.LOGIN))
         if (handler.wait()) {
             handler.fromService!!.body.readLoginPacket(device.randKey) { result, tlvMap ->
-                println(tlvMap.keys)
-                println(result)
+                println(tlvMap.keys.map { "0x" + it.toHexString() })
+                println("ret:$result")
+                tlvMap[0x161]?.let { analysisTlv161(it) }
+
+                tlvMap[0x146]?.let {
+                    // TODO: 2021/6/16 错误消息解析
+                    val toByteReadPacket = it.toByteReadPacket()
+//                    val ver = toByteReadPacket.readInt()
+                    val code = toByteReadPacket.readInt()
+                    val title = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                    val message = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                    val errorInfo = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                    println("code = [${code}], title = [${title}], message = [${message}], errorInfo = [${errorInfo}]")
+                }
+
                 when (result) {
                     0 -> succ(TeaUtil.decrypt(tlvMap.getOrElse(0x119) { TODO("D") }, device.tgtgKey))
                     1 -> listener?.onLoginFinish(LoginResult.PasswordWrong)
                     2 -> TODO("需要滑块啊！傻卵！！")
                     204 -> onDevLockLogin(tlvMap) //TODO("伟大的设备锁验证")
+                    108 -> TODO("服务器已满 请连接指定服务器 注：上线成功后任然有可能会被踢出服务器(被动  主动 ConfigPushSvc.PushReq) 要求使用指定服务器重新连接")
                     else -> error("unknown login result : $result")
                 }
             }
@@ -76,9 +134,13 @@ class LoginHelper(private val uin: Long, private val client: BotClient, private 
         }
     }
 
+    private fun pwe(decrypt: ByteArray) {
+
+    }
+
     private fun succ(decrypt: ByteArray) {
         val tlvMap119 = parseTlv(decrypt.toByteReadPacket())
-        println(tlvMap119.keys)
+        println(tlvMap119.keys.map { "0x" + it.toHexString() })
         manager.wLoginSigInfo.superKey = tlvMap119.getOrDefault(0x16d, ByteArray(0))
         manager.wLoginSigInfo.d2Key = tlvMap119.getOrDefault(0x305, ByteArray(0))
         manager.wLoginSigInfo.tgt = tlvMap119.getOrDefault(0x10a, ByteArray(0))

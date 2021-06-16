@@ -21,11 +21,16 @@
 
 package moe.ore.core.bot
 
+import moe.ore.core.helper.toByteArray
+import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.util.*
 import kotlin.math.abs
 
 class WtLoginSigInfo {
+    lateinit var wtSessionTicketKey: ByteArray
+    var packetSessionId: ByteArray = 0x02B05B8B.toByteArray()
+    lateinit var wtSessionTicket: ByteArray
     lateinit var tgtKey: ByteArray
     lateinit var tgt: ByteArray
     lateinit var superKey: ByteArray
@@ -34,7 +39,7 @@ class WtLoginSigInfo {
     var sigInfo2 = ByteArray(0)//todo sigInfo[2]
 
     var d2: ByteArray? = null
-    var d2Key: ByteArray? = null
+    lateinit var d2Key: ByteArray
 
     // form T403
     var randSeed: ByteArray? = null
@@ -54,10 +59,10 @@ class WtLoginSigInfo {
     }.toByteArray()
 
     // from t16a
-    var noPicSig: ByteArray? = null
+    lateinit var noPicSig: ByteArray
 
     // 用t106和t10c计算得到
-    var enA1: ByteArray? = null
+    lateinit var enA1: ByteArray
 
 
 }

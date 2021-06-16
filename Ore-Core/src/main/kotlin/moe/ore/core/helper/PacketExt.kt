@@ -21,9 +21,7 @@
 
 package moe.ore.core.helper
 
-import kotlinx.io.core.BytePacketBuilder
-import kotlinx.io.core.discardExact
-import kotlinx.io.core.readBytes
+import kotlinx.io.core.*
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.PacketType
 import moe.ore.core.protocol.ProtocolInternal
@@ -48,13 +46,11 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
         // println(remaining) 剩余字节数
         // println(size) 总字节数
 
-        TeaUtil.decrypt(
-            ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
-                1 -> manager.wLoginSigInfo.d2Key!!
-                2 -> DEFAULT_TEA_KEY
-                else -> runtimeError("unknown key type : $keyType")
-            }
-        ).reader {
+        TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
+            1 -> manager.wLoginSigInfo.d2Key
+            2 -> DEFAULT_TEA_KEY
+            else -> runtimeError("unknown key type : $keyType")
+        }).reader {
             val headReader = readByteReadPacket(readInt() - 4)
             val body = readBytes(readInt() - 4)
             if (body.isNotEmpty()) {
@@ -67,7 +63,8 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
                 }
                 val commandName = headReader.readString(headReader.readInt() - 4)
                 // val randomSeed =
-                headReader.discardExact(headReader.readInt() - 4)
+                manager.wLoginSigInfo.packetSessionId = headReader.readBytes(headReader.readInt() - 4)
+                println("packetSessionId:${manager.wLoginSigInfo.packetSessionId.toInt()}")
                 when (headReader.readInt()) {
                     0, 4 -> body
                     1 -> ZipUtil.unCompress(body)
@@ -107,13 +104,7 @@ fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: Byt
     }.toByteArray()
 }
 
-fun buildSecondLayer(
-    uin: Long,
-    commandName: String,
-    body: ByteArray,
-    packetType: PacketType,
-    seq: Int
-): ByteArray {
+fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, packetType: PacketType, seq: Int): ByteArray {
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
     val protocolInfo = ProtocolInternal[manager.protocolType]
@@ -160,3 +151,21 @@ private inline fun BytePacketBuilder.writeBodyWithSize(block: BytePacketBuilder.
     this.writeInt(builder.size + 4)
     this.writePacket(builder)
 }
+
+internal inline fun BytePacketBuilder.writeIntLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = { it }, builder: BytePacketBuilder.() -> Unit): Int =
+    BytePacketBuilder().apply(builder).build().use {
+        if (tag != null) writeUByte(tag)
+        val length = lengthOffset.invoke(it.remaining)
+        writeInt(length.toInt())
+        writePacket(it)
+        return length.toInt()
+    }
+
+internal inline fun BytePacketBuilder.writeShortLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = { it }, builder: BytePacketBuilder.() -> Unit): Int =
+    BytePacketBuilder().apply(builder).build().use {
+        if (tag != null) writeUByte(tag)
+        val length = lengthOffset.invoke(it.remaining)
+        writeUShort(length.toUShort())
+        writePacket(it)
+        return length.toInt()
+    }
