@@ -1,5 +1,6 @@
 package moe.ore.core.protocol.wtlogin
 
+/**
 import kotlinx.io.core.readBytes
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.packet.buildUniPacket
@@ -127,9 +128,10 @@ class WtLoginV5(var uin: Long) {
                 //t544() // new
 
 //        上面是结构 下面的包装 但是我看不懂 乱抄一通还没成功  OicqRequestPacket是什么东西  mirai 里面的 WtLogin15类
-                writeBytesWithShortSize(manager.wLoginSigInfo.wtSessionTicket)
+                writeBytes(manager.wLoginSigInfo.wtSessionTicket)
             }
         }.readBytes()
 
     }
 }
+        **/

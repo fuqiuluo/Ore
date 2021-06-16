@@ -33,14 +33,14 @@ import okhttp3.internal.closeQuietly
 
 val DEFAULT_TEA_KEY = ByteArray(16)
 
-inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromService) -> Unit) {
+inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, FromService) -> Unit) {
     val manager = DataManager.manager(uin)
     this.reader {
         val packetType = readInt()
         // 貌似没有什么鸟用
         val keyType = readByte().toInt()
         discardExact(1)
-        // 不知道是什么奇怪的玩意 skip 吧
+        //
         val uinStr = readString(readInt() - 4)
 
         // println(remaining) 剩余字节数
@@ -63,8 +63,8 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
                 }
                 val commandName = headReader.readString(headReader.readInt() - 4)
                 // val randomSeed =
-                manager.wLoginSigInfo.packetSessionId = headReader.readBytes(headReader.readInt() - 4)
-                println("packetSessionId:${manager.wLoginSigInfo.packetSessionId.toInt()}")
+                val sessionId = headReader.readBytes(headReader.readInt() - 4)
+                // println("packetSessionId:${manager.wLoginSigInfo.lastSessionId.toInt()}")
                 when (headReader.readInt()) {
                     0, 4 -> body
                     1 -> ZipUtil.unCompress(body)
@@ -72,6 +72,7 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
                 }.let {
                     // msfSSoSeq , commandName, uinStr, it (body)
                     val from = FromService(msfSSoSeq, commandName, body)
+                    from.sessionId = sessionId
                     block(uinStr, from)
                 }
             }
@@ -84,7 +85,7 @@ inline fun ByteArray.readPacket(uin: Long, crossinline block: (String, FromServi
 /**
  * 构建第一层，最外面那层
  */
-fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: ByteArray): ByteArray {
+internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: ByteArray): ByteArray {
     return createBuilder().apply {
         writeBodyWithSize {
             writeInt(packetType.flag1)
@@ -96,15 +97,16 @@ fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: Byt
 
             }
             writeByte(0)
-            val uinStr = uin.toString()
-            writeStringWithSize(uinStr, uinStr.length + 4)
-
+            uin.toString().let {
+                writeInt(it.length + 4)
+                writeString(it)
+            }
             writeBytes(TeaUtil.encrypt(body, key))
         }
     }.toByteArray()
 }
 
-fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, packetType: PacketType, seq: Int): ByteArray {
+internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, packetType: PacketType, seq: Int): ByteArray {
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
     val protocolInfo = ProtocolInternal[manager.protocolType]
@@ -120,19 +122,24 @@ fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, packetType
                 writeInt(0) // Token Type 如果有Token就是256
                 writeInt(0 + 4) // Token Size
                 commandName.let {
-                    writeStringWithSize(it, it.length + 4)
+                    writeInt(it.length + 4)
+                    writeString(it)
                 }
                 BytesUtil.randomKey(4).let {
-                    writeBytesWithSize(it, it.size + 4)
+                    writeInt(it.size + 4)
+                    writeBytes(it)
                 }
                 deviceInfo.androidId.let {
-                    writeStringWithSize(it, it.length + 4)
+                    writeInt(it.length + 4)
+                    writeString(it)
                 }
                 deviceInfo.ksid.let {
-                    writeBytesWithSize(it, it.size + 4)
+                    writeInt(it.size + 4)
+                    writeBytes(it)
                 }
                 protocolInfo.protocolDetail.let {
-                    writeStringWithShortSize(it, it.length + 2)
+                    writeShort(it.length + 2)
+                    writeString(it)
                 }
                 // 非常规组包，跳过部分异常
                 // writeInt(4)
@@ -152,20 +159,3 @@ private inline fun BytePacketBuilder.writeBodyWithSize(block: BytePacketBuilder.
     this.writePacket(builder)
 }
 
-internal inline fun BytePacketBuilder.writeIntLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = { it }, builder: BytePacketBuilder.() -> Unit): Int =
-    BytePacketBuilder().apply(builder).build().use {
-        if (tag != null) writeUByte(tag)
-        val length = lengthOffset.invoke(it.remaining)
-        writeInt(length.toInt())
-        writePacket(it)
-        return length.toInt()
-    }
-
-internal inline fun BytePacketBuilder.writeShortLVPacket(tag: UByte? = null, lengthOffset: ((Long) -> Long) = { it }, builder: BytePacketBuilder.() -> Unit): Int =
-    BytePacketBuilder().apply(builder).build().use {
-        if (tag != null) writeUByte(tag)
-        val length = lengthOffset.invoke(it.remaining)
-        writeUShort(length.toUShort())
-        writePacket(it)
-        return length.toInt()
-    }

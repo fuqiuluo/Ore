@@ -27,7 +27,6 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.encodeProtobuf
 import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.*
-import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
@@ -110,7 +109,7 @@ class Tlv(val uin: Long) {
             writeBytes(deviceInfo.guid)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.loginType)
-            writeStringWithShortSize(uin.toString())
+            writeStringWithShortLen(uin.toString())
             writeShort(0)
         }
     }
@@ -143,11 +142,11 @@ class Tlv(val uin: Long) {
     }
 
     private fun t124() = buildTlv(0x124) {
-        writeStringWithShortSize(deviceInfo.osType)
-        writeStringWithShortSize(deviceInfo.androidVersion)
+        writeStringWithShortLen(deviceInfo.osType)
+        writeStringWithShortLen(deviceInfo.androidVersion)
         writeShort(deviceInfo.netType.value)
-        writeStringWithShortSize(deviceInfo.apnName)
-        writeStringWithSize(deviceInfo.apn)
+        writeStringWithShortLen(deviceInfo.apnName)
+        writeStringWithIntLen(deviceInfo.apn)
     }
 
     private fun t128() = buildTlv(0x128) {
@@ -156,22 +155,22 @@ class Tlv(val uin: Long) {
         writeBoolean(protocolInfo.isGuidAvailable)
         writeBoolean(protocolInfo.isGuidChanged)
         writeInt(0x01000000)
-        writeStringWithShortSize(deviceInfo.model)
-        writeBytesWithShortSize(deviceInfo.guid)
-        writeStringWithShortSize(deviceInfo.brand)
+        writeStringWithShortLen(deviceInfo.model)
+        writeBytesWithShortLen(deviceInfo.guid)
+        writeStringWithShortLen(deviceInfo.brand)
     }
 
     fun t141() = buildTlv(0x141) {
         writeShort(1)
         // version
-        writeStringWithShortSize(deviceInfo.apnName)
+        writeStringWithShortLen(deviceInfo.apnName)
         writeShort(deviceInfo.netType.value)
-        writeStringWithShortSize(deviceInfo.apn)
+        writeStringWithShortLen(deviceInfo.apn)
     }
 
     fun t142() = buildTlv(0x142) {
         writeShort(0)
-        writeStringWithShortSize(protocolInfo.packageName)
+        writeStringWithShortLen(protocolInfo.packageName)
     }
 
     fun t144() = buildTlv(0x144) {
@@ -191,8 +190,8 @@ class Tlv(val uin: Long) {
 
     fun t147() = buildTlv(0x147) {
         writeInt(protocolInfo.subAppId)
-        writeStringWithShortSize(protocolInfo.packageVersion)
-        writeBytesWithShortSize(protocolInfo.tencentSdkMd5)
+        writeStringWithShortLen(protocolInfo.packageVersion)
+        writeBytesWithShortLen(protocolInfo.tencentSdkMd5)
     }
 
     fun t154(seq: Int) = buildTlv(0x154) {
@@ -213,7 +212,7 @@ class Tlv(val uin: Long) {
         val domains = arrayOf("tenpay.com", "qzone.qq.com", "qun.qq.com", "mail.qq.com", "openmobile.qq.com", "qzone.com", "game.qq.com", "vip.qq.com")
         writeShort(domains.size)
         for (s in domains) {
-            writeStringWithShortSize(s)
+            writeStringWithShortLen(s)
         }
     }
 
@@ -228,9 +227,8 @@ class Tlv(val uin: Long) {
     fun t177() = buildTlv(0x177) {
         writeBoolean(true)
         writeInt(protocolInfo.buildTime)
-        writeStringWithShortSize(protocolInfo.buildVersion)
+        writeStringWithShortLen(protocolInfo.buildVersion)
     }
-
 
     fun t17a() = buildTlv(0x17a) {
         writeInt(9)
@@ -272,8 +270,8 @@ class Tlv(val uin: Long) {
     }
 
     fun t202() = buildTlv(0x202) {
-        writeBytesWithShortSize(MD5.toMD5Byte(deviceInfo.wifiBSsid))
-        writeStringWithShortSize(deviceInfo.wifiSsid)
+        writeBytesWithShortLen(MD5.toMD5Byte(deviceInfo.wifiBSsid))
+        writeStringWithShortLen(deviceInfo.wifiSsid)
     }
 
     // TODO: 2021/6/9 Emp用的
@@ -343,7 +341,7 @@ class Tlv(val uin: Long) {
                 }
             }
             writeByte(b)
-            writeStringWithShortSize(domain)
+            writeStringWithShortLen(domain)
         }
     }
 

@@ -1,7 +1,7 @@
 package moe.ore.core.net.packet
 
+/**
 import kotlinx.io.core.*
-import moe.ore.core.helper.ByteArrayPool.Companion.EMPTY_BYTE_ARRAY
 import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.writeIntLVPacket
 import moe.ore.core.protocol.ECDH_PUBLIC_KEY
@@ -25,7 +25,7 @@ internal inline fun buildUniPacket(manager: DataManager, bodyType: Byte = 1, // 
                 writeStringUtf8(it)
             }
             writeTeaEncrypt(key) {
-                writeUniPacket(commandName, manager.wLoginSigInfo.packetSessionId, extraData) {
+                writeUniPacket(commandName, manager.wLoginSigInfo.lastSessionId, extraData) {
                     body(sequenceId)
                 }
             }
@@ -47,7 +47,7 @@ internal inline fun buildResponseUniPacket(dataManager: DataManager, bodyType: B
                 writeStringUtf8(it)
             }
             writeTeaEncrypt(key) {
-                writeUniPacket(commandName, dataManager.wLoginSigInfo.packetSessionId, extraData) {
+                writeUniPacket(commandName, dataManager.wLoginSigInfo.lastSessionId, extraData) {
                     body(sequenceId)
                 }
             }
@@ -83,7 +83,7 @@ internal val NO_ENCRYPT: ByteArray = ByteArray(0)
 /**
  * com.tencent.qphone.base.util.CodecWarpper#encodeRequest(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, byte[], int, int, java.lang.String, byte, byte, byte, byte[], byte[], boolean)
  */
-internal inline fun buildLoginPacket(dataManager: DataManager, bodyType: Byte, extraData: ByteArray = EMPTY_BYTE_ARRAY, commandName: String, key: ByteArray = ByteArray(16), body: BytePacketBuilder.(sequenceId: Int) -> Unit): ByteReadPacket {
+internal inline fun buildLoginPacket(dataManager: DataManager, bodyType: Byte, extraData: ByteArray = ByteArray(0), commandName: String, key: ByteArray = ByteArray(16), body: BytePacketBuilder.(sequenceId: Int) -> Unit): ByteReadPacket {
     val sequenceId: Int = dataManager.recorder.nextSeq()
 
     return buildPacket {
@@ -149,7 +149,7 @@ internal inline fun BytePacketBuilder.writeSsoPacket(dataManager: DataManager, s
         }
 
         writeInt(4 + 4)
-        writeFully(dataManager.wLoginSigInfo.packetSessionId) //  02 B0 5B 8B
+        writeFully(dataManager.wLoginSigInfo.lastSessionId) //  02 B0 5B 8B
 
         dataManager.deviceInfo.imei.let {
             writeInt(it.length + 4)
@@ -199,10 +199,12 @@ private fun makeBody(uin: Long, byteArray: ByteArray, commandId: Int, encryptTyp
         writeBytes(randomKey)
         writeShort(305)
         writeShort(ECDH_VERSION.toShort())
-        writeBytesWithShortSize(ECDH_PUBLIC_KEY)
+        writeBytes(ECDH_PUBLIC_KEY)
         writeBytes(tlvBody)
 
         writeByte(0x3)
     })
     return builder.toByteArray()
 }
+
+ **/

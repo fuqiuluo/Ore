@@ -89,38 +89,32 @@ fun BytePacketBuilder.writeLongToBuf32(v: Long) {
     this.writeBytes(BytesUtil.int64ToBuf32(v))
 }
 
-fun BytePacketBuilder.writeBytesWithShortSize(body: ByteArray, size: Int = body.size) {
+fun BytePacketBuilder.writeBytes(body: ByteArray, size: Int = body.size) {
     writeShort(size)
-    writeBytes(body)
+    this.writeBytes(body)
 }
 
-fun BytePacketBuilder.writeBytesWithSize(body: ByteArray, size: Int = body.size) {
-    writeInt(size)
-    writeBytes(body)
+fun BytePacketBuilder.writeStringWithIntLen(str: String) {
+    writeBytesWithIntLen(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithSize(str: String) {
-    writeBytesWithSize(str.toByteArray())
+fun BytePacketBuilder.writeStringWithShortLen(str: String) {
+    writeBytesWithShortLen(str.toByteArray())
 }
 
-fun BytePacketBuilder.writeStringWithSize(str: String, size: Int) {
-    writeBytesWithSize(str.toByteArray(), size)
+fun BytePacketBuilder.writeBytesWithIntLen(bytes: ByteArray) {
+    writeInt(bytes.size)
+    writeBytes(bytes)
 }
 
-fun BytePacketBuilder.writeStringWithShortSize(str: String) {
-    writeBytesWithShortSize(str.toByteArray())
-}
-
-fun BytePacketBuilder.writeStringWithShortSize(str: String, size: Int) {
-    writeBytesWithShortSize(str.toByteArray(), size)
+fun BytePacketBuilder.writeBytesWithShortLen(bytes: ByteArray) {
+    check(bytes.size <= Short.MAX_VALUE) { "byteArray length is too long" }
+    writeShort(bytes.size.toShort())
+    writeBytes(bytes)
 }
 
 fun BytePacketBuilder.md5(): ByteArray {
     return MD5.toMD5Byte(toByteArray())
-}
-
-fun ByteArray.md5(): ByteArray {
-    return MD5.toMD5Byte(this)
 }
 
 inline fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {

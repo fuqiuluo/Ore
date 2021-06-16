@@ -21,24 +21,15 @@
 
 package moe.ore.helper
 
-import java.io.Closeable
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 
-inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
-    throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
+/**
+ * 比你妈BytePacket在读取方面好用多了
+ */
 
-@OptIn(ExperimentalContracts::class)
-inline fun <C : Closeable, R> C.withUse(block: C.() -> R): R {
-    contract {
-        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-    }
-    return use(block)
-}
+fun ByteArray.toByteBuf(): ByteBuf = Unpooled.copiedBuffer(this)
 
-inline fun costTime(block : () -> Unit) : Long {
-    val st = System.currentTimeMillis()
-    block()
-    return System.currentTimeMillis() - st
-}
+fun ByteBuf.readString(length : Int) = String(readBytes(length).array())
+
+fun ByteBuf.readRestBytes(): ByteBuf = this.readBytes(this.readableBytes())

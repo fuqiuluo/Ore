@@ -29,14 +29,15 @@ import kotlin.math.abs
 
 class WtLoginSigInfo {
     lateinit var wtSessionTicketKey: ByteArray
-    var packetSessionId: ByteArray = 0x02B05B8B.toByteArray()
+
     lateinit var wtSessionTicket: ByteArray
     lateinit var tgtKey: ByteArray
     lateinit var tgt: ByteArray
     lateinit var superKey: ByteArray
     lateinit var t104: ByteArray
 
-    var sigInfo2 = ByteArray(0)//todo sigInfo[2]
+    var sigInfo2 = ByteArray(0)
+    //todo sigInfo[2]
 
     var d2: ByteArray? = null
     lateinit var d2Key: ByteArray

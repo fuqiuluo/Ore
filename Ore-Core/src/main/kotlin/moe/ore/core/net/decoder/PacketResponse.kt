@@ -21,15 +21,15 @@
 
 package moe.ore.core.net.decoder
 
+import io.netty.buffer.ByteBuf
+
 data class PacketResponse (
     val body : ByteArray,
     val charsetName : String = "utf-8"
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as PacketResponse
+        if (other !is PacketResponse) return false
 
         if (!body.contentEquals(other.body)) return false
         if (charsetName != other.charsetName) return false
