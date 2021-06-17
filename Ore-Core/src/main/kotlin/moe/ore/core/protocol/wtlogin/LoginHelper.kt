@@ -31,6 +31,7 @@ import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
+import okhttp3.internal.toHexString
 
 /**
  * 登录器
@@ -38,8 +39,7 @@ import moe.ore.util.TeaUtil
  * @property listener OreListener?
  * @constructor
  */
-internal class LoginHelper(private val uin: Long, private val client: BotClient, private val listener: OreListener?) :
-    Thread() {
+internal class LoginHelper(private val uin: Long, private val client: BotClient, private val listener: OreListener?) : Thread() {
 
     private val manager = DataManager.manager(uin)
     private val userStInfo = manager.wLoginSigInfo
@@ -57,14 +57,15 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
     private fun handle(sender: PacketSender) {
         val from = sender sync 20 * 1000
-        if(from == null) {
+        if (from == null) {
             callback(LoginResult.ServerTimeout)
         } else {
             from.body.readLoginPacket { result, tlvMap ->
+                println("result: $result tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
                 when (result) {
                     0 -> onSuccess(tlvMap)
                     1 -> onPasswordWrong()
-                    180 -> onRollBack()
+                    180 -> onRollBack(tlvMap)
                     204 -> onDevicePass(tlvMap)
                     else -> error("unknown login result : $result")
                 }
@@ -72,8 +73,35 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         }
     }
 
-    private inline fun onRollBack() {
+    private inline fun onRollBack(tlvMap: Map<Int, ByteArray>) {
+        tlvMap[0x161]?.let { it ->
+            val tlv = it.toByteReadPacket().withUse { parseTlv(this) }
+            println("onRollBack tlv: " + tlv.keys.map { "0x" + it.toHexString() })
+            tlv[0x173]?.let {
+                it.reader {
+                    val type = readByte()
+                    val host = readString(readUShort().toInt())
+                    val port = readShort()
 
+                    TODO("服务器: host=$host, port=$port, type=$type")
+                    // SEE oicq_request.java at method analysisT173
+                }
+            }
+            tlv[0x17f]?.let {
+                it.reader {
+                    val type = readByte()
+                    val host = readString(readUShort().toInt())
+                    val port = readShort()
+
+                    TODO("服务器 ipv6: host=$host, port=$port, type=$type")
+                    // SEE oicq_request.java at method analysisT173
+                }
+            }
+            tlv[0x172]?.let {
+                println("0x172 call rollbackSig")
+                client.connect()
+            }
+        }
 
     }
 
