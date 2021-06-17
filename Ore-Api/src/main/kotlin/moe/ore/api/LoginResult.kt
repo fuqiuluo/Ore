@@ -30,5 +30,10 @@ enum class LoginResult {
     /**
      * 密码错误
      */
-    PasswordWrong
+    PasswordWrong,
+
+    /**
+     * 滑块验证失败
+     */
+    SliderVerifyFail
 }

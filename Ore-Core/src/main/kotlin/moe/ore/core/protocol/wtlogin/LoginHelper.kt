@@ -65,6 +65,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                 when (result) {
                     0 -> onSuccess(tlvMap)
                     1 -> onPasswordWrong()
+                    2 -> onCaptcha(tlvMap)
                     180 -> onRollBack(tlvMap)
                     204 -> onDevicePass(tlvMap)
                     else -> error("unknown login result : $result")
@@ -73,18 +74,34 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         }
     }
 
+    private inline fun onCaptcha(tlvMap: Map<Int, ByteArray>) {
+        val url = String(tlvMap[0x192]!!)
+        val ticket = listener?.onCaptcha(url)
+        if(ticket == null) {
+            callback(LoginResult.SliderVerifyFail)
+        } else {
+
+
+        }
+    }
+
     private inline fun onRollBack(tlvMap: Map<Int, ByteArray>) {
         tlvMap[0x161]?.let { it ->
             val tlv = it.toByteReadPacket().withUse { parseTlv(this) }
+            tlv[0x173]?.let {
+                println("T173 : " + it.toHexString())
+            }
+            tlv[0x17f]?.let {
+                println("T17F : " + it.toHexString())
+            }
+            // 等待遇到实际的包 再进行分析
+
             /**
             tlv[0x173]?.let {
                 it.reader {
                     val type = readByte()
                     val host = readString(readUShort().toInt())
                     val port = readShort()
-
-                    TODO("服务器: host=$host, port=$port, type=$type")
-                    // SEE oicq_request.java at method analysisT173
                 }
             }
             tlv[0x17f]?.let {
@@ -92,9 +109,6 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                     val type = readByte()
                     val host = readString(readUShort().toInt())
                     val port = readShort()
-
-                    TODO("服务器 ipv6: host=$host, port=$port, type=$type")
-                    // SEE oicq_request.java at method analysisT173
                 }
             } **/
             tlv[0x172]?.let {
@@ -108,6 +122,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     }
 
     private inline fun onSuccess(tlvMap: Map<Int, ByteArray>) {
+
 
     }
 
@@ -159,8 +174,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             val size = bs.readShort().toInt()
             val map = hashMapOf<Int, ByteArray>()
             repeat(size) {
-                val ver = bs.readShort().toInt()
-                val tSize = bs.readShort().toInt()
+                val ver = bs.readUShort().toInt()
+                val tSize = bs.readUShort().toInt()
                 val content = bs.readBytes(tSize)
                 map[ver] = content
             }

@@ -31,6 +31,7 @@ import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.protocol.wtlogin.LoginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
+import java.util.*
 
 class OreBot(val uin: Long) : Ore() {
     /**
@@ -80,7 +81,8 @@ class OreBot(val uin: Long) : Ore() {
 }
 
 fun main() {
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
+    // 3042628723
+    val ore = OreManager.addBot(3042623, "911586abcd", "C:\\")
     ore.oreListener = object : OreListener {
         override fun onLoginStart() {
             println("登录开始了，呼呼呼！！！")
@@ -88,6 +90,11 @@ fun main() {
 
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
+        }
+
+        override fun onCaptcha(url: String): String? {
+            println("伟大的滑块开始了：$url")
+            return null
         }
 
     }

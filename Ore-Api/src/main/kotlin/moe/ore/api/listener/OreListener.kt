@@ -39,4 +39,8 @@ interface OreListener {
      */
     fun onLoginFinish(result: LoginResult)
 
+    /**
+     * 遇到滑块 返回ticket
+     */
+    fun onCaptcha(url : String) : String?
 }
