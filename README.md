@@ -6,5 +6,5 @@ Tencent Protocol Project
 
 ### 使用注意
 
- - 该项目仅提供需要与交流，使用本项目前请参阅**MPL开源协议**
+ - 该项目仅提供需要与交流，使用本项目前请参阅[**MPL开源协议**](https://github.com/zhangshikj/Ore/blob/main/LICENSE)
 
