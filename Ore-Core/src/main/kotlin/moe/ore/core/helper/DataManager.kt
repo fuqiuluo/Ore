@@ -149,7 +149,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         // %4;7t>;28<fc.5*6
         var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
 
-        var tgtgKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
+        var tgtgtKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
         // expamel 1, 0, 0, 127 是倒过来的哦！
         var clientIp = byteArrayOf(0, 0, 0, 0)

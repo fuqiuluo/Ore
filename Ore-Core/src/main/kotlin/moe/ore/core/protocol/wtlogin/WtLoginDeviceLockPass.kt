@@ -27,9 +27,10 @@ import moe.ore.helper.writeBytes
 import moe.ore.helper.writeShort
 
 /**
+ * device lock pass
  * 设备所已验证 使用设备锁登录
  */
-class WtLoginV2(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
+class WtLoginDeviceLockPass(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             // t402 // 403 可能不存在
@@ -47,7 +48,7 @@ class WtLoginV2(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
                 return@let size
             })
             writeBytes(tlv.t8())
-            writeBytes(tlv.t104(manager.wLoginSigInfo.t104!!))
+            writeBytes(tlv.t104(manager.wLoginSigInfo.t104))
             writeBytes(tlv.t116())
             writeBytes(tlv.t401())
             userStSig.t402?.let { writeBytes(tlv.t402(it)) }

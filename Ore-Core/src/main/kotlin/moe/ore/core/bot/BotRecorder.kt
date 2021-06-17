@@ -25,6 +25,9 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class BotRecorder {
+    @JvmField
+    var rollBackTime = 0
+
     private val seqFactory = AtomicInteger(Random().nextInt(100000))
 
     @Synchronized

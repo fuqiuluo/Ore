@@ -52,7 +52,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     private fun invoke() {
         // println(Thread.currentThread().name)
         // 禁止使用nio线程进行堵塞等包操作
-        handle(sender = WtLoginV1(uin).sendTo(client))
+        handle(sender = WtLoginPassword(uin).sendTo(client))
     }
 
     private fun handle(sender: PacketSender) {
@@ -76,7 +76,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     private inline fun onRollBack(tlvMap: Map<Int, ByteArray>) {
         tlvMap[0x161]?.let { it ->
             val tlv = it.toByteReadPacket().withUse { parseTlv(this) }
-            println("onRollBack tlv: " + tlv.keys.map { "0x" + it.toHexString() })
+            /**
             tlv[0x173]?.let {
                 it.reader {
                     val type = readByte()
@@ -96,9 +96,11 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                     TODO("服务器 ipv6: host=$host, port=$port, type=$type")
                     // SEE oicq_request.java at method analysisT173
                 }
-            }
+            } **/
             tlv[0x172]?.let {
-                println("0x172 call rollbackSig")
+                manager.recorder.rollBackTime++
+                userStInfo.rollbackSig = it
+                // println("0x172 call rollbackSig")
                 client.connect()
             }
         }
@@ -106,7 +108,6 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     }
 
     private inline fun onSuccess(tlvMap: Map<Int, ByteArray>) {
-
 
     }
 
@@ -121,7 +122,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         tlvMap[0x403]?.let {
             userStInfo.t403 = it
         }
-        handle(sender = WtLoginV2(uin).sendTo(client))
+        handle(sender = WtLoginDeviceLockPass(uin).sendTo(client))
     }
 
     /**
