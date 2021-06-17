@@ -39,6 +39,11 @@ class WtLoginSigInfo {
     var t402 : ByteArray? = null
     var t403 : ByteArray? = null
 
+    var t174: ByteArray? = null
+
+    // from t172
+    var rollbackSig : ByteArray? = null
+
     /**
      * 没有名字 QQ逆向里面它叫做G from 8.7.5
      */

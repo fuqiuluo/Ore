@@ -21,26 +21,16 @@
 
 package moe.ore.core
 
-import kotlinx.io.core.readBytes
 import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.OreListener
-import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
-import moe.ore.core.net.packet.SingleHandler
 import moe.ore.core.protocol.wtlogin.LoginHelper
-import moe.ore.core.protocol.wtlogin.WtLogin
-import moe.ore.core.protocol.wtlogin.WtLoginV1
-import moe.ore.helper.hex2ByteArray
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
-import moe.ore.helper.toByteReadPacket
-import moe.ore.helper.toHexString
-import okhttp3.internal.wait
-import java.util.*
 
 class OreBot(val uin: Long) : Ore() {
     /**

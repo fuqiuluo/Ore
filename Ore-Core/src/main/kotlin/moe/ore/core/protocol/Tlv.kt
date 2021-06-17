@@ -33,7 +33,8 @@ import kotlin.experimental.or
 
 class Tlv(val uin: Long) {
     private val dataManager = DataManager.manager(uin)
-    private var deviceInfo = dataManager.deviceInfo
+    private val deviceInfo = dataManager.deviceInfo
+    private val recorder = dataManager.recorder
 
     /**
      * 协议信息
@@ -71,7 +72,7 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.subAppId)
         writeInt(0)
         writeLongToBuf32(uin)
-        writeInt(0)
+        writeInt(recorder.rollBackTime)
         // 默认开始是0，回滚（rollback）一次就+1
     }
 
@@ -86,8 +87,8 @@ class Tlv(val uin: Long) {
         // mainSigMap
     }
 
-    fun t104(dt104: ByteArray) = buildTlv(0x104) {
-        writeBytes(dt104)
+    fun t104(dt104: ByteArray?) = buildTlv(0x104) {
+        writeBytes(dt104 ?: byteArrayOf())
     }
 
     fun t106() = buildTlv(0x106) {
@@ -103,7 +104,7 @@ class Tlv(val uin: Long) {
             writeFully(deviceInfo.clientIp)
             writeByte(1.toByte())
             writeBytes(dataManager.botAccount.bytesMd5Password)
-            writeBytes(deviceInfo.tgtgKey)
+            writeBytes(deviceInfo.tgtgtKey)
             writeInt(0)
             writeBoolean(protocolInfo.isGuidAvailable)
             writeBytes(deviceInfo.guid)
@@ -174,7 +175,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t144() = buildTlv(0x144) {
-        writeTeaEncrypt(deviceInfo.tgtgKey) {
+        writeTeaEncrypt(deviceInfo.tgtgtKey) {
             writeShort(5)
             writeBytes(t109())
             writeBytes(t52d())
@@ -220,8 +221,12 @@ class Tlv(val uin: Long) {
         writeString(deviceInfo.model)
     }
 
-    fun t174(dt174: ByteArray) = buildTlv(0x174) {
-        writeBytes(dt174)
+    fun t172() = buildTlv(0x172) {
+        writeBytes(dataManager.wLoginSigInfo.rollbackSig!!)
+    }
+
+    fun t174(dt174: ByteArray?) = buildTlv(0x174) {
+        writeBytes(dt174 ?: byteArrayOf())
     }
 
     fun t177() = buildTlv(0x177) {
@@ -231,6 +236,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t17a() = buildTlv(0x17a) {
+        // 这个9 是smsAppid
         writeInt(9)
     }
 
