@@ -42,6 +42,7 @@ abstract class WtLogin(
 ) {
     val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
+    val userStSig = manager.wLoginSigInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 
     abstract fun build(seq: Int): ByteArray

@@ -23,6 +23,7 @@ package moe.ore.core.protocol.wtlogin
 
 import kotlinx.io.core.*
 import moe.ore.api.LoginResult
+import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
@@ -30,6 +31,7 @@ import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.helper.*
+import moe.ore.helper.thread.ThreadManager
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 
@@ -41,6 +43,7 @@ import okhttp3.internal.toHexString
  */
 internal class LoginHelper(private val uin: Long, private val client: BotClient, private val listener: OreListener?) : Thread() {
 
+    private val threadManager = ThreadManager.getInstance(uin)
     private val manager = DataManager.manager(uin)
     private val userStInfo = manager.wLoginSigInfo
     private val device = manager.deviceInfo
@@ -61,32 +64,39 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             callback(LoginResult.ServerTimeout)
         } else {
             from.body.readLoginPacket { result, tlvMap ->
+                tlvMap[0x104]?.let {
+                    userStInfo.t104 = it
+                }
+
+                val t402 = tlvMap[0x402]?.also {
+                    userStInfo.G = device.guid + userStInfo.dpwd + it
+                    // 字节组拼接
+                }
+
                 println("result: $result tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
                 when (result) {
                     0 -> onSuccess(tlvMap)
                     1 -> onPasswordWrong()
-                    2 -> onCaptcha(tlvMap)
-                    180 -> onRollBack(tlvMap)
-                    204 -> onDevicePass(tlvMap)
+                    2 -> onCaptcha(tlvMap[0x192]!!, tlvMap[0x546])
+                    180 -> onRollBack(tlvMap[0x161])
+                    204 -> onDevicePass(t402, tlvMap[0x403])
                     else -> error("unknown login result : $result")
                 }
             }
         }
     }
 
-    private inline fun onCaptcha(tlvMap: Map<Int, ByteArray>) {
-        val url = String(tlvMap[0x192]!!)
-        val ticket = listener?.onCaptcha(url)
-        if(ticket == null) {
-            callback(LoginResult.SliderVerifyFail)
-        } else {
-
-
-        }
+    private inline fun onCaptcha(t192 : ByteArray, t546 : ByteArray?) {
+        val url = String(t192)
+        listener?.onCaptcha(object : CaptchaChannel(url) {
+            override fun submitTicket(ticket: String) {
+                handle(WtLoginTicket(ticket, t546, uin).sendTo(client))
+            }
+        })
     }
 
-    private inline fun onRollBack(tlvMap: Map<Int, ByteArray>) {
-        tlvMap[0x161]?.let { it ->
+    private inline fun onRollBack(t161 : ByteArray?) {
+        t161?.let { it ->
             val tlv = it.toByteReadPacket().withUse { parseTlv(this) }
             tlv[0x173]?.let {
                 println("T173 : " + it.toHexString())
@@ -126,18 +136,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
     }
 
-    private inline fun onDevicePass(tlvMap: Map<Int, ByteArray>) {
-        tlvMap[0x104]?.let {
-            userStInfo.t104 = it
-        }
-        tlvMap[0x402]?.let {
-            userStInfo.G = device.guid + userStInfo.dpwd + it
-            // 字节组拼接
-        }
-        tlvMap[0x403]?.let {
-            userStInfo.t403 = it
-        }
-        handle(sender = WtLoginDeviceLockPass(uin).sendTo(client))
+    private inline fun onDevicePass(t402 : ByteArray?, t403 : ByteArray?) {
+        handle(sender = WtLoginDeviceLockPass(t402, t403, uin).sendTo(client))
     }
 
     /**
@@ -147,7 +147,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         callback(LoginResult.PasswordWrong)
     }
 
-    private fun callback(loginResult: LoginResult) = listener?.onLoginFinish(loginResult)
+    private fun callback(loginResult: LoginResult) = threadManager.addTask { listener?.onLoginFinish(loginResult) }
 
     companion object {
         @JvmStatic

@@ -36,8 +36,6 @@ class WtLoginSigInfo {
     lateinit var superKey: ByteArray
 
     var t104: ByteArray? = null
-    var t402 : ByteArray? = null
-    var t403 : ByteArray? = null
 
     var t174: ByteArray? = null
 

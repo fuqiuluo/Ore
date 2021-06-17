@@ -22,6 +22,8 @@
 package moe.ore.helper
 
 import java.io.Closeable
+import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -41,4 +43,14 @@ inline fun costTime(block : () -> Unit) : Long {
     val st = System.currentTimeMillis()
     block()
     return System.currentTimeMillis() - st
+}
+
+fun timeoutEvent(time : Long, block : TimerTask.() -> Unit) : Timer {
+    val timer = Timer()
+    timer.schedule(object : TimerTask() {
+        override fun run() {
+            this.block()
+        }
+    }, time)
+    return timer
 }
