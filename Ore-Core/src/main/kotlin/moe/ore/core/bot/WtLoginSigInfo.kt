@@ -34,10 +34,15 @@ class WtLoginSigInfo {
     lateinit var tgtKey: ByteArray
     lateinit var tgt: ByteArray
     lateinit var superKey: ByteArray
-    lateinit var t104: ByteArray
 
-    var sigInfo2 = ByteArray(0)
-    //todo sigInfo[2]
+    var t104: ByteArray? = null
+    var t402 : ByteArray? = null
+    var t403 : ByteArray? = null
+
+    /**
+     * 没有名字 QQ逆向里面它叫做G from 8.7.5
+     */
+    var G = byteArrayOf()
 
     var d2: ByteArray? = null
     lateinit var d2Key: ByteArray

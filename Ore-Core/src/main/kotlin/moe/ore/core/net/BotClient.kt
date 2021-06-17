@@ -98,6 +98,11 @@ class BotClient(val uin: Long) {
         connection.send(requestBody)
     }
 
+    fun connect(host : String, port : Int): BotClient {
+        connection.connect(host, port)
+        return this
+    }
+
     fun connect(): BotClient {
         connection.connect()
         return this

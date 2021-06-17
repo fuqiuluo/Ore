@@ -289,12 +289,13 @@ class Tlv(val uin: Long) {
         }
     }
 
-    fun t401(dt402: ByteArray) = buildTlv(0x401) {
-        val builder = BytePacketBuilder()
+    fun t401() = buildTlv(0x401) {
+        /**
         builder.writeBytes(deviceInfo.guid)
         builder.writeBytes(dataManager.wLoginSigInfo.dpwd)
         builder.writeBytes(dt402)
-        writeBytes(builder.md5())
+        **/
+        writeBytes(MD5.toMD5Byte(dataManager.wLoginSigInfo.G))
     }
 
     fun t402(dt402: ByteArray) = buildTlv(0x402) {

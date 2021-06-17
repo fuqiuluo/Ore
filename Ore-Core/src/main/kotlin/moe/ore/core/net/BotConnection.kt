@@ -49,7 +49,7 @@ import kotlin.random.Random
  * create 2021-05-30 13:18
  */
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
-    lateinit var channelFuture: ChannelFuture
+    var channelFuture: ChannelFuture? = null
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup(DebugUtil.getIoThreadPoolSize())
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
@@ -65,13 +65,18 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     @Synchronized
     @Throws(InterruptedException::class)
-    fun connect() {
-        val server = oicqServer[Random.nextInt(oicqServer.size)]
-        println("TencentServer: $server")
-        channelFuture = init(Bootstrap()).connect(server.first, server.second)
+    fun connect(host : String, port : Int) {
+        if(channelFuture != null) {
+            // 断开原先的连接 重新建立连接
+            val channel = channelFuture!!.channel()
+            if(channel.isActive) {
+                channel.close()
+            }
+        }
+        channelFuture = init(Bootstrap()).connect(host, port)
         scheduler.execute {
             try {
-                channelFuture
+                channelFuture!!
                     .addListener(usefulListener)
                     .sync()
             } catch (e: InterruptedException) {
@@ -83,9 +88,17 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         }
     }
 
+    @Synchronized
+    @Throws(InterruptedException::class)
+    fun connect() {
+        val server = oicqServer[Random.nextInt(oicqServer.size)]
+        // println("TencentServer: $server")
+        this.connect(server.first, server.second)
+    }
+
     fun send(bytes: ByteArray) {
         // println("Send: " + bytes.toHexString())
-        channelFuture.channel().writeAndFlush(
+        channelFuture!!.channel().writeAndFlush(
             Unpooled.copiedBuffer(bytes)
         )
     }

@@ -52,8 +52,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     private fun invoke() {
         // println(Thread.currentThread().name)
         // 禁止使用nio线程进行堵塞等包操作
-        val sender = WtLoginV1(uin).sendTo(client)
-        handle(sender = sender)
+        handle(sender = WtLoginV1(uin).sendTo(client))
     }
 
     private fun handle(sender: PacketSender) {
@@ -63,18 +62,44 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         } else {
             from.body.readLoginPacket { result, tlvMap ->
                 when (result) {
-
+                    0 -> onSuccess(tlvMap)
                     1 -> onPasswordWrong()
+                    180 -> onRollBack()
+                    204 -> onDevicePass(tlvMap)
                     else -> error("unknown login result : $result")
                 }
             }
         }
     }
 
+    private inline fun onRollBack() {
+
+
+    }
+
+    private inline fun onSuccess(tlvMap: Map<Int, ByteArray>) {
+
+
+    }
+
+    private inline fun onDevicePass(tlvMap: Map<Int, ByteArray>) {
+        tlvMap[0x104]?.let {
+            userStInfo.t104 = it
+        }
+        tlvMap[0x402]?.let {
+            userStInfo.G = device.guid + userStInfo.dpwd + it
+            // 字节组拼接
+        }
+        tlvMap[0x403]?.let {
+            userStInfo.t403 = it
+        }
+        handle(sender = WtLoginV2(uin).sendTo(client))
+    }
+
     /**
      * 密码错误
      */
-    private fun onPasswordWrong() {
+    private inline fun onPasswordWrong() {
         callback(LoginResult.PasswordWrong)
     }
 

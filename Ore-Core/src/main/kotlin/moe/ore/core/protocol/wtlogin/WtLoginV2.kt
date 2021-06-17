@@ -24,17 +24,35 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
-import moe.ore.helper.writeHex
+import moe.ore.helper.writeShort
 
-class WtLoginV2(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
+/**
+ * 设备所已验证 使用设备锁登录
+ */
+class WtLoginV2(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
-            writeShort(20) // subCommand
-            writeShort(4) // count of TLVs, probably ignored by server?
+            // t402 // 403 可能不存在
+            val userStSig = manager.wLoginSigInfo
+
+            writeShort(20)
+            writeShort(4 + let {
+                var size = 0
+                if (userStSig.t402 != null) {
+                    size++
+                }
+                if (userStSig.t403 != null) {
+                    size++
+                }
+                return@let size
+            })
             writeBytes(tlv.t8())
-            writeBytes(tlv.t104(manager.wLoginSigInfo.t104))
+            writeBytes(tlv.t104(manager.wLoginSigInfo.t104!!))
             writeBytes(tlv.t116())
-            writeBytes(tlv.t401(manager.wLoginSigInfo.sigInfo2))
+            writeBytes(tlv.t401())
+            userStSig.t402?.let { writeBytes(tlv.t402(it)) }
+            userStSig.t403?.let { writeBytes(tlv.t403(it)) }
+
         }.toByteArray()
     }
 }
