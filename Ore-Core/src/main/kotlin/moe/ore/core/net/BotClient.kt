@@ -21,7 +21,7 @@
 
 package moe.ore.core.net
 
-import moe.ore.core.helper.readPacket
+import moe.ore.core.helper.readMsfSsoPacket
 import moe.ore.core.net.decoder.PacketResponse
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
@@ -57,10 +57,10 @@ class BotClient(val uin: Long) {
         }
 
         override fun onMassage(msg: PacketResponse) {
-            msg.body.readPacket(uin) { uinStr, from ->
+            msg.body.readMsfSsoPacket(uin) { uinStr, from ->
                 check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
                 val hash = from.hashCode()
-                // println(from)
+                // println("A = $from")
                 if (commonHandler.containsKey(hash)) {
                     commonHandler[hash]!!.let {
                         if (it.check(from)) {
@@ -94,7 +94,13 @@ class BotClient(val uin: Long) {
     }
 
     fun send(requestBody: ByteArray) {
+        // println("发送包")
         connection.send(requestBody)
+    }
+
+    fun connect(host : String, port : Int): BotClient {
+        connection.connect(host, port)
+        return this
     }
 
     fun connect(): BotClient {

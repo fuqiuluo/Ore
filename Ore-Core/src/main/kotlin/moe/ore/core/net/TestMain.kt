@@ -27,8 +27,9 @@ object TestMain {
     @Throws(InterruptedException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-
-
+        val byteArrayOf = byteArrayOf(1, 2, 3)
+        byteArrayOf[0]=-1
+        println(( byteArrayOf+ byteArrayOf(5, 6, 7)).toUByteArray())
     }
 
 }

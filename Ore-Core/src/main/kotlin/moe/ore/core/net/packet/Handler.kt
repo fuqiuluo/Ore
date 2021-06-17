@@ -27,11 +27,12 @@ import java.util.concurrent.ArrayBlockingQueue
 
 abstract class LongHandler(commandName: String) : Handler(0, commandName)
 
-class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
+open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
     /**
      * 堵塞器
      */
     private val queue = ArrayBlockingQueue<Boolean>(1)
+    private var isSuccess = false
     private var isOver = false
     var fromService: FromService? = null
 
@@ -42,6 +43,11 @@ class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
      * @return Boolean
      */
     fun wait(timeout: Long = 20 * 1000): Boolean {
+        if(isOver || queue.size >= 1) {
+            println("直接结束")
+            // 已经结束了，没必要再继续同步接包
+            return isSuccess
+        }
         Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
@@ -50,7 +56,7 @@ class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
                 }
             }, timeout)
         }
-        val ret = queue.take()
+        val ret = queue.take().also { this.isSuccess = it }
         this.isOver = true
         return ret
     }

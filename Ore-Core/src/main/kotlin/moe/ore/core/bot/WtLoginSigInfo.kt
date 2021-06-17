@@ -21,13 +21,36 @@
 
 package moe.ore.core.bot
 
+import moe.ore.core.helper.toByteArray
+import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.util.*
 import kotlin.math.abs
 
 class WtLoginSigInfo {
+    lateinit var wtSessionTicketKey: ByteArray
+
+    lateinit var wtSessionTicket: ByteArray
+    lateinit var tgtKey: ByteArray
+    lateinit var tgt: ByteArray
+    lateinit var superKey: ByteArray
+
+    var t104: ByteArray? = null
+    var t402 : ByteArray? = null
+    var t403 : ByteArray? = null
+
+    var t174: ByteArray? = null
+
+    // from t172
+    var rollbackSig : ByteArray? = null
+
+    /**
+     * 没有名字 QQ逆向里面它叫做G from 8.7.5
+     */
+    var G = byteArrayOf()
+
     var d2: ByteArray? = null
-    var d2Key: ByteArray? = null
+    lateinit var d2Key: ByteArray
 
     // form T403
     var randSeed: ByteArray? = null
@@ -47,10 +70,10 @@ class WtLoginSigInfo {
     }.toByteArray()
 
     // from t16a
-    var noPicSig: ByteArray? = null
+    lateinit var noPicSig: ByteArray
 
     // 用t106和t10c计算得到
-    var enA1: ByteArray? = null
+    lateinit var enA1: ByteArray
 
 
 }

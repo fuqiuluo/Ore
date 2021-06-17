@@ -19,28 +19,17 @@
  *
  */
 
-package moe.ore.core.bot
+package moe.ore.helper
 
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 
-class BotRecorder {
-    @JvmField
-    var rollBackTime = 0
+/**
+ * 比你妈BytePacket在读取方面好用多了
+ */
 
-    private val seqFactory = AtomicInteger(Random().nextInt(100000))
+fun ByteArray.toByteBuf(): ByteBuf = Unpooled.copiedBuffer(this)
 
-    @Synchronized
-    fun nextSeq(): Int {
-        var incrementAndGet: Int
-        synchronized(this) {
-            incrementAndGet = seqFactory.incrementAndGet()
-            if (incrementAndGet > 1000000) {
-                seqFactory.set(Random().nextInt(100000) + 60000)
-            }
-        }
-        return incrementAndGet
-    }
+fun ByteBuf.readString(length : Int) = String(readBytes(length).array())
 
-
-}
+fun ByteBuf.readRestBytes(): ByteBuf = this.readBytes(this.readableBytes())

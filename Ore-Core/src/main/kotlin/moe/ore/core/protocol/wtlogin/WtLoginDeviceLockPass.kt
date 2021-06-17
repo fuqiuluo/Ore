@@ -19,28 +19,41 @@
  *
  */
 
-package moe.ore.core.bot
+package moe.ore.core.protocol.wtlogin
 
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+import moe.ore.helper.createBuilder
+import moe.ore.helper.toByteArray
+import moe.ore.helper.writeBytes
+import moe.ore.helper.writeShort
 
-class BotRecorder {
-    @JvmField
-    var rollBackTime = 0
+/**
+ * device lock pass
+ * 设备所已验证 使用设备锁登录
+ */
+class WtLoginDeviceLockPass(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
+    override fun build(seq: Int): ByteArray {
+        return createBuilder().apply {
+            // t402 // 403 可能不存在
+            val userStSig = manager.wLoginSigInfo
 
-    private val seqFactory = AtomicInteger(Random().nextInt(100000))
+            writeShort(20)
+            writeShort(4 + let {
+                var size = 0
+                if (userStSig.t402 != null) {
+                    size++
+                }
+                if (userStSig.t403 != null) {
+                    size++
+                }
+                return@let size
+            })
+            writeBytes(tlv.t8())
+            writeBytes(tlv.t104(manager.wLoginSigInfo.t104))
+            writeBytes(tlv.t116())
+            writeBytes(tlv.t401())
+            userStSig.t402?.let { writeBytes(tlv.t402(it)) }
+            userStSig.t403?.let { writeBytes(tlv.t403(it)) }
 
-    @Synchronized
-    fun nextSeq(): Int {
-        var incrementAndGet: Int
-        synchronized(this) {
-            incrementAndGet = seqFactory.incrementAndGet()
-            if (incrementAndGet > 1000000) {
-                seqFactory.set(Random().nextInt(100000) + 60000)
-            }
-        }
-        return incrementAndGet
+        }.toByteArray()
     }
-
-
 }

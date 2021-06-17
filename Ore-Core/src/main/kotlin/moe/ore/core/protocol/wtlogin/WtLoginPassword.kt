@@ -27,9 +27,10 @@ import moe.ore.helper.writeBytes
 import moe.ore.helper.writeHex
 
 /**
+ * password
  * GetStWithPassword
  */
-class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
+class WtLoginPassword(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
@@ -60,6 +61,7 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             // writeBytes(tlv.t400())
             // 无randSeed与noPicSig
             writeBytes(tlv.t188())
+
             writeBytes(tlv.t191())
             // t191 提交可以回退协议 使得可以在原本设备异常的环境下登录
             // t191 QQ8.7.5开始 t191不会再发送
@@ -72,6 +74,8 @@ class WtLoginV1(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             writeBytes(tlv.t525())
             writeBytes(tlv.t544())
             writeBytes(tlv.t545())
+
+
         }.toByteArray()
     }
 }

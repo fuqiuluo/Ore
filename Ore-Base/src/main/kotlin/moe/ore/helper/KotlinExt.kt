@@ -21,11 +21,24 @@
 
 package moe.ore.helper
 
+import java.io.Closeable
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
     throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
 
-fun printlnArgs(vararg any: Any?) {
-    println()
+@OptIn(ExperimentalContracts::class)
+inline fun <C : Closeable, R> C.withUse(block: C.() -> R): R {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return use(block)
+}
 
-    any.forEach { println(it) }
+inline fun costTime(block : () -> Unit) : Long {
+    val st = System.currentTimeMillis()
+    block()
+    return System.currentTimeMillis() - st
 }
