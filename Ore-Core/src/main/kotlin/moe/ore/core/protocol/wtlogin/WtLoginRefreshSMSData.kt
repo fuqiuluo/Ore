@@ -3,7 +3,6 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
-import moe.ore.helper.writeShort
 
 class WtLoginRefreshSMSData(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
     override fun build(seq: Int): ByteArray {

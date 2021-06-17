@@ -24,7 +24,6 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
-import moe.ore.helper.writeHex
 
 /**
  * password
