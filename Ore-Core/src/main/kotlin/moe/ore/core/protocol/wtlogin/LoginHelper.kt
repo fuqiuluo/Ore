@@ -47,6 +47,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     private val manager = DataManager.manager(uin)
     private val userStInfo = manager.wLoginSigInfo
     private val device = manager.deviceInfo
+    private val session = manager.session
 
     override fun run() {
         invoke()
@@ -64,12 +65,10 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             callback(LoginResult.ServerTimeout)
         } else {
             from.body.readLoginPacket { result, tlvMap ->
-                tlvMap[0x104]?.let {
-                    userStInfo.t104 = it
-                }
-
+                tlvMap[0x104]?.let { userStInfo.t104 = it }
+                tlvMap[0x403]?.let { session.randSeed = it }
                 val t402 = tlvMap[0x402]?.also {
-                    userStInfo.G = device.guid + userStInfo.dpwd + it
+                    userStInfo.G = device.guid + session.mpasswd + it
                     // 字节组拼接
                 }
 
@@ -122,8 +121,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                 }
             } **/
             tlv[0x172]?.let {
-                manager.recorder.rollBackTime++
-                userStInfo.rollbackSig = it
+                session.rollBackCount++
+                session.rollbackSig = it
                 // println("0x172 call rollbackSig")
                 client.connect()
             }

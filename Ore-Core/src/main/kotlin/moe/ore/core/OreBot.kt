@@ -98,9 +98,9 @@ fun main() {
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {
 
-
-
-            captchaChan.submitTicket("ticket")
+            println(captchaChan.url)
+            val ticket = Scanner(System.`in`).nextLine()
+            captchaChan.submitTicket(ticket)
 
 
         }

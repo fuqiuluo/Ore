@@ -39,8 +39,8 @@ class WtLoginSigInfo {
 
     var t174: ByteArray? = null
 
-    // from t172
-    var rollbackSig : ByteArray? = null
+//    // from t172
+//    var rollbackSig : ByteArray? = null
 
     /**
      * 没有名字 QQ逆向里面它叫做G from 8.7.5
@@ -50,22 +50,8 @@ class WtLoginSigInfo {
     var d2: ByteArray? = null
     lateinit var d2Key: ByteArray
 
-    // form T403
-    var randSeed: ByteArray? = null
-
-    /**
-     * 每次初始化都随机
-     */
-    val dpwd: ByteArray = try {
-        val str = StringBuilder()
-        for (b in SecureRandom.getSeed(16)) {
-            val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
-            str.append(abs.toChar())
-        }
-        str.toString()
-    } catch (unused: Throwable) {
-        "1234567890123456"
-    }.toByteArray()
+//    // form T403
+//    var randSeed: ByteArray? = null
 
     // from t16a
     lateinit var noPicSig: ByteArray

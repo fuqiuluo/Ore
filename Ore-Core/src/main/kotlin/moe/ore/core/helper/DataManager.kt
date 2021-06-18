@@ -24,7 +24,8 @@ package moe.ore.core.helper
 import kotlinx.serialization.Serializable
 import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
-import moe.ore.core.bot.BotRecorder
+//import moe.ore.core.bot.BotRecorder
+import moe.ore.core.bot.SsoSession
 import moe.ore.core.bot.WtLoginSigInfo
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil.checkAccount
@@ -56,7 +57,8 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
      */
     @JvmField
     @Transient
-    val recorder = BotRecorder()
+//    val recorder = BotRecorder()
+    val session = SsoSession()
 
     lateinit var botAccount: BotAccount
 

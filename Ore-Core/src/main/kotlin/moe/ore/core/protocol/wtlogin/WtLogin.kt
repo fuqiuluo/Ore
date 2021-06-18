@@ -48,7 +48,7 @@ abstract class WtLogin(
     abstract fun build(seq: Int): ByteArray
 
     fun sendTo(botClient: BotClient): PacketSender {
-        val seq = manager.recorder.nextSeq()
+        val seq = manager.session.nextPacketRequestId()
         val body = makeBody(seq)
         val to = ToService(seq, commandName, body)
         to.packetType = PacketType.LoginPacket

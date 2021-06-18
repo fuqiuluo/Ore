@@ -34,7 +34,8 @@ import kotlin.experimental.or
 class Tlv(val uin: Long) {
     private val dataManager = DataManager.manager(uin)
     private val deviceInfo = dataManager.deviceInfo
-    private val recorder = dataManager.recorder
+//    private val recorder = dataManager.recorder
+    private val session = dataManager.session
 
     /**
      * 协议信息
@@ -72,7 +73,7 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.subAppId)
         writeInt(0)
         writeLongToBuf32(uin)
-        writeInt(recorder.rollBackTime)
+        writeInt(session.rollBackCount)
         // 默认开始是0，回滚（rollback）一次就+1
     }
 
@@ -222,7 +223,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t172() = buildTlv(0x172) {
-        writeBytes(dataManager.wLoginSigInfo.rollbackSig!!)
+        writeBytes(session.rollbackSig!!)
     }
 
     fun t174(dt174: ByteArray?) = buildTlv(0x174) {
@@ -287,11 +288,11 @@ class Tlv(val uin: Long) {
             writeByte(1) // version
             writeLong(uin)
             writeFully(deviceInfo.guid)
-            writeFully(dataManager.wLoginSigInfo.dpwd)
+            writeFully(session.mpasswd)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
-            writeFully(dataManager.wLoginSigInfo.randSeed!!)
+            writeFully(session.randSeed)
         }
     }
 
@@ -300,7 +301,7 @@ class Tlv(val uin: Long) {
         builder.writeBytes(deviceInfo.guid)
         builder.writeBytes(dataManager.wLoginSigInfo.dpwd)
         builder.writeBytes(dt402)
-        **/
+         **/
         writeBytes(MD5.toMD5Byte(dataManager.wLoginSigInfo.G))
     }
 
@@ -313,21 +314,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t511() = buildTlv(0x511) {
-        val domains = arrayOf(
-            "office.qq.com",
-            "qun.qq.com",
-            "gamecenter.qq.com",
-            "docs.qq.com",
-            "mail.qq.com",
-            "ti.qq.com",
-            "vip.qq.com",
-            "tenpay.qq.com",
-            "qqqweb.qq.com",
-            "qzone.qq.com",
-            "mma.qq.com",
-            "game.qq.com",
-            "openmobile.qq.com",
-            "conect.qq.com"
+        val domains = arrayOf("office.qq.com", "qun.qq.com", "gamecenter.qq.com", "docs.qq.com", "mail.qq.com", "ti.qq.com", "vip.qq.com", "tenpay.qq.com", "qqqweb.qq.com", "qzone.qq.com", "mma.qq.com", "game.qq.com", "openmobile.qq.com", "conect.qq.com"
             // "y.qq.com",
             // "v.qq.com"
         )
@@ -379,21 +366,7 @@ class Tlv(val uin: Long) {
     }
 
     private fun t52d() = buildTlv(0x52d) {
-        writeBytes(
-            encodeProtobuf(
-                DeviceReport(
-                    bootloader = "unknown".toByteArray(),
-                    version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(),
-                    codename = "REL".toByteArray(),
-                    incremental = "20.8.13".toByteArray(),
-                    fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(),
-                    bootId = "".toByteArray(),
-                    androidId = deviceInfo.androidId.toByteArray(),
-                    baseband = "".toByteArray(),
-                    innerVer = "21.2.4".toByteArray()
-                )
-            )
-        )
+        writeBytes(encodeProtobuf(DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = deviceInfo.androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())))
     }
 
     fun t542() = buildTlv(0x542) {
@@ -407,6 +380,10 @@ class Tlv(val uin: Long) {
 
     fun t545() = buildTlv(0x545) {
         writeHex("613664343731333466346264656366613138653866303266313030303165353135333131")
+    }
+
+    fun t547(byteArray: ByteArray) = buildTlv(0x547) {
+        writeFully(byteArray)
     }
 
     fun t193(ticket: String) = buildTlv(0x193) {

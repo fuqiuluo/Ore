@@ -9,9 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
 class SsoSession {
-    //    var packetSessionId: ByteArray = 0x02B05B8B.toByteArray()
-//    var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
-    var randSeed: ByteArray = TODO("tlvMap[0x403]")
+
+    var rollBackCount = 0
+
+    // from t172
+    var rollbackSig: ByteArray? = null
+    lateinit var randSeed: ByteArray
     var randomKey = BytesUtil.randomKey(16)
 
     // expamel 1, 0, 0, 127 是倒过来的哦！
