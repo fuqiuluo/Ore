@@ -77,6 +77,9 @@ class Tlv(val uin: Long) {
         // 默认开始是0，回滚（rollback）一次就+1
     }
 
+    fun t10a() = buildTlv(0x10a) {
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt)
+    }
 
     fun t100() = buildTlv(0x100) {
         writeShort(protocolInfo.dbVersion)
@@ -123,8 +126,8 @@ class Tlv(val uin: Long) {
         writeByte(1.toByte())
     }
 
-    fun t108(ksid: ByteArray?) = buildTlv(0x108) {
-        writeBytes(ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
+    fun t108() = buildTlv(0x108) {
+        writeBytes(deviceInfo.ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
     }
 
     private fun t109() = buildTlv(0x109) {
@@ -173,6 +176,10 @@ class Tlv(val uin: Long) {
     fun t142() = buildTlv(0x142) {
         writeShort(0)
         writeStringWithShortLen(protocolInfo.packageName)
+    }
+
+    fun t143() = buildTlv(0x143) {
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.d2)
     }
 
     fun t144() = buildTlv(0x144) {
