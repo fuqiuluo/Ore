@@ -16,7 +16,7 @@ class WtLoginTicket(private val ticket : String, private val t546 : ByteArray?, 
             writeBytes(tlv.t104(userStSig.t104)) // 3
             writeBytes(tlv.t116()) // 4
             println(t546?.toHexString())
-            writeBytes(tlv.t547(ClientPow().javaGetPow(t546)))
+            writeBytes(tlv.t547(ClientPow().calc(t546)))
         }.toByteArray()
     }
 }

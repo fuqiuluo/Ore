@@ -1,7 +1,5 @@
 package moe.ore.core.client;
 
-import oicq.wlogin_sdk.tools.util;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -140,17 +138,14 @@ public class ClientPow {
             bInt = bInt.add(BigInteger.ONE);
             byte[] byteArray = bInt.toByteArray();
             if (byteArray.length > copy.length) {
-                util.LOGI("big number too large len:" + byteArray.length, "");
                 return -1;
             }
             System.arraycopy(byteArray, 0, copy, 0, byteArray.length);
         }
         if (value.algorithmType == 2) {
             sm3(copy);
-            util.LOGI("hash func not support sm3", "");
             return -1;
         }
-        util.LOGI("error hash func", "");
         return -1;
     }
 
