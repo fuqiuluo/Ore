@@ -23,6 +23,11 @@ package moe.ore.core.util
 
 object QQUtil {
     @JvmStatic
+    private val ConfigSvrKey = byteArrayOf(-16, 68, 31, 95, -12, 45, -91, -113, -36, -9, -108, -102, -70, 98, -44, 17)
+
+
+
+    @JvmStatic
     fun checkAccount(uin: Long): Long {
         check((uin >= 10000L) or (uin <= 4000000000L)) { "QQ号格式错误" }
         return uin

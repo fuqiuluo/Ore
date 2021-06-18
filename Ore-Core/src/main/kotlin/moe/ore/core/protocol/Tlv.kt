@@ -282,13 +282,13 @@ class Tlv(val uin: Long) {
     }
 
     // TODO: 2021/6/9 Emp用的
-    // sigInfo2 = (client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)).md5()
-    fun t400(sigInfo2: ByteArray) = buildTlv(0x400) {
-        writeTeaEncrypt(sigInfo2) {
+    // g = client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)
+    fun t400(pwd : ByteArray, g: ByteArray) = buildTlv(0x400) {
+        writeTeaEncrypt(MD5.toMD5Byte(g)) {
             writeByte(1) // version
             writeLong(uin)
             writeFully(deviceInfo.guid)
-            writeFully(session.mpasswd)
+            writeFully(pwd)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
@@ -314,9 +314,25 @@ class Tlv(val uin: Long) {
     }
 
     fun t511() = buildTlv(0x511) {
-        val domains = arrayOf("office.qq.com", "qun.qq.com", "gamecenter.qq.com", "docs.qq.com", "mail.qq.com", "ti.qq.com", "vip.qq.com", "tenpay.qq.com", "qqqweb.qq.com", "qzone.qq.com", "mma.qq.com", "game.qq.com", "openmobile.qq.com", "conect.qq.com"
-            // "y.qq.com",
-            // "v.qq.com"
+        val domains = arrayOf(
+            "office.qq.com",
+            "qun.qq.com",
+            "gamecenter.qq.com",
+            "docs.qq.com",
+            "mail.qq.com",
+            "ti.qq.com",
+            "vip.qq.com",
+            "tenpay.qq.com",
+            "qqqweb.qq.com",
+            "qzone.qq.com",
+            "mma.qq.com",
+            "game.qq.com",
+            "openmobile.qq.com",
+            "conect.qq.com",
+            "y.qq.com",
+            "v.qq.com",
+            "t.qq.com",
+            "om.qq.com"
         )
         writeShort(domains.size)
         for (domain in domains) {
@@ -356,7 +372,7 @@ class Tlv(val uin: Long) {
             writeByte(extraData.ip.size.toByte())
             writeFully(extraData.ip)
             writeInt(extraData.time)
-            writeInt(extraData.version)
+            writeInt(extraData.appId)
         }
     }
 

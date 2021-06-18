@@ -28,6 +28,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+@Throws(RuntimeException::class)
 inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
     throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
 

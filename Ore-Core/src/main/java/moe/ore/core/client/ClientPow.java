@@ -149,9 +149,6 @@ public class ClientPow {
         return -1;
     }
 
-    /**
-     * SM3加密算法 [正在开发]
-     */
     private byte[] sm3(byte[] bArr) {
         return new byte[0];
     }

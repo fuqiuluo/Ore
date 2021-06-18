@@ -57,7 +57,6 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
      */
     @JvmField
     @Transient
-//    val recorder = BotRecorder()
     val session = SsoSession()
 
     lateinit var botAccount: BotAccount
@@ -146,7 +145,6 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
         var apnName = "中国移动"
         var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
-        var randKey: ByteArray = BytesUtil.randomKey(16)
 
         // %4;7t>;28<fc.5*6
         var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)

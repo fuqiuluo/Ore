@@ -21,52 +21,106 @@
 
 package moe.ore.core.bot
 
-import moe.ore.core.helper.toByteArray
-import java.nio.ByteBuffer
-import java.security.SecureRandom
-import java.util.*
-import kotlin.math.abs
-
+import kotlinx.serialization.Serializable
 class WtLoginSigInfo {
-    lateinit var wtSessionTicketKey: ByteArray
+    lateinit var tgtKey: BytesTicket
+    // A2
+    lateinit var tgt: BytesTicket
 
-    lateinit var wtSessionTicket: ByteArray
-    lateinit var tgtKey: ByteArray
-    lateinit var tgt: ByteArray
-    lateinit var superKey: ByteArray
+    lateinit var sKey: StringTicket
 
     var t104: ByteArray? = null
 
     var t174: ByteArray? = null
-
-//    // from t172
-//    var rollbackSig : ByteArray? = null
 
     /**
      * 没有名字 QQ逆向里面它叫做G from 8.7.5
      */
     var G = byteArrayOf()
 
-    var d2: ByteArray? = null
-    lateinit var d2Key: ByteArray
+    lateinit var d2: BytesTicket
+    lateinit var d2Key: BytesTicket
 
-//    // form T403
-//    var randSeed: ByteArray? = null
+    val extraDataList = arrayListOf<LoginExtraData>()
 
     // from t16a
-    lateinit var noPicSig: ByteArray
+    lateinit var noPicSig: BytesTicket
 
-    // 用t106和t10c计算得到
-    lateinit var enA1: ByteArray
+    lateinit var superKey : BytesTicket
 
+    // 用t106和t10c计算得到 from QQ 8.6.0
+    lateinit var encryptA1: BytesTicket
 
+    lateinit var webSig : BytesTicket
+
+    lateinit var da2 : BytesTicket
+
+    lateinit var st : BytesTicket
+    lateinit var stKey : BytesTicket
+
+    lateinit var deviceToken : BytesTicket
+
+    lateinit var downloadStKey : BytesTicket
+    lateinit var downloadSt : BytesTicket
+
+    lateinit var wtSessionTicket : BytesTicket
+    lateinit var wtSessionTicketKey : BytesTicket
+
+    lateinit var t528 : ByteArray
 }
 
-/**
- * 有时间限制的TOKEN
- *
- * 所有的Key有1个月的保质期，但是随时间迁移key的权力会越来越小 ————> 需要刷新(emp)
- */
+open class BytesTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
+    fun ticket() = value
+}
+
+open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
+    fun ticket() = String(value)
+
+    override fun toString(): String {
+        return ticket()
+    }
+}
+
+open class Ticket(var value : ByteArray,
+                  var createTime : Long,
+                  /**
+                   * 过期时间可修改 from <h>T138</h>
+                   */
+                  var shelfLife : Long) {
+
+    fun isExpired() : Boolean {
+        return System.currentTimeMillis() > (createTime + shelfLife)
+    }
+}
+
+@Serializable
+data class LoginExtraData(
+    val uin : Long,
+    val ip : ByteArray,
+    val time : Int,
+    val appId : Int
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is LoginExtraData) return false
+
+        if (uin != other.uin) return false
+        if (!ip.contentEquals(other.ip)) return false
+        if (time != other.time) return false
+        if (appId != other.appId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = uin.hashCode()
+        result = 31 * result + ip.contentHashCode()
+        result = 31 * result + time
+        result = 31 * result + appId
+        return result
+    }
+}
+
 //
 //package moe.ore.core.bot
 //
@@ -93,20 +147,6 @@ class WtLoginSigInfo {
 //
 //    // form T403
 ////    var randSeed: ByteArray? = null
-//
-//    /**
-//     * 每次初始化都随机
-//     */
-//    val dpwd: ByteArray = try {
-//        val str = StringBuilder()
-//        for (b in SecureRandom.getSeed(16)) {
-//            val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
-//            str.append(abs.toChar())
-//        }
-//        str.toString()
-//    } catch (unused: Throwable) {
-//        "1234567890123456"
-//    }.toByteArray()
 //
 //    // from t16a
 ////    lateinit var noPicSig: ByteArray
@@ -219,23 +259,4 @@ class WtLoginSigInfo {
 //
 //    //    @Transient
 ////    var cacheUpdateStamp: Long = 0
-//}
-//
-///**
-// * 有时间限制的TOKEN
-// *
-// * 所有的Key有1个月的保质期，但是随时间迁移key的权力会越来越小 ————> 需要刷新(emp)
-// */
-//class TokenWithTimeLimit {
-//
-//}
-//class LoginExtraData(
-//    val uin: Long,
-//    val ip: ByteArray,
-//    val time: Int,
-//    val version: Int
-//) {
-//    override fun toString(): String {
-//        return "LoginExtraData(uin=$uin, ip=${ip.contentToString()}, time=$time, version=$version)"
-//    }
 //}

@@ -42,6 +42,7 @@ abstract class WtLogin(
 ) {
     val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
+    val session = manager.session
     val userStSig = manager.wLoginSigInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 
@@ -80,7 +81,7 @@ abstract class WtLogin(
             writeByte(1)
             // 03 87 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
 
-            writeBytes(device.randKey)
+            writeBytes(session.randomKey)
             writeShort(0x131)
             writeShort(ECDH_VERSION.toShort())
             writeBytesWithShortLen(ECDH_PUBLIC_KEY)
