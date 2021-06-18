@@ -21,15 +21,16 @@
 
 package moe.ore.core.net
 
-import moe.ore.core.helper.DataManager
+import moe.ore.helper.hex2ByteArray
 
 object TestMain {
     @Throws(InterruptedException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val byteArrayOf = byteArrayOf(1, 2, 3)
-        byteArrayOf[0]=-1
-        println(( byteArrayOf+ byteArrayOf(5, 6, 7)).toUByteArray())
+        val t546 = "0102010200010000008074eaadc4365db11f6b510e66c936f2aefc7db054c6943535bc70fe15b7ad4f5c2db9a4630e11824e09eeb1e4b7ea993b05aff64ad57a1f9263838fe173c61064bdccad0c0dda679152180d87c86c52729d97af0725510582cd78c5e97a226e331e4b6a81c974c4235632051df17aa6a6d385f28efe0707b7f16a317e74bc4b1a00202ce752e5efc2c156bcd0a7dade94e629568cdcadb6ba4578de6d86d53b37e24a00ac0102010200010000008074eaadc4365db11f6b510e66c936f2aefc7db054c6943535bc70fe15b7ad4f5c2db9a4630e11824e09eeb1e4b7ea993b05aff64ad57a1f9263838fe173c61064bdccad0c0dda679152180d87c86c52729d97af0725510582cd78c5e97a226e331e4b6a81c974c4235632051df17aa6a6d385f28efe0707b7f16a317e74bc4b1a00202ce752e5efc2c156bcd0a7dade94e629568cdcadb6ba4578de6d86d53b37e24a".hex2ByteArray()
+
+
     }
 
 }
+

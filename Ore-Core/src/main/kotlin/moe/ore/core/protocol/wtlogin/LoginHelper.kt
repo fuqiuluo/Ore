@@ -86,6 +86,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     }
 
     private inline fun onCaptcha(t192 : ByteArray, t546 : ByteArray?) {
+        println(t546?.size)
         val url = String(t192)
         listener?.onCaptcha(object : CaptchaChannel(url) {
             override fun submitTicket(ticket: String) {

@@ -1,10 +1,10 @@
 package moe.ore.core.protocol.wtlogin
 
+import moe.ore.core.client.ClientPow
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.toHexString
 import moe.ore.helper.writeBytes
-import moe.ore.util.ClientPow
 
 class WtLoginTicket(private val ticket : String, private val t546 : ByteArray?, uin : Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
     override fun build(seq: Int): ByteArray {
@@ -16,7 +16,7 @@ class WtLoginTicket(private val ticket : String, private val t546 : ByteArray?, 
             writeBytes(tlv.t104(userStSig.t104)) // 3
             writeBytes(tlv.t116()) // 4
             println(t546?.toHexString())
-            writeBytes(tlv.t547(ClientPow().getPow(t546)))
+            writeBytes(tlv.t547(ClientPow().javaGetPow(t546)))
         }.toByteArray()
     }
 }
