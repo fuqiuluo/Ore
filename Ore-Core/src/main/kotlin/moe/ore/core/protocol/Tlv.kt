@@ -78,7 +78,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t10a() = buildTlv(0x10a) {
-        writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt)
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt.ticket())
     }
 
     fun t100() = buildTlv(0x100) {
@@ -179,7 +179,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t143() = buildTlv(0x143) {
-        writeBytesWithShortLen(dataManager.wLoginSigInfo.d2)
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.d2.ticket())
     }
 
     fun t144() = buildTlv(0x144) {
