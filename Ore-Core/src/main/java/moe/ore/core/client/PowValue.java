@@ -1,6 +1,7 @@
 package moe.ore.core.client;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class PowValue {
     public int version;
@@ -28,24 +29,26 @@ public class PowValue {
 
     public int init(byte[] tlv546) {
         int pos = 0;
-        this.version = tlv546[pos]; // 0
+        this.version = tlv546[pos]; // 0 [a]
         pos++;
-        this.checkType = tlv546[pos]; // 1
+        this.checkType = tlv546[pos]; // 1 [b]
         pos++;
-        this.algorithmType = tlv546[pos]; // 2
+        this.algorithmType = tlv546[pos]; // 2 [c]
         pos++;
-        this.hasHashResult = tlv546[pos]; // 3
+        this.hasHashResult = tlv546[pos]; // 3 [d]
         pos += 2;
         this.baseCount = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 4 , 5
+        // System.out.println("BaseCount : " + baseCount);
         this.filling = new int[2];
         for (int m = 0; m < 2; m++) {
             pos++;
-            this.filling[m] = tlv546[pos]; // 6, 7, 8
+            this.filling[m] = tlv546[pos]; // 6, 7
         }
+        // System.out.println("filling : " + Arrays.toString(filling));
 
         //========================================================================================
         pos += 2;
-        this.originSize = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 9, 10
+        this.originSize = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 8, 9
         if(this.originSize > 0) {
             this.origin = new byte[originSize];
             pos++;
@@ -53,10 +56,11 @@ public class PowValue {
                 this.origin[m] = tlv546[pos]; // start pos : 11
                 pos++;
             }
+            // System.out.println("original end pos : " + pos);
         }
         //========================================================================================
 
-        pos += 2;
+        pos++;
         this.cpSize = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 11, 12
         if(this.cpSize > 0) {
             this.cp = new byte[this.cpSize];
@@ -68,7 +72,7 @@ public class PowValue {
         }
         //========================================================================================
 
-        pos += 2;
+        pos++;
         this.sm3Size = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 13, 14
         if(this.sm3Size > 0) {
             this.sm = new byte[this.sm3Size];
@@ -81,7 +85,7 @@ public class PowValue {
         //========================================================================================
 
         if (this.hasHashResult == 1) {
-            pos += 2;
+            pos++;
             this.hashResultSize = buf16ToShort(tlv546[pos - 1], tlv546[pos]); // 15, 16
             if(this.hashResultSize > 0) {
                 this.hashResult = new byte[this.hashResultSize];
