@@ -26,7 +26,6 @@ import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.PacketType
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
-import moe.ore.util.BytesUtil
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
@@ -46,8 +45,10 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
         // println(remaining) 剩余字节数
         // println(size) 总字节数
 
+        println("type : %s, packet : %s".format(keyType, packetType))
+
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
-            1 -> manager.wLoginSigInfo.d2Key
+            1 -> manager.wLoginSigInfo.d2Key.ticket()
             2 -> DEFAULT_TEA_KEY
             else -> runtimeError("unknown key type : $keyType")
         }).reader {
@@ -72,7 +73,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
                 }.let {
                     // msfSSoSeq , commandName, uinStr, it (body)
                     val from = FromService(msfSSoSeq, commandName, body)
-                    from.sessionId = sessionId
+                    from.msgCookie = sessionId
                     block(uinStr, from)
                 }
             }
@@ -85,7 +86,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 /**
  * 构建第一层，最外面那层
  */
-internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: ByteArray): ByteArray {
+internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, seq: Int, body: ByteArray): ByteArray {
     return createBuilder().apply {
         writeBodyWithSize {
             writeInt(packetType.flag1)
@@ -94,7 +95,9 @@ internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, 
                 PacketType.LoginPacket -> {
                     writeInt(0 + 4)
                 }
-
+                PacketType.ExChangeEmp -> {
+                    writeInt(seq)
+                }
             }
             writeByte(0)
             uin.toString().let {
@@ -110,10 +113,12 @@ internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, p
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
     val protocolInfo = ProtocolInternal[manager.protocolType]
+    val session = manager.session
     val deviceInfo = manager.deviceInfo
-    when (packetType) {
-        PacketType.LoginPacket -> {
-            builder.writeBodyWithSize {
+
+    builder.writeBodyWithSize {
+        when (packetType) {
+            PacketType.LoginPacket -> {
                 writeInt(seq)
                 writeInt(protocolInfo.appId)
                 writeInt(protocolInfo.appId)
@@ -125,7 +130,7 @@ internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, p
                     writeInt(it.length + 4)
                     writeString(it)
                 }
-                BytesUtil.randomKey(4).let {
+                session.msgCookie.let {
                     writeInt(it.size + 4)
                     writeBytes(it)
                 }
@@ -144,10 +149,20 @@ internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, p
                 // 非常规组包，跳过部分异常
                 // writeInt(4)
             }
+            PacketType.ExChangeEmp -> {
+                commandName.let {
+                    writeInt(it.length + 4)
+                    writeString(it)
+                }
+                session.msgCookie.let {
+                    writeInt(it.size + 4)
+                    writeBytes(it)
+                }
+                writeInt(4)
+            }
         }
-
-
     }
+
     builder.writeInt(body.size + 4)
     builder.writeBytes(body)
     return builder.toByteArray()

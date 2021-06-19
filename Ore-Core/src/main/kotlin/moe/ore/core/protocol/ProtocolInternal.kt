@@ -48,8 +48,8 @@ class ProtocolInternal(
     @JvmField internal var protocolDetail: String,
     @JvmField internal var packageName: String,
     @JvmField internal var packageVersion: String,
-    @JvmField internal var tencentSdkMd5: ByteArray
-) {
+    @JvmField internal var tencentSdkMd5: ByteArray,
+    ) {
 
     // TODO: 2021/6/6  待优化 这里静态有问题
 

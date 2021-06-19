@@ -31,7 +31,7 @@ import moe.ore.helper.writeShort
  * 设备所已验证 使用设备锁登录
  */
 class WtLoginDeviceLockPass(val t402 : ByteArray?, val t403 : ByteArray?, uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
-    override fun build(seq: Int): ByteArray {
+    override fun buildTlvBody(seq: Int): ByteArray {
         return createBuilder().apply {
             // t402 // 403 可能不存在
             writeShort(20)
