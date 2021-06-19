@@ -33,7 +33,6 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ECDH_SHARE_KEY
-import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
 import moe.ore.helper.thread.ThreadManager
 import moe.ore.util.MD5
@@ -46,7 +45,7 @@ import okhttp3.internal.toHexString
  * @property listener OreListener?
  * @constructor
  */
-internal class LoginHelper(private val uin: Long, private val client: BotClient, private val listener: OreListener?) : Thread() {
+internal class WtLoginHelper(private val uin: Long, private val client: BotClient, private val listener: OreListener?) : Thread() {
 
     private val threadManager = ThreadManager.getInstance(uin)
     private val manager = DataManager.manager(uin)
@@ -64,12 +63,12 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         handle(sender = WtLoginPassword(uin).sendTo(client))
     }
 
-    private fun handle(sender: PacketSender) {
+    private fun handle(sender: PacketSender, key: ByteArray = ECDH_SHARE_KEY) {
         val from = sender sync 20 * 1000
         if (from == null) {
             callback(LoginResult.ServerTimeout)
         } else {
-            from.body.readLoginPacket { result, tlvMap ->
+            from.body.readLoginPacket(key) { result, tlvMap ->
                 tlvMap[0x104]?.let { userStInfo.t104 = it }
                 tlvMap[0x403]?.let { session.randSeed = it }
 
@@ -88,6 +87,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                     1 -> onPasswordWrong()
                     2 -> onCaptcha(tlvMap[0x192]!!, tlvMap[0x546])
                     6 -> callback(LoginResult.SliderVerifyFail)
+                    9 -> error("协议参数错误，请检查你的TLV是否正确")
                     180 -> onRollBack(tlvMap[0x161])
                     204 -> onDevicePass(t402, tlvMap[0x403])
                     else -> error("unknown login result : $result")
@@ -96,7 +96,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         }
     }
 
-    private inline fun onCaptcha(t192 : ByteArray, t546 : ByteArray?) {
+    private inline fun onCaptcha(t192: ByteArray, t546: ByteArray?) {
         val url = String(t192)
         listener?.onCaptcha(object : CaptchaChannel(url) {
             override fun submitTicket(ticket: String) {
@@ -105,7 +105,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
         })
     }
 
-    private inline fun onRollBack(t161 : ByteArray?) {
+    private inline fun onRollBack(t161: ByteArray?) {
         t161?.let { it ->
             val tlv = it.toByteReadPacket().withUse { decodeTlv(this) }
             tlv[0x173]?.let {
@@ -118,18 +118,18 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
             /**
             tlv[0x173]?.let {
-                it.reader {
-                    val type = readByte()
-                    val host = readString(readUShort().toInt())
-                    val port = readShort()
-                }
+            it.reader {
+            val type = readByte()
+            val host = readString(readUShort().toInt())
+            val port = readShort()
+            }
             }
             tlv[0x17f]?.let {
-                it.reader {
-                    val type = readByte()
-                    val host = readString(readUShort().toInt())
-                    val port = readShort()
-                }
+            it.reader {
+            val type = readByte()
+            val host = readString(readUShort().toInt())
+            val port = readShort()
+            }
             } **/
             tlv[0x172]?.let {
                 session.rollBackCount++
@@ -147,8 +147,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
             val now = System.currentTimeMillis()
             val shelfLife = 86400L // 默认保质期一天
-            val bsTicket : (ByteArray) -> BytesTicket = { BytesTicket(it, now, shelfLife) }
-            val strTicket : (String) -> StringTicket = { StringTicket(it.toByteArray(), now, shelfLife) }
+            val bsTicket: (ByteArray) -> BytesTicket = { BytesTicket(it, now, shelfLife) }
+            val strTicket: (String) -> StringTicket = { StringTicket(it.toByteArray(), now, shelfLife) }
 
             map[0x103]?.let { userStInfo.webSig = bsTicket(it) }
 
@@ -160,9 +160,11 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             }
 
             (map[0x106]!! to map[0x10c]!!).run {
+                // println("t106 size : %s".format(first.size))
+                // println("t10c size : %s".format(second.size))
                 userStInfo.encryptA1 = bsTicket(first)
                 // TODO 验证A1算法
-                //     userStInfo.encryptA1 = bsTicket(first + sec)
+                // userStInfo.encryptA1 = bsTicket(first + sec)
                 // 傻卵，不知道你去什么鸟屎开源协议项目看来的代码，
                 // 自己逆向QQ去看，a1就是这么算 天王老子来了也是这样
                 // QQ 8.6.0
@@ -239,6 +241,10 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             }
             */
 
+            map[0x108]?.let {
+                device.ksid = it
+            }
+
             map[0x528]?.let {
                 userStInfo.t528 = it
             }
@@ -254,7 +260,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             map[0x130]?.reader {
                 val version = readShort()
                 val time = readUInt().toLong()
-                val ipAddr = readUInt().toLong()
+                // val ipAddr = readUInt().toLong()
+                session.clientIp = readBytes(4)
             }
 
             map[0x133]?.let {
@@ -263,7 +270,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
             map[0x134]?.let {
                 userStInfo.wtSessionTicketKey = bsTicket(it)
-                println("ticketKey;" + DataManager.manager(uin).wLoginSigInfo.wtSessionTicketKey.ticket().toHexString())
+                // println("ticketKey;" + DataManager.manager(uin).wLoginSigInfo.wtSessionTicketKey.ticket().toHexString())
 
             }
 
@@ -287,7 +294,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                 repeat(count) {
                     val ver = readShort().toInt()
                     val time = readUInt().toInt() * 1000L
-                    when(ver) {
+                    when (ver) {
                         0x106 -> userStInfo.encryptA1.shelfLife = time // 3 days
                         0x10a -> {
                             userStInfo.tgt.shelfLife = time
@@ -324,13 +331,13 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
             println("t119 --> tlvMap: " + map.keys.map { "0x" + it.toHexString() })
 
-
+            // handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
 
             callback(LoginResult.Success)
         }
     }
 
-    private inline fun onDevicePass(t402 : ByteArray?, t403 : ByteArray?) {
+    private inline fun onDevicePass(t402: ByteArray?, t403: ByteArray?) {
         handle(sender = WtLoginDeviceLockPass(t402, t403, uin).sendTo(client))
     }
 
@@ -342,38 +349,34 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
     }
 
     private fun callback(loginResult: LoginResult) = threadManager.addTask { listener?.onLoginFinish(loginResult) }
+}
 
-    companion object {
-        @JvmStatic
-        private inline fun ByteArray.readLoginPacket(block: (Int, Map<Int, ByteArray>) -> Unit) {
-            val reader = this.toByteReadPacket()
-            reader.discardExact(1 + 2 + 2 + 2 + 2)
-            // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)
-            val uin = reader.readUInt().toLong()
-            // println(uin)
-            val manager = DataManager.manager(uin)
-            reader.discardExact(2)
-            // 00 00 (dis)
+private inline fun ByteArray.readLoginPacket(key : ByteArray, block: (Int, Map<Int, ByteArray>) -> Unit) {
+    val reader = this.toByteReadPacket()
+    reader.discardExact(1 + 2 + 2 + 2 + 2)
+    // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)
+    val uin = reader.readUInt().toLong()
+    // println(uin)
+    val manager = DataManager.manager(uin)
+    reader.discardExact(2)
+    // 00 00 (dis)
 //            val subCommand = reader.readShort().toInt() // subCommand discardExact 2
 //            println(subCommand)
-            val result = reader.readByte().toInt() and 0xff
-            // 235 协议版本过低
-            val teaKey = if (result == 180) manager.session.randomKey else ECDH_SHARE_KEY
-            val tlvBody = TeaUtil.decrypt(reader.readBytes(reader.remaining.toInt() - 1), teaKey).toByteReadPacket().also { it.discardExact(3) }
-            block.invoke(result, decodeTlv(tlvBody))
-        }
+    val result = reader.readByte().toInt() and 0xff
+    // 235 协议版本过低
+    val teaKey = if (result == 180) manager.session.randomKey else key
+    val tlvBody = TeaUtil.decrypt(reader.readBytes(reader.remaining.toInt() - 1), teaKey).toByteReadPacket().also { it.discardExact(3) }
+    block.invoke(result, decodeTlv(tlvBody))
+}
 
-        @JvmStatic
-        private fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
-            val size = bs.readUShort().toInt()
-            val map = hashMapOf<Int, ByteArray>()
-            repeat(size) {
-                val ver = bs.readUShort().toInt()
-                val tSize = bs.readUShort().toInt()
-                val content = bs.readBytes(tSize)
-                map[ver] = content
-            }
-            return map
-        }
+private fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
+    val size = bs.readUShort().toInt()
+    val map = hashMapOf<Int, ByteArray>()
+    repeat(size) {
+        val ver = bs.readUShort().toInt()
+        val tSize = bs.readUShort().toInt()
+        val content = bs.readBytes(tSize)
+        map[ver] = content
     }
+    return map
 }

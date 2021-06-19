@@ -45,7 +45,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
         // println(remaining) 剩余字节数
         // println(size) 总字节数
 
-        println("type : %s, packet : %s".format(keyType, packetType))
+        // println("type : %s, packet : %s".format(keyType, packetType))
 
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
             1 -> manager.wLoginSigInfo.d2Key.ticket()
@@ -98,6 +98,8 @@ internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, 
                 PacketType.ExChangeEmp -> {
                     writeInt(seq)
                 }
+
+
             }
             writeByte(0)
             uin.toString().let {

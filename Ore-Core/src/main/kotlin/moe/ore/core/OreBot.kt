@@ -29,8 +29,7 @@ import moe.ore.api.listener.OreListener
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
-import moe.ore.core.protocol.wtlogin.LoginHelper
-import moe.ore.core.protocol.wtlogin.WtLoginV5
+import moe.ore.core.protocol.wtlogin.WtLoginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
 import java.util.*
@@ -47,7 +46,7 @@ class OreBot(val uin: Long) : Ore() {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
-                        threadManager.addTask(LoginHelper(uin, this@apply, oreListener))
+                        threadManager.addTask(WtLoginHelper(uin, this@apply, oreListener))
                     }
                     OreStatus.Online -> {
                         // 重连

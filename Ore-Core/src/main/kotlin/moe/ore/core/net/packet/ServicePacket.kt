@@ -47,7 +47,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
     }
     val out = buildFirstLayer(uin, teaKey, packetType, seq, buildSecondLayer(uin, commandName, body, packetType, seq))
 
-    println(out.toHexString())
+    // println(out.toHexString())
 
     return PacketSender(client, out, commandName, seq)
 }

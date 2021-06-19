@@ -9,7 +9,7 @@ import moe.ore.helper.*
  *@author 飞翔的企鹅
  *create 2021-06-16 09:33
  */
-class WtLoginV5(uin: Long) : WtLogin(uin, EXCHANGE_EMP, 0x810, 0x45) {
+class WtLoginEmp(uin: Long) : WtLogin(uin, EXCHANGE_EMP, 0x810, 0x45) {
     init {
         packetType = PacketType.ExChangeEmp
     }
@@ -32,8 +32,10 @@ class WtLoginV5(uin: Long) : WtLogin(uin, EXCHANGE_EMP, 0x810, 0x45) {
         writeBytes(buildTlv(0x106) {
             writeBytes(userStSig.encryptA1.ticket())
         })
-        writeBytes(tlv.t116(IntArray(0)))
-        writeBytes(tlv.t100())
+        writeBytes(tlv.t116())
+        writeBytes(tlv.t100(
+            appId = 1
+        ))
         writeBytes(tlv.t107())
         writeBytes(tlv.t108())
         writeBytes(tlv.t144())
