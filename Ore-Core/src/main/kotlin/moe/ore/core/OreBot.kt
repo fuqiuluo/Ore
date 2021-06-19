@@ -29,9 +29,13 @@ import moe.ore.api.listener.OreListener
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
+import moe.ore.core.protocol.tars.statsvc.RegisterReq
 import moe.ore.core.protocol.wtlogin.WtLoginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.helper.toHexString
+import moe.ore.tars.UniPacket
+import moe.ore.util.TarsUtil
 import java.util.*
 
 class OreBot(val uin: Long) : Ore() {
@@ -109,6 +113,4 @@ fun main() {
 
     }
     ore.login()
-
-
 }

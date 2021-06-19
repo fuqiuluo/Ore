@@ -1,8 +1,4 @@
-package moe.ore.protocol.tars
-
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+package moe.ore.tars
 
 class RequestPacket : TarsStructBase() {
     companion object {

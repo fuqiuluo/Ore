@@ -333,6 +333,9 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
             // handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
 
+
+
+
             callback(LoginResult.Success)
         }
     }
@@ -379,4 +382,13 @@ private fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
         map[ver] = content
     }
     return map
+}
+
+private class SvcRegisterHelper {
+
+    fun register() {
+
+
+    }
+
 }

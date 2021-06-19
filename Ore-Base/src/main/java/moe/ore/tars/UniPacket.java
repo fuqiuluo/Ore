@@ -42,9 +42,8 @@
 
 package moe.ore.tars;
 
-import kotlinx.io.core.BytePacketBuilder;
-import moe.ore.helper.BytePacketExtKt;
-import moe.ore.protocol.tars.RequestPacket;
+import moe.ore.helper.KotlinExtKt;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -63,7 +62,19 @@ public class UniPacket {
     private HashMap<String, byte[]> _newData = new HashMap<>();
     private HashMap<String, HashMap<String, byte[]>> _data = new HashMap<>();
 
-    public <T> void put(String mapName, T t) {
+    public void put(@NotNull TarsStructBase base) {
+        servantName = base.servantName();
+        funcName = base.funcName();
+        String req = base.reqName();
+        if(servantName == null || "".equals(servantName) ||
+                funcName == null || "".equals(funcName) ||
+                req == null || "".equals(req) ) {
+            KotlinExtKt.runtimeError("servant or func or req name is null", null);
+        }
+        this.put(req, base);
+    }
+
+    public <T extends TarsStructBase> void put(String mapName, T t) {
         if (mapName == null) {
             throw new IllegalArgumentException("put key can not is null");
         } else if (t == null) {
@@ -129,18 +140,13 @@ public class UniPacket {
         this._package.setContext(new HashMap<>());
         this._package.setStatus(new HashMap<>());
         this._package.setBuffer(data);
-        byte[] out = _package.toByteArray();
-        BytePacketBuilder builder = BytePacketExtKt.createBuilder();
-        builder.writeInt(out.length + 4);
-        BytePacketExtKt.writeBytes(builder, out);
-        data = BytePacketExtKt.toByteArray(builder);
-        builder.close();
-        return data;
+        this._package.setRequestId(requestId);
+        return _package.toByteArray();
     }
 
     public static UniPacket decode(byte[] bytes) {
         UniPacket uniPacket = new UniPacket();
-        TarsInputStream input = new TarsInputStream(bytes, 4);
+        TarsInputStream input = new TarsInputStream(bytes, 0);
         uniPacket._package.readFrom(input);
         input = new TarsInputStream(uniPacket._package.buffer);
         uniPacket.version = uniPacket._package.getVersion();

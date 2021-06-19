@@ -1,4 +1,4 @@
-package moe.ore.protocol.tars.statsvc
+package moe.ore.core.protocol.tars.statsvc
 
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsStructBase
