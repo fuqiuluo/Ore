@@ -53,7 +53,7 @@ class HeartBeatListener(private val botConnection: BotConnection) : ChannelHandl
                 evt.state() == IdleState.WRITER_IDLE -> {
                     println("该发心跳包了")
                     //发送心跳包
-                    ctx.writeAndFlush(Unpooled.copiedBuffer(makeHeartBeatPacket(DataManager.manager(botConnection.uin).recorder.nextSeq())))
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(makeHeartBeatPacket(DataManager.manager(botConnection.uin).session.nextPacketRequestId())))
                 }
                 evt.state() == IdleState.ALL_IDLE -> {
                     System.err.println("ALL????")

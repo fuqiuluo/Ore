@@ -26,7 +26,6 @@ import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.PacketType
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
-import moe.ore.util.BytesUtil
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
@@ -47,7 +46,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
         // println(size) 总字节数
 
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
-            1 -> manager.wLoginSigInfo.d2Key
+            1 -> manager.wLoginSigInfo.d2Key.ticket()
             2 -> DEFAULT_TEA_KEY
             else -> runtimeError("unknown key type : $keyType")
         }).reader {
@@ -72,7 +71,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
                 }.let {
                     // msfSSoSeq , commandName, uinStr, it (body)
                     val from = FromService(msfSSoSeq, commandName, body)
-                    from.sessionId = sessionId
+                    from.msgCookie = sessionId
                     block(uinStr, from)
                 }
             }
@@ -110,6 +109,7 @@ internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, p
     val builder = createBuilder()
     val manager = DataManager.manager(uin)
     val protocolInfo = ProtocolInternal[manager.protocolType]
+    val session = manager.session
     val deviceInfo = manager.deviceInfo
     when (packetType) {
         PacketType.LoginPacket -> {
@@ -125,7 +125,7 @@ internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, p
                     writeInt(it.length + 4)
                     writeString(it)
                 }
-                BytesUtil.randomKey(4).let {
+                session.msgCookie.let {
                     writeInt(it.size + 4)
                     writeBytes(it)
                 }

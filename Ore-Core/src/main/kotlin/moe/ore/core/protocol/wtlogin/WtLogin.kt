@@ -42,12 +42,14 @@ abstract class WtLogin(
 ) {
     val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
+    val session = manager.session
+    val userStSig = manager.wLoginSigInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 
     abstract fun build(seq: Int): ByteArray
 
     fun sendTo(botClient: BotClient): PacketSender {
-        val seq = manager.recorder.nextSeq()
+        val seq = manager.session.nextPacketRequestId()
         val body = makeBody(seq)
         val to = ToService(seq, commandName, body)
         to.packetType = PacketType.LoginPacket
@@ -79,7 +81,7 @@ abstract class WtLogin(
             writeByte(1)
             // 03 87 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
 
-            writeBytes(device.randKey)
+            writeBytes(session.randomKey)
             writeShort(0x131)
             writeShort(ECDH_VERSION.toShort())
             writeBytesWithShortLen(ECDH_PUBLIC_KEY)

@@ -34,7 +34,8 @@ import kotlin.experimental.or
 class Tlv(val uin: Long) {
     private val dataManager = DataManager.manager(uin)
     private val deviceInfo = dataManager.deviceInfo
-    private val recorder = dataManager.recorder
+//    private val recorder = dataManager.recorder
+    private val session = dataManager.session
 
     /**
      * 协议信息
@@ -72,10 +73,13 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.subAppId)
         writeInt(0)
         writeLongToBuf32(uin)
-        writeInt(recorder.rollBackTime)
+        writeInt(session.rollBackCount)
         // 默认开始是0，回滚（rollback）一次就+1
     }
 
+    fun t10a() = buildTlv(0x10a) {
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt.ticket())
+    }
 
     fun t100() = buildTlv(0x100) {
         writeShort(protocolInfo.dbVersion)
@@ -122,8 +126,8 @@ class Tlv(val uin: Long) {
         writeByte(1.toByte())
     }
 
-    fun t108(ksid: ByteArray?) = buildTlv(0x108) {
-        writeBytes(ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
+    fun t108() = buildTlv(0x108) {
+        writeBytes(deviceInfo.ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
     }
 
     private fun t109() = buildTlv(0x109) {
@@ -174,6 +178,10 @@ class Tlv(val uin: Long) {
         writeStringWithShortLen(protocolInfo.packageName)
     }
 
+    fun t143() = buildTlv(0x143) {
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.d2.ticket())
+    }
+
     fun t144() = buildTlv(0x144) {
         writeTeaEncrypt(deviceInfo.tgtgtKey) {
             writeShort(5)
@@ -222,7 +230,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t172() = buildTlv(0x172) {
-        writeBytes(dataManager.wLoginSigInfo.rollbackSig!!)
+        writeBytes(session.rollbackSig!!)
     }
 
     fun t174(dt174: ByteArray?) = buildTlv(0x174) {
@@ -281,17 +289,17 @@ class Tlv(val uin: Long) {
     }
 
     // TODO: 2021/6/9 Emp用的
-    // sigInfo2 = (client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)).md5()
-    fun t400(sigInfo2: ByteArray) = buildTlv(0x400) {
-        writeTeaEncrypt(sigInfo2) {
+    // g = client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)
+    fun t400(pwd : ByteArray, g: ByteArray) = buildTlv(0x400) {
+        writeTeaEncrypt(MD5.toMD5Byte(g)) {
             writeByte(1) // version
             writeLong(uin)
             writeFully(deviceInfo.guid)
-            writeFully(dataManager.wLoginSigInfo.dpwd)
+            writeFully(pwd)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
-            writeFully(dataManager.wLoginSigInfo.randSeed!!)
+            writeFully(session.randSeed)
         }
     }
 
@@ -300,7 +308,7 @@ class Tlv(val uin: Long) {
         builder.writeBytes(deviceInfo.guid)
         builder.writeBytes(dataManager.wLoginSigInfo.dpwd)
         builder.writeBytes(dt402)
-        **/
+         **/
         writeBytes(MD5.toMD5Byte(dataManager.wLoginSigInfo.G))
     }
 
@@ -327,9 +335,11 @@ class Tlv(val uin: Long) {
             "mma.qq.com",
             "game.qq.com",
             "openmobile.qq.com",
-            "conect.qq.com"
-            // "y.qq.com",
-            // "v.qq.com"
+            "conect.qq.com",
+            "y.qq.com",
+            "v.qq.com",
+            "t.qq.com",
+            "om.qq.com"
         )
         writeShort(domains.size)
         for (domain in domains) {
@@ -369,7 +379,7 @@ class Tlv(val uin: Long) {
             writeByte(extraData.ip.size.toByte())
             writeFully(extraData.ip)
             writeInt(extraData.time)
-            writeInt(extraData.version)
+            writeInt(extraData.appId)
         }
     }
 
@@ -379,21 +389,7 @@ class Tlv(val uin: Long) {
     }
 
     private fun t52d() = buildTlv(0x52d) {
-        writeBytes(
-            encodeProtobuf(
-                DeviceReport(
-                    bootloader = "unknown".toByteArray(),
-                    version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(),
-                    codename = "REL".toByteArray(),
-                    incremental = "20.8.13".toByteArray(),
-                    fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(),
-                    bootId = "".toByteArray(),
-                    androidId = deviceInfo.androidId.toByteArray(),
-                    baseband = "".toByteArray(),
-                    innerVer = "21.2.4".toByteArray()
-                )
-            )
-        )
+        writeBytes(encodeProtobuf(DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = deviceInfo.androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())))
     }
 
     fun t542() = buildTlv(0x542) {
@@ -407,6 +403,10 @@ class Tlv(val uin: Long) {
 
     fun t545() = buildTlv(0x545) {
         writeHex("613664343731333466346264656366613138653866303266313030303165353135333131")
+    }
+
+    fun t547(byteArray: ByteArray) = buildTlv(0x547) {
+        writeFully(byteArray)
     }
 
     fun t193(ticket: String) = buildTlv(0x193) {

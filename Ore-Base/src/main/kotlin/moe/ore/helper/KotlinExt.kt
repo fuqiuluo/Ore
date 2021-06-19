@@ -22,10 +22,13 @@
 package moe.ore.helper
 
 import java.io.Closeable
+import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+@Throws(RuntimeException::class)
 inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
     throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
 
@@ -41,4 +44,14 @@ inline fun costTime(block : () -> Unit) : Long {
     val st = System.currentTimeMillis()
     block()
     return System.currentTimeMillis() - st
+}
+
+fun timeoutEvent(time : Long, block : TimerTask.() -> Unit) : Timer {
+    val timer = Timer()
+    timer.schedule(object : TimerTask() {
+        override fun run() {
+            this.block()
+        }
+    }, time)
+    return timer
 }

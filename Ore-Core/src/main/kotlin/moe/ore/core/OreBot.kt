@@ -24,6 +24,7 @@ package moe.ore.core
 import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
+import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
@@ -65,7 +66,10 @@ class OreBot(val uin: Long) : Ore() {
 
     override fun login() {
         // 登录开始传递登录开始事件
-        oreListener?.onLoginStart()
+        threadManager.addTask {
+            oreListener?.onLoginStart()
+        }
+        // 连接到服务器会自动发送登录包
         client.connect()
     }
 
@@ -82,7 +86,7 @@ class OreBot(val uin: Long) : Ore() {
 
 fun main() {
     // 3042628723
-    val ore = OreManager.addBot(3042623, "911586abcd", "C:\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
     ore.oreListener = object : OreListener {
         override fun onLoginStart() {
             println("登录开始了，呼呼呼！！！")
@@ -92,10 +96,15 @@ fun main() {
             println("登录结果：$result")
         }
 
-        override fun onCaptcha(url: String): String? {
-            println("伟大的滑块开始了：$url")
-            return null
+        override fun onCaptcha(captchaChan: CaptchaChannel) {
+
+            println(captchaChan.url)
+            val ticket = Scanner(System.`in`).nextLine()
+            captchaChan.submitTicket(ticket)
+
+
         }
+
 
     }
     ore.login()

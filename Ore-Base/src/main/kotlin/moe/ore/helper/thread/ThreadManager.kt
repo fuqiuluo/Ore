@@ -100,6 +100,8 @@ class ThreadManager private constructor(val uin: Long = 0) {
     }
 
     companion object {
+        private val THREAD_MAP = hashMapOf<Long, ThreadManager>()
+
         @JvmStatic
         private var SELF: ThreadManager? = null
 
@@ -134,7 +136,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
          */
         @JvmStatic
         fun getInstance(uin: Long): ThreadManager {
-            return ThreadManager(uin)
+            return THREAD_MAP.getOrPut(uin) { ThreadManager(uin) }
         }
     }
 

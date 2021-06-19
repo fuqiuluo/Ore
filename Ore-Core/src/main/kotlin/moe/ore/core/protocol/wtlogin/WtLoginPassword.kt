@@ -24,7 +24,6 @@ package moe.ore.core.protocol.wtlogin
 import moe.ore.helper.createBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
-import moe.ore.helper.writeHex
 
 /**
  * password
@@ -41,7 +40,7 @@ class WtLoginPassword(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             writeBytes(tlv.t116())
             writeBytes(tlv.t100())
             writeBytes(tlv.t107())
-            writeBytes(tlv.t108(device.ksid))
+            writeBytes(tlv.t108())
             writeBytes(tlv.t142())
             writeBytes(tlv.t144())
             writeBytes(tlv.t145())
