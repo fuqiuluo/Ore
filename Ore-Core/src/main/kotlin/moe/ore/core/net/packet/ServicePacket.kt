@@ -22,14 +22,16 @@
 package moe.ore.core.net.packet
 
 import moe.ore.core.helper.*
-import moe.ore.core.helper.buildFirstLayer
-import moe.ore.core.helper.buildSecondLayer
 import moe.ore.core.net.BotClient
+import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil
-import moe.ore.helper.toHexString
+import moe.ore.helper.*
+import moe.ore.util.TeaUtil
 
 class ToService(val seq: Int, val commandName: String, val body: ByteArray) {
     var packetType: PacketType = PacketType.LoginPacket
+
+    var outToken : ByteArray? = null
 }
 
 enum class PacketType(val flag1: Int, val flag2: Byte) {
@@ -37,18 +39,90 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
      * 登录包
      */
     LoginPacket(0xa, 0x2),
-    ExChangeEmp(0xb, 0x2)
+    SvcRegister(0xa, 0x1),
+    ExChangeEmp(0xb, 0x2),
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
     val uin = client.uin
+    val manager = DataManager.manager(uin)
+    val userStSig = manager.wLoginSigInfo
+    val protocolInfo = ProtocolInternal[manager.protocolType]
+    val session = manager.session
+    val deviceInfo = manager.deviceInfo
+
     val teaKey = when (packetType) {
         PacketType.ExChangeEmp, PacketType.LoginPacket -> DEFAULT_TEA_KEY
+        PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
-    val out = buildFirstLayer(uin, teaKey, packetType, seq, buildSecondLayer(uin, commandName, body, packetType, seq))
-
-    // println(out.toHexString())
-
+    val out = createBuilder().apply { writeBlockWithIntLen(4) {
+        writeInt(packetType.flag1)
+        writeByte(packetType.flag2)
+        when(packetType) {
+            // write token
+            PacketType.LoginPacket, PacketType.SvcRegister -> {
+                val token = outToken ?: EMPTY_BYTE_ARRAY
+                writeInt(token.size + 4)
+                writeBytes(token)
+            }
+            PacketType.ExChangeEmp -> writeInt(seq)
+        }
+        writeByte(0)
+        uin.toString().let {
+            writeInt(it.length + 4)
+            writeString(it)
+        }
+        writeBytes(TeaUtil.encrypt(createBuilder().apply {
+            writeBlockWithIntLen(4) {
+                when(packetType) {
+                    PacketType.LoginPacket -> {
+                        writeInt(seq)
+                        writeInt(protocolInfo.appId)
+                        writeInt(protocolInfo.appId)
+                        writeInt(16777216)
+                        writeInt(0)
+                        writeInt(0) // Token Type 如果有Token就是256
+                        writeInt(0 + 4) // Token Size
+                        commandName.let {
+                            writeInt(it.length + 4)
+                            writeString(it)
+                        }
+                        session.msgCookie.let {
+                            writeInt(it.size + 4)
+                            writeBytes(it)
+                        }
+                        deviceInfo.androidId.let {
+                            writeInt(it.length + 4)
+                            writeString(it)
+                        }
+                        deviceInfo.ksid.let {
+                            writeInt(it.size + 4)
+                            writeBytes(it)
+                        }
+                        protocolInfo.protocolDetail.let {
+                            writeShort(it.length + 2)
+                            writeString(it)
+                        }
+                        // 非常规组包，跳过部分异常
+                        // writeInt(4)
+                    }
+                    else -> {
+                        commandName.let {
+                            writeInt(it.length + 4)
+                            writeString(it)
+                        }
+                        session.msgCookie.let {
+                            writeInt(it.size + 4)
+                            writeBytes(it)
+                        }
+                        writeInt(4)
+                    }
+                }
+            }
+            writeInt(body.size + 4)
+            writeBytes(body)
+        }.toByteArray(), teaKey))
+    } }.toByteArray()
     return PacketSender(client, out, commandName, seq)
 }
 

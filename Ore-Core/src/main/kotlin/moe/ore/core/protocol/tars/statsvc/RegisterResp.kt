@@ -29,6 +29,8 @@ class RegisterResp : TarsStructBase() {
     var uClientBatteryGetInterval: Long = 86400
     var uExtOnlineStatus: Long = 0
 
+    override fun respName(): String = "SvcRespRegister"
+
     override fun readFrom(input: TarsInputStream) {
         this.lUin = input.read(this.lUin, 0, true);
         this.lBid = input.read(this.lBid, 1, true);

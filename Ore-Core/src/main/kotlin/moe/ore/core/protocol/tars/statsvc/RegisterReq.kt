@@ -54,6 +54,12 @@ class RegisterReq : TarsStructBase() {
     var vecGuid: ByteArray? = null
     var vecServerBuf: ByteArray? = null
 
+    override fun funcName(): String = "SvcReqRegister"
+
+    override fun servantName(): String = "PushService"
+
+    override fun reqName(): String = "SvcReqRegister"
+
     override fun writeTo(stream: TarsOutputStream) {
         stream.write(lUin, 0)
         stream.write(lBid, 1)
