@@ -33,6 +33,11 @@ enum class LoginResult {
     PasswordWrong,
 
     /**
+     * 登录成功
+     */
+    Success,
+
+    /**
      * 滑块验证失败
      */
     SliderVerifyFail

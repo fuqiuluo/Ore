@@ -48,6 +48,9 @@ class SsoSession {
     // 86400 单位：秒 保质期 一天
     var appPriChangeTime : Long = 0
 
+    // from t167
+    var imgType = 1
+
     private val seqFactory = AtomicInteger(Random().nextInt(100000))
 
     @Synchronized

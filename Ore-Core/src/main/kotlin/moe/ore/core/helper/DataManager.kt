@@ -144,7 +144,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         }
 
         var apnName = "中国移动"
-        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
+        var ksid: ByteArray = "31008c9064e89b48f20765fd739edd1e".hex2ByteArray()
 
         // %4;7t>;28<fc.5*6
         var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)

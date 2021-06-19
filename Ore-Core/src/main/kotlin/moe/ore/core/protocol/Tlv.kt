@@ -42,16 +42,6 @@ class Tlv(val uin: Long) {
      */
     private val protocolInfo = ProtocolInternal[dataManager.protocolType]
 
-    private inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
-        val bodyBuilder = BytePacketBuilder()
-        val out = BytePacketBuilder()
-        bodyBuilder.block()
-        out.writeShort(tlvVer.toShort())
-        out.writeShort(bodyBuilder.size.toShort())
-        out.writePacket(bodyBuilder)
-        return out.toByteArray()
-    }
-
     fun t1() = buildTlv(0x1) {
         writeShort(protocolInfo.ipVersion)
         writeInt(Random.nextInt())
@@ -127,19 +117,22 @@ class Tlv(val uin: Long) {
     }
 
     fun t108() = buildTlv(0x108) {
-        writeBytes(deviceInfo.ksid ?: "31008c9064e89b48f20765fd739edd1e".hex2ByteArray())
+        writeBytes(deviceInfo.ksid)
     }
 
     private fun t109() = buildTlv(0x109) {
         writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
     }
 
-    fun t116() = buildTlv(0x116) {
+    fun t112() = buildTlv(0x112) {
+        writeBytes(dataManager.wLoginSigInfo.noPicSig.ticket())
+    }
+
+    fun t116(appidArray : IntArray = intArrayOf(0x5f5e10e2)) = buildTlv(0x116) {
         writeByte(0.toByte())
         // ver
         writeInt(protocolInfo.miscBitmap)
         writeInt(protocolInfo.subSigMap)
-        val appidArray = intArrayOf(0x5f5e10e2)
         writeByte(appidArray.size.toByte())
         for (appid in appidArray) {
             writeInt(appid)
@@ -207,6 +200,11 @@ class Tlv(val uin: Long) {
         writeInt(seq)
     }
 
+    fun t166() = buildTlv(0x166) {
+        writeInt(session.imgType)
+        // imgType
+    }
+
     fun t16a(noPicSig: ByteArray) = buildTlv(0x16a) {
         /**
          * 20 B5 33 79 18 79 9C AB E4 4A 8E F8 0D 66 84 B81F 8C 15 24 AD 46 D6 D7 7A AF 24 6A 09 16 0A 59AF 22 ED 5B 14 A8 B4 78 36 F2 AC 9A 34 61 15 3A
@@ -230,7 +228,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t172() = buildTlv(0x172) {
-        writeBytes(session.rollbackSig!!)
+        writeBytes(session.rollbackSig ?: byteArrayOf())
     }
 
     fun t174(dt174: ByteArray?) = buildTlv(0x174) {
@@ -283,19 +281,24 @@ class Tlv(val uin: Long) {
         writeByte(0.toByte())
     }
 
+    fun t201() = buildTlv(0x201) {
+        writeBytesWithShortLen(dataManager.wLoginSigInfo.payToken)
+        writeStringWithShortLen("")
+        writeStringWithShortLen("qq")
+        writeStringWithShortLen("") // channelId
+    }
+
     fun t202() = buildTlv(0x202) {
         writeBytesWithShortLen(MD5.toMD5Byte(deviceInfo.wifiBSsid))
         writeStringWithShortLen(deviceInfo.wifiSsid)
     }
 
-    // TODO: 2021/6/9 Emp用的
-    // g = client.device.guid + client.dpwd + tlvMap.getOrFail(0x402)
-    fun t400(pwd : ByteArray, g: ByteArray) = buildTlv(0x400) {
-        writeTeaEncrypt(MD5.toMD5Byte(g)) {
+    fun t400(g: ByteArray) = buildTlv(0x400) {
+        writeTeaEncrypt(g) {
             writeByte(1) // version
             writeLong(uin)
             writeFully(deviceInfo.guid)
-            writeFully(pwd)
+            writeFully(session.pwd)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.subAppId)
             writeInt(currentTimeSeconds())
@@ -309,7 +312,7 @@ class Tlv(val uin: Long) {
         builder.writeBytes(dataManager.wLoginSigInfo.dpwd)
         builder.writeBytes(dt402)
          **/
-        writeBytes(MD5.toMD5Byte(dataManager.wLoginSigInfo.G))
+        writeBytes(dataManager.wLoginSigInfo.G)
     }
 
     fun t402(dt402: ByteArray) = buildTlv(0x402) {
@@ -410,6 +413,16 @@ class Tlv(val uin: Long) {
     }
 
     fun t193(ticket: String) = buildTlv(0x193) {
-        writeBytes(ticket.toByteArray())
+        writeString(ticket)
     }
+}
+
+internal inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
+    val bodyBuilder = BytePacketBuilder()
+    val out = BytePacketBuilder()
+    bodyBuilder.block()
+    out.writeShort(tlvVer.toShort())
+    out.writeShort(bodyBuilder.size.toShort())
+    out.writePacket(bodyBuilder)
+    return out.toByteArray()
 }

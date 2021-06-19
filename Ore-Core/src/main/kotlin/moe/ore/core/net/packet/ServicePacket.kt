@@ -21,10 +21,9 @@
 
 package moe.ore.core.net.packet
 
-import moe.ore.core.helper.DEFAULT_TEA_KEY
+import moe.ore.core.helper.*
 import moe.ore.core.helper.buildFirstLayer
 import moe.ore.core.helper.buildSecondLayer
-import moe.ore.core.helper.toByteArray
 import moe.ore.core.net.BotClient
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.toHexString
@@ -37,17 +36,18 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
     /**
      * 登录包
      */
-    LoginPacket(0xa, 0x2)
-
+    LoginPacket(0xa, 0x2),
+    ExChangeEmp(0xb, 0x2)
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
     val uin = client.uin
     val teaKey = when (packetType) {
-        PacketType.LoginPacket -> DEFAULT_TEA_KEY
-
+        PacketType.ExChangeEmp, PacketType.LoginPacket -> DEFAULT_TEA_KEY
     }
-    val out = buildFirstLayer(uin, teaKey, packetType, buildSecondLayer(uin, commandName, body, packetType, seq))
+    val out = buildFirstLayer(uin, teaKey, packetType, seq, buildSecondLayer(uin, commandName, body, packetType, seq))
+
+    println(out.toHexString())
 
     return PacketSender(client, out, commandName, seq)
 }

@@ -38,6 +38,8 @@ class WtLoginSigInfo {
      */
     var G = byteArrayOf()
 
+    var payToken = byteArrayOf()
+
     lateinit var d2: BytesTicket
     lateinit var d2Key: BytesTicket
 

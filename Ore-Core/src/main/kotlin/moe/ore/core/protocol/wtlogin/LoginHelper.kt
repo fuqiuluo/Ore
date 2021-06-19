@@ -36,6 +36,7 @@ import moe.ore.core.protocol.ECDH_SHARE_KEY
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 
@@ -73,8 +74,12 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                 tlvMap[0x403]?.let { session.randSeed = it }
 
                 val t402 = tlvMap[0x402]?.also {
-                    userStInfo.G = device.guid + session.pwd + it
+                    userStInfo.G = MD5.toMD5Byte(device.guid + session.pwd + it)
                     // 字节组拼接
+                }
+
+                tlvMap[0x199]?.let {
+                    userStInfo.payToken = it
                 }
 
                 println("result: $result tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
@@ -82,6 +87,7 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                     0 -> onSuccess(tlvMap[0x119])
                     1 -> onPasswordWrong()
                     2 -> onCaptcha(tlvMap[0x192]!!, tlvMap[0x546])
+                    6 -> callback(LoginResult.SliderVerifyFail)
                     180 -> onRollBack(tlvMap[0x161])
                     204 -> onDevicePass(t402, tlvMap[0x403])
                     else -> error("unknown login result : $result")
@@ -154,7 +160,9 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             }
 
             (map[0x106]!! to map[0x10c]!!).run {
-                userStInfo.encryptA1 = bsTicket(first + second)
+                userStInfo.encryptA1 = bsTicket(first)
+                // TODO 验证A1算法
+                //     userStInfo.encryptA1 = bsTicket(first + sec)
                 // 傻卵，不知道你去什么鸟屎开源协议项目看来的代码，
                 // 自己逆向QQ去看，a1就是这么算 天王老子来了也是这样
                 // QQ 8.6.0
@@ -185,6 +193,10 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
             map[0x118]?.let {
                 session.uinInfo.mainDisplayName = it
                 // 用都没见腾讯用过
+            }
+
+            map[0x199]?.let {
+                userStInfo.payToken = it
             }
 
             map[0x11a]?.reader {
@@ -251,6 +263,8 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
 
             map[0x134]?.let {
                 userStInfo.wtSessionTicketKey = bsTicket(it)
+                println("ticketKey;" + DataManager.manager(uin).wLoginSigInfo.wtSessionTicketKey.ticket().toHexString())
+
             }
 
             map[0x537]?.reader {
@@ -308,10 +322,11 @@ internal class LoginHelper(private val uin: Long, private val client: BotClient,
                 }
             }
 
-
             println("t119 --> tlvMap: " + map.keys.map { "0x" + it.toHexString() })
 
 
+
+            callback(LoginResult.Success)
         }
     }
 

@@ -6,7 +6,7 @@ import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
 
 class WtLoginTicket(private val ticket : String, private val t546 : ByteArray?, uin : Long) : WtLogin(uin, LOGIN, 0x810, 0x7) {
-    override fun build(seq: Int): ByteArray {
+    override fun buildTlvBody(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(2)
             writeShort(5)
