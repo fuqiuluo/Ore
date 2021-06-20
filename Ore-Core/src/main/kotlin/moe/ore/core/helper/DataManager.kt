@@ -144,12 +144,14 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         }
 
         var apnName = "中国移动"
-        var ksid: ByteArray = "14751d8e7d633d9b06a392c357c675e5".hex2ByteArray()
+        var ksid: ByteArray = "31008c9064e89b48f20765fd739edd1e".hex2ByteArray()
 
         // %4;7t>;28<fc.5*6
         var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
 
-        var tgtgtKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
+        // 实际上在逆向8.7.5时 并没有出现md5(macAddr) 而是随机了一个16字节的东西
+        // 不保存 懒加载在线合成
+        var tgtgt: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
         // expamel 1, 0, 0, 127 是倒过来的哦！
         var clientIp = byteArrayOf(0, 0, 0, 0)

@@ -113,6 +113,20 @@ fun BytePacketBuilder.writeBytesWithShortLen(bytes: ByteArray) {
     writeBytes(bytes)
 }
 
+fun BytePacketBuilder.writeBlockWithIntLen(increment : Int = 0, block: BytePacketBuilder.() -> Unit, ) {
+    val builder = createBuilder()
+    builder.block()
+    this.writeInt(builder.size + increment)
+    this.writePacket(builder)
+}
+
+fun BytePacketBuilder.writeBlockWithShortLen(increment : Int = 0, block: BytePacketBuilder.() -> Unit) {
+    val builder = createBuilder()
+    builder.block()
+    this.writeShort(builder.size + increment)
+    this.writePacket(builder)
+}
+
 fun BytePacketBuilder.md5(): ByteArray {
     return MD5.toMD5Byte(toByteArray())
 }

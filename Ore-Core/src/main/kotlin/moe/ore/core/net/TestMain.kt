@@ -21,16 +21,41 @@
 
 package moe.ore.core.net
 
+import com.google.gson.Gson
 import moe.ore.helper.hex2ByteArray
+import moe.ore.tars.UniPacket
+import moe.ore.util.OkhttpUtil
+import moe.ore.util.TeaUtil
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.*
 
 object TestMain {
     @Throws(InterruptedException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val t546 = "0102010200010000008074eaadc4365db11f6b510e66c936f2aefc7db054c6943535bc70fe15b7ad4f5c2db9a4630e11824e09eeb1e4b7ea993b05aff64ad57a1f9263838fe173c61064bdccad0c0dda679152180d87c86c52729d97af0725510582cd78c5e97a226e331e4b6a81c974c4235632051df17aa6a6d385f28efe0707b7f16a317e74bc4b1a00202ce752e5efc2c156bcd0a7dade94e629568cdcadb6ba4578de6d86d53b37e24a00ac0102010200010000008074eaadc4365db11f6b510e66c936f2aefc7db054c6943535bc70fe15b7ad4f5c2db9a4630e11824e09eeb1e4b7ea993b05aff64ad57a1f9263838fe173c61064bdccad0c0dda679152180d87c86c52729d97af0725510582cd78c5e97a226e331e4b6a81c974c4235632051df17aa6a6d385f28efe0707b7f16a317e74bc4b1a00202ce752e5efc2c156bcd0a7dade94e629568cdcadb6ba4578de6d86d53b37e24a".hex2ByteArray()
 
+        var key = "F0441F5FF42DA58FDCF7949ABA62D411".hex2ByteArray()
 
+        val uniPacket = UniPacket()
+        uniPacket.servantName = "ConfigHttp"
+        uniPacket.funcName = "HttpServerListReq"
+        uniPacket.version = 3
+        uniPacket.put("HttpServerListReq", SsoServerInfoReq())
+
+        val encrypt = TeaUtil.encrypt(uniPacket.encode(), key)
+        val resp = OkhttpUtil().post("https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist", encrypt.toRequestBody())
+        val decrypt = TeaUtil.decrypt(resp?.body?.bytes(), key)
+        println(decrypt.toAsciiHexString())
+        val decode = UniPacket.decode(decrypt)
+        val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
+        println(Gson().toJson(findByClass))
+        for (ipAddressInfo in findByClass.b!!) {
+            println(ipAddressInfo.ip + ":" + ipAddressInfo.port)
+        }
     }
 
+    fun ByteArray.toAsciiHexString() = joinToString("") {
+        if (it in 32..127) it.toInt().toChar().toString() else "{${it.toUByte().toString(16).padStart(2, '0').uppercase(Locale.getDefault())}}"
+    }
 }
 

@@ -23,6 +23,7 @@ package moe.ore.util
 
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsStructBase
+import moe.ore.tars.UniPacket
 import java.nio.charset.Charset
 
 object TarsUtil {
@@ -49,7 +50,33 @@ object TarsUtil {
     }
 
     @JvmStatic
-    fun encodeRequest(base: TarsStructBase) : ByteArray {
-        TODO("下次一定写！！！")
+    fun getUni(version: Int) : UniPacket {
+        val uni = UniPacket()
+        uni.version = version
+        return uni
+    }
+
+    @JvmStatic
+    fun encodeRequest(
+        requestId : Int,
+        base: TarsStructBase,
+        version : Int = 3
+    ) : ByteArray {
+        val uni = getUni(version)
+        uni.requestId = requestId
+        uni.version = version
+        uni.put(base)
+        return uni.encode()
+    }
+
+    @JvmStatic
+    fun decodeRequest(data: ByteArray) : UniPacket {
+        return UniPacket.decode(data)
+    }
+
+    @JvmStatic
+    fun <T : TarsStructBase> decodeRequest(base : T, body : ByteArray) : T {
+        val uni = decodeRequest(body)
+        return uni.findByClass(base.respName(), base)
     }
 }

@@ -40,19 +40,37 @@ abstract class WtLogin(
     private val commandId: Int,
     private val encryptType: Int
 ) {
+    var packetType = PacketType.LoginPacket
+
     val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
     val session = manager.session
     val userStSig = manager.wLoginSigInfo
     val tlv: Tlv by lazy { Tlv(uin) }
 
-    abstract fun build(seq: Int): ByteArray
+    open fun publicKey() : ByteArray {
+        return ECDH_PUBLIC_KEY
+    }
+
+    open fun encryptKey() : ByteArray {
+        return ECDH_SHARE_KEY
+    }
+
+    open fun buildAttach() = createBuilder().apply {
+        writeByte(2)
+        writeByte(1)
+        writeBytes(session.randomKey)
+        writeShort(0x131)
+        writeShort(ECDH_VERSION.toShort())
+    }
+
+    abstract fun buildTlvBody(seq: Int): ByteArray
 
     fun sendTo(botClient: BotClient): PacketSender {
-        val seq = manager.session.nextPacketRequestId()
+        val seq = manager.session.nextSeqId()
         val body = makeBody(seq)
         val to = ToService(seq, commandName, body)
-        to.packetType = PacketType.LoginPacket
+        to.packetType = packetType
         // println("是否发包堵塞呢？")
         return to.sendTo(botClient)
     }
@@ -62,10 +80,11 @@ abstract class WtLogin(
         builder.writePacket(createBuilder().apply {
             writeByte(0x2)
 
-            val tlvBody = TeaUtil.encrypt(build(seq), ECDH_SHARE_KEY)
-            // println(tlvBody.toHexString())
+            val tlvBody = TeaUtil.encrypt(buildTlvBody(seq), encryptKey())
+            val attach = buildAttach()
+            val pubKey = publicKey()
 
-            writeShort(tlvBody.size + 4 + 49 + ECDH_PUBLIC_KEY.size)
+            writeShort(tlvBody.size + 4 + pubKey.size + 27 + attach.size)
             writeShort(8001)
             writeShort(commandId)
             writeShort(1)
@@ -77,14 +96,10 @@ abstract class WtLogin(
             writeInt(2) // 天王老子来了这个2也是int 自己逆向qq去看，傻卵
             writeInt(0)
             writeInt(0)
-            writeByte(2)
-            writeByte(1)
-            // 03 87 00 00 00 00 02 00 00 00 00 00 00 00 00 02 01
 
-            writeBytes(session.randomKey)
-            writeShort(0x131)
-            writeShort(ECDH_VERSION.toShort())
-            writeBytesWithShortLen(ECDH_PUBLIC_KEY)
+            writePacket(attach)
+
+            writeBytesWithShortLen(pubKey)
 
             writeBytes(tlvBody)
 
@@ -95,5 +110,6 @@ abstract class WtLogin(
 
     companion object {
         const val LOGIN = "wtlogin.login"
+        const val EXCHANGE_EMP = "wtlogin.exchange_emp"
     }
 }

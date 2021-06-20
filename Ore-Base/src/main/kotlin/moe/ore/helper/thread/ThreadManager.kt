@@ -96,14 +96,11 @@ class ThreadManager private constructor(val uin: Long = 0) {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        SELF = null
+        THREAD_MAP.remove(uin)
     }
 
     companion object {
         private val THREAD_MAP = hashMapOf<Long, ThreadManager>()
-
-        @JvmStatic
-        private var SELF: ThreadManager? = null
 
         /**
          * 核心线程数
@@ -121,13 +118,6 @@ class ThreadManager private constructor(val uin: Long = 0) {
          * 空闲线程最大存活时间（毫秒）
          */
         private const val keepAliveTime = 3 * 1000
-
-        @JvmStatic
-        val instance: ThreadManager
-            get() {
-                if (SELF == null) SELF = ThreadManager()
-                return SELF as ThreadManager
-            }
 
         /**
          * 创建一个Bot专属的线程池

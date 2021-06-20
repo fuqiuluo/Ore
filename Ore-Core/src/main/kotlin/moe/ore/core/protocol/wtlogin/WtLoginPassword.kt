@@ -30,7 +30,7 @@ import moe.ore.helper.writeBytes
  * GetStWithPassword
  */
 class WtLoginPassword(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
-    override fun build(seq: Int): ByteArray {
+    override fun buildTlvBody(seq: Int): ByteArray {
         return createBuilder().apply {
             writeShort(9)
             writeShort(27)
@@ -41,8 +41,8 @@ class WtLoginPassword(uin: Long) : WtLogin(uin, LOGIN, 0x810, 0x87) {
             writeBytes(tlv.t100())
             writeBytes(tlv.t107())
             writeBytes(tlv.t108())
-            writeBytes(tlv.t142())
             writeBytes(tlv.t144())
+            writeBytes(tlv.t142())
             writeBytes(tlv.t145())
             writeBytes(tlv.t147())
             writeBytes(tlv.t154(seq))

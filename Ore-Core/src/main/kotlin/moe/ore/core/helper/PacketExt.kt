@@ -22,9 +22,9 @@
 package moe.ore.core.helper
 
 import kotlinx.io.core.*
-import moe.ore.core.net.packet.FromService
-import moe.ore.core.net.packet.PacketType
-import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.api.Ore
+import moe.ore.core.OreBot
+import moe.ore.core.net.packet.*
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
@@ -44,6 +44,8 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 
         // println(remaining) 剩余字节数
         // println(size) 总字节数
+
+        // println("type : %s, packet : %s".format(keyType, packetType))
 
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
             1 -> manager.wLoginSigInfo.d2Key.ticket()
@@ -81,81 +83,24 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
     }
 }
 
-/**
- * 构建第一层，最外面那层
- */
-internal fun buildFirstLayer(uin: Long, key: ByteArray, packetType: PacketType, body: ByteArray): ByteArray {
-    return createBuilder().apply {
-        writeBodyWithSize {
-            writeInt(packetType.flag1)
-            writeByte(packetType.flag2)
-            when (packetType) {
-                PacketType.LoginPacket -> {
-                    writeInt(0 + 4)
-                }
-
-            }
-            writeByte(0)
-            uin.toString().let {
-                writeInt(it.length + 4)
-                writeString(it)
-            }
-            writeBytes(TeaUtil.encrypt(body, key))
-        }
-    }.toByteArray()
-}
-
-internal fun buildSecondLayer(uin: Long, commandName: String, body: ByteArray, packetType: PacketType, seq: Int): ByteArray {
-    val builder = createBuilder()
-    val manager = DataManager.manager(uin)
-    val protocolInfo = ProtocolInternal[manager.protocolType]
+fun Ore.sendPacket(
+    cmd: String,
+    body: ByteArray,
+    packetType: PacketType = PacketType.LoginPacket,
+    firstToken : ByteArray? = null,
+    secondToken : ByteArray? = null
+) : PacketSender {
+    val bot = this as OreBot
+    val client = bot.client
+    val manager = DataManager.manager(bot.uin)
     val session = manager.session
-    val deviceInfo = manager.deviceInfo
-    when (packetType) {
-        PacketType.LoginPacket -> {
-            builder.writeBodyWithSize {
-                writeInt(seq)
-                writeInt(protocolInfo.appId)
-                writeInt(protocolInfo.appId)
-                writeInt(16777216)
-                writeInt(0)
-                writeInt(0) // Token Type 如果有Token就是256
-                writeInt(0 + 4) // Token Size
-                commandName.let {
-                    writeInt(it.length + 4)
-                    writeString(it)
-                }
-                session.msgCookie.let {
-                    writeInt(it.size + 4)
-                    writeBytes(it)
-                }
-                deviceInfo.androidId.let {
-                    writeInt(it.length + 4)
-                    writeString(it)
-                }
-                deviceInfo.ksid.let {
-                    writeInt(it.size + 4)
-                    writeBytes(it)
-                }
-                protocolInfo.protocolDetail.let {
-                    writeShort(it.length + 2)
-                    writeString(it)
-                }
-                // 非常规组包，跳过部分异常
-                // writeInt(4)
-            }
-        }
-
-
-    }
-    builder.writeInt(body.size + 4)
-    builder.writeBytes(body)
-    return builder.toByteArray()
+    val to = ToService(
+        seq = session.nextSeqId(),
+        commandName = cmd,
+        body = body
+    )
+    to.packetType = packetType
+    to.firstToken = firstToken
+    to.secondToken = secondToken
+    return to.sendTo(client)
 }
-
-private inline fun BytePacketBuilder.writeBodyWithSize(block: BytePacketBuilder.() -> Unit) {
-    val builder = createBuilder().apply { this.block() }
-    this.writeInt(builder.size + 4)
-    this.writePacket(builder)
-}
-

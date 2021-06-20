@@ -21,6 +21,22 @@ public class TarsStructBase implements Serializable {
 
     public static final int MAX_STRING_LENGTH = 100 * 1024 * 1024;
 
+    public String servantName() {
+        return "";
+    }
+
+    public String funcName() {
+        return "";
+    }
+
+    public String reqName() {
+        return "";
+    }
+
+    public String respName() {
+        return "";
+    }
+
     // 非必要实现
     public void writeTo(TarsOutputStream output) {
 

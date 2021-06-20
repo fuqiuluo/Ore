@@ -38,6 +38,8 @@ class WtLoginSigInfo {
      */
     var G = byteArrayOf()
 
+    var payToken = byteArrayOf()
+
     lateinit var d2: BytesTicket
     lateinit var d2Key: BytesTicket
 
@@ -50,6 +52,11 @@ class WtLoginSigInfo {
 
     // 用t106和t10c计算得到 from QQ 8.6.0
     lateinit var encryptA1: BytesTicket
+
+    lateinit var tgtgt : BytesTicket
+
+    // from 10c
+    lateinit var gtKey : BytesTicket
 
     lateinit var webSig : BytesTicket
 

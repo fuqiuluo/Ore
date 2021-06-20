@@ -28,6 +28,9 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+@JvmField
+val EMPTY_BYTE_ARRAY = ByteArray(0)
+
 @Throws(RuntimeException::class)
 inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
     throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)

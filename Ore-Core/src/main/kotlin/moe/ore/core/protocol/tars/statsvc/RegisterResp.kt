@@ -1,4 +1,4 @@
-package moe.ore.protocol.tars.statsvc
+package moe.ore.core.protocol.tars.statsvc
 
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsStructBase
@@ -28,6 +28,8 @@ class RegisterResp : TarsStructBase() {
     var uClientAutoStatusInterval: Long = 600
     var uClientBatteryGetInterval: Long = 86400
     var uExtOnlineStatus: Long = 0
+
+    override fun respName(): String = "SvcRespRegister"
 
     override fun readFrom(input: TarsInputStream) {
         this.lUin = input.read(this.lUin, 0, true);
