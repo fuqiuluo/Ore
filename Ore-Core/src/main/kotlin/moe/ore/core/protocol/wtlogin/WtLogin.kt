@@ -67,7 +67,7 @@ abstract class WtLogin(
     abstract fun buildTlvBody(seq: Int): ByteArray
 
     fun sendTo(botClient: BotClient): PacketSender {
-        val seq = manager.session.nextPacketRequestId()
+        val seq = manager.session.nextSeqId()
         val body = makeBody(seq)
         val to = ToService(seq, commandName, body)
         to.packetType = packetType

@@ -73,4 +73,10 @@ object TarsUtil {
     fun decodeRequest(data: ByteArray) : UniPacket {
         return UniPacket.decode(data)
     }
+
+    @JvmStatic
+    fun <T : TarsStructBase> decodeRequest(base : T, body : ByteArray) : T {
+        val uni = decodeRequest(body)
+        return uni.findByClass(base.respName(), base)
+    }
 }

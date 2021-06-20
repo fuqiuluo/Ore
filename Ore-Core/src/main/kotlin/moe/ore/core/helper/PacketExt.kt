@@ -22,9 +22,9 @@
 package moe.ore.core.helper
 
 import kotlinx.io.core.*
-import moe.ore.core.net.packet.FromService
-import moe.ore.core.net.packet.PacketType
-import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.api.Ore
+import moe.ore.core.OreBot
+import moe.ore.core.net.packet.*
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
@@ -83,3 +83,24 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
     }
 }
 
+fun Ore.sendPacket(
+    cmd: String,
+    body: ByteArray,
+    packetType: PacketType = PacketType.LoginPacket,
+    firstToken : ByteArray? = null,
+    secondToken : ByteArray? = null
+) : PacketSender {
+    val bot = this as OreBot
+    val client = bot.client
+    val manager = DataManager.manager(bot.uin)
+    val session = manager.session
+    val to = ToService(
+        seq = session.nextSeqId(),
+        commandName = cmd,
+        body = body
+    )
+    to.packetType = packetType
+    to.firstToken = firstToken
+    to.secondToken = secondToken
+    return to.sendTo(client)
+}

@@ -33,11 +33,16 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ECDH_SHARE_KEY
+import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.SvcRegisterHelper
+import moe.ore.core.protocol.tars.statsvc.RegisterReq
 import moe.ore.helper.*
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.tars.UniPacket
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
+import kotlin.random.Random
 
 /**
  * 登录器
@@ -334,9 +339,9 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
             // handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
 
 
+            val ret = SvcRegisterHelper(uin).register()
 
-
-            callback(LoginResult.Success)
+            if(ret == 0) callback(LoginResult.Success)else callback(LoginResult.RegisterFail)
         }
     }
 
@@ -384,12 +389,3 @@ private fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
     return map
 }
 
-private class SvcRegisterHelper {
-
-
-    fun register() {
-
-
-    }
-
-}

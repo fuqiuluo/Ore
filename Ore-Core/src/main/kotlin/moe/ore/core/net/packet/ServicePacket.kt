@@ -31,7 +31,9 @@ import moe.ore.util.TeaUtil
 class ToService(val seq: Int, val commandName: String, val body: ByteArray) {
     var packetType: PacketType = PacketType.LoginPacket
 
-    var outToken : ByteArray? = null
+    var firstToken : ByteArray? = null
+
+    var secondToken : ByteArray? = null
 }
 
 enum class PacketType(val flag1: Int, val flag2: Byte) {
@@ -41,6 +43,7 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
     LoginPacket(0xa, 0x2),
     SvcRegister(0xa, 0x1),
     ExChangeEmp(0xb, 0x2),
+    // ServicePacket(0xb, 0x2)
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
@@ -53,6 +56,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
 
     val teaKey = when (packetType) {
         PacketType.ExChangeEmp, PacketType.LoginPacket -> DEFAULT_TEA_KEY
+        // PacketType.ServicePacket,
         PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
     val out = createBuilder().apply { writeBlockWithIntLen(4) {
@@ -61,7 +65,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         when(packetType) {
             // write token
             PacketType.LoginPacket, PacketType.SvcRegister -> {
-                val token = outToken ?: EMPTY_BYTE_ARRAY
+                val token = firstToken ?: EMPTY_BYTE_ARRAY
                 writeInt(token.size + 4)
                 writeBytes(token)
             }
@@ -75,14 +79,16 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         writeBytes(TeaUtil.encrypt(createBuilder().apply {
             writeBlockWithIntLen(4) {
                 when(packetType) {
-                    PacketType.LoginPacket -> {
+                    PacketType.SvcRegister, PacketType.LoginPacket -> {
                         writeInt(seq)
                         writeInt(protocolInfo.appId)
                         writeInt(protocolInfo.appId)
                         writeInt(16777216)
                         writeInt(0)
-                        writeInt(0) // Token Type 如果有Token就是256
-                        writeInt(0 + 4) // Token Size
+                        writeInt(if(secondToken == null) 0 else 256) // Token Type 如果有Token就是256
+                        val token = secondToken ?: EMPTY_BYTE_ARRAY
+                        writeInt(token.size + 4)
+                        writeBytes(token)
                         commandName.let {
                             writeInt(it.length + 4)
                             writeString(it)

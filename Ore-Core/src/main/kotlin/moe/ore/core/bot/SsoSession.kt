@@ -54,15 +54,29 @@ class SsoSession {
     private val seqFactory = AtomicInteger(Random().nextInt(100000))
 
     @Synchronized
-    fun nextPacketRequestId(): Int {
-        var incrementAndGet: Int
+    fun nextSeqId(): Int {
+        var id: Int
         synchronized(this) {
-            incrementAndGet = seqFactory.incrementAndGet()
-            if (incrementAndGet > 1000000) {
+            id = seqFactory.incrementAndGet()
+            if (id > 1000000) {
                 seqFactory.set(Random().nextInt(100000) + 60000)
             }
         }
-        return incrementAndGet
+        return id
+    }
+
+    private val requestIdFactory = AtomicInteger(Random().nextInt(100000))
+
+    @Synchronized
+    fun nextRequestId(): Int {
+        var id: Int
+        synchronized(this) {
+            id = requestIdFactory.incrementAndGet()
+            if (id > 1000000) {
+                requestIdFactory.set(Random().nextInt(100000) + 60000)
+            }
+        }
+        return id
     }
 }
 

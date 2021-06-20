@@ -5,54 +5,54 @@ import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
 
 
-class RegisterReq : TarsStructBase() {
+class RegisterReq(
+    var bIsOnline: Byte = 0,
+    var bIsSetStatus: Byte = 0,
+    var bIsShowOnline: Byte = 0,
+    var bKikPC: Byte = 0,
+    var bKikWeak: Byte = 0,
+    var bOnlinePush: Byte = 0,
+    var bOpenPush: Byte = 1,
+    var bRegType: Byte = 0,
+    var bSetMute: Byte = 0,
+    var bSilentPush: Byte = 0,
+    var bytes0x769ReqBody: ByteArray? = null,
+    var cConnType: Byte = 0,
+    var cNetType: Byte = 0,
+    var cNotifySwitch: Byte = 0,
+    var iBatteryStatus : Int = 0,
+    var iLargeSeq: Long = 0,
+    var iLastWatchStartTime: Long = 0,
+    var iLocaleID : Int = 2052,
+    var iOSVersion: Int = 0,
+    var iStatus : Int = 11,
+    var lBid: Long = 0,
+    var lCpId: Long = 0,
+    var lUin: Long = 0,
+    var sBuildVer : String = "",
+    var sChannelNo : String = "",
+    var sOther : String = "",
+    var stVendorPushInfo: VendorPushInfo? = null,
+    var strDevName : String = "",
+    var strDevType : String = "",
+    var strIOSIdfa : String = "",
+    var strOSVer : String = "",
+    var strVendorName : String = "",
+    var strVendorOSName : String = "",
+    var timeStamp: Long = 0,
+    var uExtOnlineStatus: Long = 0,
+    var uNewSSOIp: Long = 0,
+    var uOldSSOIp: Long = 0,
+    var vecDevParam: ByteArray? = null,
+    var vecGuid: ByteArray? = null,
+    var vecServerBuf: ByteArray? = null
+) : TarsStructBase() {
     companion object {
         var cache_bytes_0x769_reqbody = ByteArray(1)
         var cache_vecDevParam = ByteArray(1)
         var cache_vecGuid = ByteArray(1)
         var cache_vecServerBuf = ByteArray(1)
     }
-
-    var bIsOnline: Byte = 0
-    var bIsSetStatus: Byte = 0
-    var bIsShowOnline: Byte = 0
-    var bKikPC: Byte = 0
-    var bKikWeak: Byte = 0
-    var bOnlinePush: Byte = 0
-    var bOpenPush: Byte = 1
-    var bRegType: Byte = 0
-    var bSetMute: Byte = 0
-    var bSilentPush: Byte = 0
-    var bytes0x769ReqBody: ByteArray? = null
-    var cConnType: Byte = 0
-    var cNetType: Byte = 0
-    var cNotifySwitch: Byte = 0
-    var iBatteryStatus = 0
-    var iLargeSeq: Long = 0
-    var iLastWatchStartTime: Long = 0
-    var iLocaleID = 2052
-    var iOSVersion: Long = 0
-    var iStatus = 11
-    var lBid: Long = 0
-    var lCpId: Long = 0
-    var lUin: Long = 0
-    var sBuildVer = ""
-    var sChannelNo = ""
-    var sOther = ""
-    var stVendorPushInfo: VendorPushInfo? = null
-    var strDevName = ""
-    var strDevType = ""
-    var strIOSIdfa = ""
-    var strOSVer = ""
-    var strVendorName = ""
-    var strVendorOSName = ""
-    var timeStamp: Long = 0
-    var uExtOnlineStatus: Long = 0
-    var uNewSSOIp: Long = 0
-    var uOldSSOIp: Long = 0
-    var vecDevParam: ByteArray? = null
-    var vecGuid: ByteArray? = null
-    var vecServerBuf: ByteArray? = null
 
     override fun funcName(): String = "SvcReqRegister"
 
