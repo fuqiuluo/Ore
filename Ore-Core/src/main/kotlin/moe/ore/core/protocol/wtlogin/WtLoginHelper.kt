@@ -305,9 +305,21 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
             val ret = SvcRegisterHelper(uin).register()
 
-            if(ret == 0) callback(LoginResult.Success) else callback(LoginResult.RegisterFail)
+            if(ret == 0) {
+                // 清空回滚
+                session.rollBackCount = 0
+                callback(LoginResult.Success)
+            } else callback(LoginResult.RegisterFail)
 
-            handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
+
+
+            val sender = WtLoginEmp(uin).sendTo(client)
+            val from = sender sync 20 * 1000
+            from?.body?.readLoginPacket(userStInfo.wtSessionTicketKey.ticket()) { result, tlvMap ->
+                println("EMP : $result")
+
+            } ?: callback(LoginResult.ServerTimeout)
+
         }
     }
 

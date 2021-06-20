@@ -114,6 +114,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         }
                         writeInt(4) // qimei 的位置
                     }
+
                     PacketType.ExChangeEmp -> {
                         commandName.let {
                             writeInt(it.length + 4)

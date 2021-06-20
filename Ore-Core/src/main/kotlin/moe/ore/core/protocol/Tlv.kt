@@ -71,13 +71,13 @@ class Tlv(val uin: Long) {
         writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt.ticket())
     }
 
-    fun t100(appId : Int = protocolInfo.appId) = buildTlv(0x100) {
+    fun t100(appId : Int = protocolInfo.appId, mainSigMap : Int = protocolInfo.mainSigMap) = buildTlv(0x100) {
         writeShort(protocolInfo.dbVersion)
         writeInt(protocolInfo.msfSsoVersion)
         writeInt(protocolInfo.subAppId)
         writeInt(appId)
         writeInt(0)
-        writeInt(protocolInfo.mainSigMap)
+        writeInt(mainSigMap)
         // mainSigMap
     }
 
