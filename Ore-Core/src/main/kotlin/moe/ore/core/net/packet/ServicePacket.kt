@@ -24,6 +24,7 @@ package moe.ore.core.net.packet
 import moe.ore.core.helper.*
 import moe.ore.core.net.BotClient
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.wtlogin.WtLogin
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
@@ -85,10 +86,12 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         writeInt(protocolInfo.appId)
                         writeInt(16777216)
                         writeInt(0)
+
                         writeInt(if(secondToken == null) 0 else 256) // Token Type 如果有Token就是256
                         val token = secondToken ?: EMPTY_BYTE_ARRAY
                         writeInt(token.size + 4)
                         writeBytes(token)
+
                         commandName.let {
                             writeInt(it.length + 4)
                             writeString(it)
@@ -109,10 +112,9 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                             writeShort(it.length + 2)
                             writeString(it)
                         }
-                        // 非常规组包，跳过部分异常
-                        // writeInt(4)
+                        writeInt(4) // qimei 的位置
                     }
-                    else -> {
+                    PacketType.ExChangeEmp -> {
                         commandName.let {
                             writeInt(it.length + 4)
                             writeString(it)

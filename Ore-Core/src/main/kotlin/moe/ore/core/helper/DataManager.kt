@@ -149,7 +149,8 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
         // %4;7t>;28<fc.5*6
         var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
 
-        var tgtgtKey: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
+        // 实际上在逆向8.7.5时 并没有出现md5(macAddr) 而是随机了一个16字节的东西
+        var tgtgt: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
 
         // expamel 1, 0, 0, 127 是倒过来的哦！
         var clientIp = byteArrayOf(0, 0, 0, 0)

@@ -98,7 +98,7 @@ class Tlv(val uin: Long) {
             writeFully(deviceInfo.clientIp)
             writeByte(1.toByte())
             writeBytes(dataManager.botAccount.bytesMd5Password)
-            writeBytes(deviceInfo.tgtgtKey)
+            writeBytes(deviceInfo.tgtgt)
             writeInt(0)
             writeBoolean(protocolInfo.isGuidAvailable)
             writeBytes(deviceInfo.guid)
@@ -110,7 +110,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t107() = buildTlv(0x107) {
-        writeShort(0)
+        writeShort(0) // picType
         writeByte(0.toByte())
         writeShort(0)
         writeByte(1.toByte())
@@ -125,7 +125,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t112() = buildTlv(0x112) {
-        writeBytes(dataManager.wLoginSigInfo.noPicSig.ticket())
+        writeString(uin.toString())
     }
 
     fun t116(appidArray : IntArray = intArrayOf(0x5f5e10e2)) = buildTlv(0x116) {
@@ -175,8 +175,8 @@ class Tlv(val uin: Long) {
         writeBytesWithShortLen(dataManager.wLoginSigInfo.d2.ticket())
     }
 
-    fun t144() = buildTlv(0x144) {
-        writeTeaEncrypt(deviceInfo.tgtgtKey) {
+    fun t144(key : ByteArray = deviceInfo.tgtgt) = buildTlv(0x144) {
+        writeTeaEncrypt(key) {
             writeShort(5)
             writeBytes(t109())
             writeBytes(t52d())
@@ -201,7 +201,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t166() = buildTlv(0x166) {
-        writeInt(session.imgType)
+        writeByte(session.imgType.toByte())
         // imgType
     }
 
@@ -209,7 +209,7 @@ class Tlv(val uin: Long) {
         /**
          * 20 B5 33 79 18 79 9C AB E4 4A 8E F8 0D 66 84 B81F 8C 15 24 AD 46 D6 D7 7A AF 24 6A 09 16 0A 59AF 22 ED 5B 14 A8 B4 78 36 F2 AC 9A 34 61 15 3A
          */
-        writeFully(noPicSig)
+        writeBytes(noPicSig)
     }
 
     /**
@@ -380,7 +380,7 @@ class Tlv(val uin: Long) {
         for (extraData in loginExtraData) {
             writeLong(uin)
             writeByte(extraData.ip.size.toByte())
-            writeFully(extraData.ip)
+            writeBytes(extraData.ip)
             writeInt(extraData.time)
             writeInt(extraData.appId)
         }

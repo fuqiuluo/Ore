@@ -33,16 +33,12 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ECDH_SHARE_KEY
-import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.SvcRegisterHelper
-import moe.ore.core.protocol.tars.statsvc.RegisterReq
 import moe.ore.helper.*
 import moe.ore.helper.thread.ThreadManager
-import moe.ore.tars.UniPacket
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
-import kotlin.random.Random
 
 /**
  * 登录器
@@ -66,39 +62,6 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
         // println(Thread.currentThread().name)
         // 禁止使用nio线程进行堵塞等包操作
         handle(sender = WtLoginPassword(uin).sendTo(client))
-    }
-
-    private fun handle(sender: PacketSender, key: ByteArray = ECDH_SHARE_KEY) {
-        val from = sender sync 20 * 1000
-        if (from == null) {
-            callback(LoginResult.ServerTimeout)
-        } else {
-            from.body.readLoginPacket(key) { result, tlvMap ->
-                tlvMap[0x104]?.let { userStInfo.t104 = it }
-                tlvMap[0x403]?.let { session.randSeed = it }
-
-                val t402 = tlvMap[0x402]?.also {
-                    userStInfo.G = MD5.toMD5Byte(device.guid + session.pwd + it)
-                    // 字节组拼接
-                }
-
-                tlvMap[0x199]?.let {
-                    userStInfo.payToken = it
-                }
-
-                println("result: $result tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
-                when (result) {
-                    0 -> onSuccess(tlvMap[0x119])
-                    1 -> onPasswordWrong()
-                    2 -> onCaptcha(tlvMap[0x192]!!, tlvMap[0x546])
-                    6 -> callback(LoginResult.SliderVerifyFail)
-                    9 -> error("协议参数错误，请检查你的TLV是否正确")
-                    180 -> onRollBack(tlvMap[0x161])
-                    204 -> onDevicePass(t402, tlvMap[0x403])
-                    else -> error("unknown login result : $result")
-                }
-            }
-        }
     }
 
     private inline fun onCaptcha(t192: ByteArray, t546: ByteArray?) {
@@ -148,7 +111,7 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
     private inline fun onSuccess(t119: ByteArray?) {
         t119?.let { source ->
-            val map = decodeTlv(TeaUtil.decrypt(source, device.tgtgtKey).toByteReadPacket())
+            val map = decodeTlv(TeaUtil.decrypt(source, device.tgtgt).toByteReadPacket())
 
             val now = System.currentTimeMillis()
             val shelfLife = 86400L // 默认保质期一天
@@ -165,10 +128,11 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
             }
 
             (map[0x106]!! to map[0x10c]!!).run {
+                userStInfo.tgtgt = bsTicket(first)
+                userStInfo.gtKey = bsTicket(second)
                 // println("t106 size : %s".format(first.size))
                 // println("t10c size : %s".format(second.size))
                 userStInfo.encryptA1 = bsTicket(first)
-                // TODO 验证A1算法
                 // userStInfo.encryptA1 = bsTicket(first + sec)
                 // 傻卵，不知道你去什么鸟屎开源协议项目看来的代码，
                 // 自己逆向QQ去看，a1就是这么算 天王老子来了也是这样
@@ -341,7 +305,9 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
             val ret = SvcRegisterHelper(uin).register()
 
-            if(ret == 0) callback(LoginResult.Success)else callback(LoginResult.RegisterFail)
+            if(ret == 0) callback(LoginResult.Success) else callback(LoginResult.RegisterFail)
+
+            handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
         }
     }
 
@@ -354,6 +320,47 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
      */
     private inline fun onPasswordWrong() {
         callback(LoginResult.PasswordWrong)
+    }
+
+    private fun handle(sender: PacketSender, key: ByteArray = ECDH_SHARE_KEY) {
+        val from = sender sync 20 * 1000
+        if (from == null) {
+            callback(LoginResult.ServerTimeout)
+        } else {
+            from.body.readLoginPacket(key) { result, tlvMap ->
+                tlvMap[0x146]?.let {
+                    println(String(it))
+                }
+
+                tlvMap[0x508]?.let {
+                    println(String(it))
+                }
+
+                tlvMap[0x104]?.let { userStInfo.t104 = it }
+                tlvMap[0x403]?.let { session.randSeed = it }
+
+                val t402 = tlvMap[0x402]?.also {
+                    userStInfo.G = MD5.toMD5Byte(device.guid + session.pwd + it)
+                    // 字节组拼接
+                }
+
+                tlvMap[0x199]?.let {
+                    userStInfo.payToken = it
+                }
+
+                println("result: $result tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
+                when (result) {
+                    0 -> onSuccess(tlvMap[0x119])
+                    1 -> onPasswordWrong()
+                    2 -> onCaptcha(tlvMap[0x192]!!, tlvMap[0x546])
+                    6 -> callback(LoginResult.SliderVerifyFail)
+                    9 -> error("协议参数错误，请检查你的TLV是否正确")
+                    180 -> onRollBack(tlvMap[0x161])
+                    204 -> onDevicePass(t402, tlvMap[0x403])
+                    else -> error("unknown login result : $result")
+                }
+            }
+        }
     }
 
     private fun callback(loginResult: LoginResult) = threadManager.addTask { listener?.onLoginFinish(loginResult) }

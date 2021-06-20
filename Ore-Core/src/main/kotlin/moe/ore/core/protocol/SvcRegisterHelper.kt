@@ -5,11 +5,8 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.sendPacket
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.net.packet.PacketType
-import moe.ore.core.net.packet.ToService
 import moe.ore.core.protocol.tars.statsvc.RegisterReq
 import moe.ore.core.protocol.tars.statsvc.RegisterResp
-import moe.ore.helper.thread.ThreadManager
-import moe.ore.helper.toHexString
 import moe.ore.tars.UniPacket
 import moe.ore.util.TarsUtil
 import kotlin.random.Random
@@ -70,7 +67,11 @@ class SvcRegisterHelper(val uin: Long) {
         val uni = UniPacket()
         uni.put(req)
         uni.requestId = session.nextRequestId()
-        val from = ore.sendPacket("StatSvc.register", uni.encode(), PacketType.SvcRegister, userStSig.d2.ticket(), userStSig.tgt.ticket()) sync 5 * 1000
+        val from = ore.sendPacket("StatSvc.register", uni.encode(),
+            packetType = PacketType.SvcRegister,
+            firstToken = userStSig.d2.ticket(),
+            secondToken = userStSig.tgt.ticket()
+        ) sync 5 * 1000
         return if(from != null) {
             TarsUtil.decodeRequest(RegisterResp(), from.body).cReplyCode.toInt()
         } else {
