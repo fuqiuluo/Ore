@@ -55,6 +55,7 @@ object OreManager {
         val account = BotAccount(uin, password)
         val manager = DataManager.init(uin, path)
         manager.botAccount = account
+        botMap[uin] = ore
         return ore
     }
 
