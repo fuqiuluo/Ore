@@ -10,7 +10,7 @@ Tencent Protocol Project [8.7.5]
 
  - 本项目使用Java与Kotlin混合编程 代码混乱，切勿使用github查看源代码
  
- - 本项目采用了**kotlinx序列化**在获取依赖库时容易失败(遇到过) 请切换VPN等翻墙工具
+ - 本项目采用了**kotlinx序列化**在获取依赖库时容易失败(遇到过) 请使用加速器再build
 
 
 
