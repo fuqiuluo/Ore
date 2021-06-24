@@ -21,6 +21,9 @@
 
 package moe.ore.core.protocol.wtlogin
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import kotlinx.io.core.*
 import moe.ore.api.LoginResult
 import moe.ore.api.listener.CaptchaChannel
@@ -39,6 +42,7 @@ import moe.ore.helper.thread.ThreadManager
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
+import java.lang.Exception
 
 /**
  * 登录器
@@ -61,7 +65,73 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
     private fun invoke() {
         // println(Thread.currentThread().name)
         // 禁止使用nio线程进行堵塞等包操作
-        handle(sender = WtLoginPassword(uin).sendTo(client))
+//        handle(sender = WtLoginPassword(uin).sendTo(client))
+//        if (true)return
+        var json ="""
+            {
+              "uin": 3042628723,
+              "d2": "620a517209ca22545f929fd631ff6959cfa7103f1c1c497cca6881f1f555207f45d5ab5802bb9bf08d9501bf0cdd58ec507d2f017008c793f8caa857f0bf39cd",
+              "tgt": "846d7328d73da93e346b5ee44faf1f025af34dedfc9289f782da7ab7a2eb988743b6212d1ce315f65f72c7d1eca0a8d0d795d873e18332c4d0ee3b521cb32f50577616b7e6606c44",
+              "gtKey": "6e404176526d6737762b575366576b41",
+              "d2Key": "76615155562d232b75547d6923326d5f",
+              "encryptA1": "ffefcdc52b9417e9c1caac0addd2390dbfd3aef536d28adf2061a4c8f471b51107d6500d4b4ae17d80d888edf28592ed8cf7e15ae4bf4151b19ea76be740fd064849871c62ec845e1976e0503c16b3ccf04fab6bb462c7e03fe1b02e8a79ef6af37b28ffac56e76d068ce4ac179a905ed8209086340e6abc",
+              "tgtgt": "ffefcdc52b9417e9c1caac0addd2390dbfd3aef536d28adf2061a4c8f471b51107d6500d4b4ae17d80d888edf28592ed8cf7e15ae4bf4151b19ea76be740fd064849871c62ec845e1976e0503c16b3ccf04fab6bb462c7e03fe1b02e8a79ef6af37b28ffac56e76d068ce4ac179a905ed8209086340e6abc",
+              "noPicSig": "b99e8eddf14b2a02b35bf34071f2e7442a6d27c24ec9f67042a94c21d824a5c221b8e30e331cbd7269594d182042ee55b03e763638b53a4b",
+              "wtSessionTicketKey": "563b524950a4407373b2eca77cbf9dc7",
+              "wtSessionTicket": "c7f7b8af2df0b74efc27b564ac07f070f5d6259769eeff91e5a06b2f4fb010852c3fa7067899eb9689f944c0cc2b1948",
+              "G": "a0a27bf68810cae54c6f1b9cec8e899d",
+              "payToken": "",
+              "randSeed": "3733536d712c455d"
+            }
+        """.trimIndent()
+        val fromJson = Gson().fromJson(json, JsonObject::class.java)
+//        上线要的参数
+        userStInfo.d2 = BytesTicket(fromJson.get("d2").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.d2Key = BytesTicket(fromJson.get("d2Key").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.tgt = BytesTicket(fromJson.get("tgt").asString.hex2ByteArray(), System.currentTimeMillis())
+
+//        emp要的参数
+        userStInfo.encryptA1 = BytesTicket(fromJson.get("encryptA1").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.gtKey = BytesTicket(fromJson.get("gtKey").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.noPicSig = BytesTicket(fromJson.get("noPicSig").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.wtSessionTicket = BytesTicket(fromJson.get("wtSessionTicket").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.wtSessionTicketKey = BytesTicket(fromJson.get("wtSessionTicketKey").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.G = fromJson.get("G").asString.hex2ByteArray()
+        userStInfo.d2Key =BytesTicket(fromJson.get("d2Key").asString.hex2ByteArray(),System.currentTimeMillis())
+        device.tgtgt =BytesTicket(fromJson.get("tgtgt").asString.hex2ByteArray(),System.currentTimeMillis()).ticket()
+
+        session.randSeed=fromJson.get("randSeed").asString.hex2ByteArray()
+        val ret = SvcRegisterHelper(uin).register()
+        println(ret)
+        if (ret == 0) {
+            // 清空回滚
+            session.rollBackCount = 0
+            callback(LoginResult.Success)
+        } else callback(LoginResult.RegisterFail)
+
+
+        val sender = WtLoginEmp(uin).sendTo(client)
+        val from = sender sync 20 * 1000
+        from?.body?.readLoginPacket(userStInfo.wtSessionTicketKey.ticket()) { result, tlvMap ->
+            println("EMP : $result")
+            tlvMap[0x146]?.let {
+                // TODO: 2021/6/16 错误消息解析
+                val toByteReadPacket = it.toByteReadPacket()
+//                    val ver = toByteReadPacket.readInt()
+                val code = toByteReadPacket.readInt()
+                val title = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                val message = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                val errorInfo = toByteReadPacket.readString(toByteReadPacket.readShort().toInt())
+                println("code = [${code}], title = [${title}], message = [${message}], errorInfo = [${errorInfo}]")
+            }
+            if (result == 204) {
+                tlvMap[0x104]?.let { userStInfo.t104 = it }
+                onDevicePass(userStInfo.G, tlvMap[0x403])
+            } else {
+                TODO("意料之外的情况result：$result")
+            }
+        } ?: callback(LoginResult.ServerTimeout)
+
     }
 
     private inline fun onCaptcha(t192: ByteArray, t546: ByteArray?) {
@@ -111,7 +181,13 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
     private inline fun onSuccess(t119: ByteArray?) {
         t119?.let { source ->
-            val map = decodeTlv(TeaUtil.decrypt(source, device.tgtgt).toByteReadPacket())
+            val map = try{decodeTlv(TeaUtil.decrypt(source, device.tgtgt).toByteReadPacket())}catch (e:Exception) {
+                decodeTlv(TeaUtil.decrypt(source, userStInfo.gtKey.ticket()).toByteReadPacket())
+            }
+            println("t119 --> tlvMap: " + map.keys.map { "0x" + it.toHexString() })
+//            lgi    t119 --> tlvMap: [0x103, 0x203, 0x143, 0x305, 0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
+//            exp    t119 --> tlvMap: [0x103, 0x203, 0x108,        0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
+//                   t119 --> tlvMap: [0x103, 0x203,               0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
 
             val now = System.currentTimeMillis()
             val shelfLife = 86400L // 默认保质期一天
@@ -122,10 +198,12 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
             map[0x203]?.let { userStInfo.da2 = bsTicket(it) }
 
-            (map[0x143]!! to map[0x305]!!).run {
-                userStInfo.d2 = bsTicket(first)
-                userStInfo.d2Key = bsTicket(second)
-            }
+            map[0x143]?.let { userStInfo.d2 = bsTicket(it) }
+            map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
+//            (map[0x143]!! to map[0x305]!!).run {
+//                userStInfo.d2 = bsTicket(first)
+//                userStInfo.d2Key = bsTicket(second)
+//            }
 
             (map[0x106]!! to map[0x10c]!!).run {
                 userStInfo.tgtgt = bsTicket(first)
@@ -298,8 +376,6 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
                 }
             }
 
-            println("t119 --> tlvMap: " + map.keys.map { "0x" + it.toHexString() })
-
             // handle(WtLoginEmp(uin).sendTo(client), userStInfo.wtSessionTicketKey.ticket())
 
 
@@ -312,13 +388,34 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
             } else callback(LoginResult.RegisterFail)
 
 
-
-            val sender = WtLoginEmp(uin).sendTo(client)
-            val from = sender sync 20 * 1000
-            from?.body?.readLoginPacket(userStInfo.wtSessionTicketKey.ticket()) { result, tlvMap ->
-                println("EMP : $result")
-
-            } ?: callback(LoginResult.ServerTimeout)
+            val loginJson = JsonObject()
+            loginJson.addProperty("uin", uin)
+            loginJson.addProperty("d2", userStInfo.d2.ticket().toHexString())
+            loginJson.addProperty("tgt", userStInfo.tgt.ticket().toHexString())
+            loginJson.addProperty("gtKey", userStInfo.gtKey.ticket().toHexString())
+            loginJson.addProperty("d2Key", userStInfo.d2Key.ticket().toHexString())
+            loginJson.addProperty("encryptA1", userStInfo.encryptA1.ticket().toHexString())
+            loginJson.addProperty("gtKey", userStInfo.gtKey.ticket().toHexString())
+            loginJson.addProperty("tgtgt", userStInfo.tgtgt.ticket().toHexString())
+            loginJson.addProperty("noPicSig", userStInfo.noPicSig.ticket().toHexString())
+            loginJson.addProperty("wtSessionTicketKey", userStInfo.wtSessionTicketKey.ticket().toHexString())
+            loginJson.addProperty("wtSessionTicket", userStInfo.wtSessionTicket.ticket().toHexString())
+            loginJson.addProperty("G", userStInfo.G.toHexString())
+            loginJson.addProperty("payToken", userStInfo.payToken.toHexString())
+            loginJson.addProperty("randSeed", session.randSeed.toHexString())
+            val gson = GsonBuilder().setPrettyPrinting().create()
+            println(gson.toJson(loginJson))
+//            val sender = WtLoginEmp(uin).sendTo(client)
+//            val from = sender sync 20 * 1000
+//            from?.body?.readLoginPacket(userStInfo.wtSessionTicketKey.ticket()) { result, tlvMap ->
+//                println("EMP : $result")
+//                if (result==204){
+//                    onDevicePass(userStInfo.G, tlvMap[0x403])
+//                }else{
+//                    val get = decodeTlv(TeaUtil.decrypt(tlvMap[0x119],userStInfo.gtKey.ticket()).toByteReadPacket())
+//                    println(get.keys.map { "0x" + it.toHexString() })
+//                }
+//            } ?: callback(LoginResult.ServerTimeout)
 
         }
     }
@@ -378,7 +475,7 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
     private fun callback(loginResult: LoginResult) = threadManager.addTask { listener?.onLoginFinish(loginResult) }
 }
 
-private inline fun ByteArray.readLoginPacket(key : ByteArray, block: (Int, Map<Int, ByteArray>) -> Unit) {
+private inline fun ByteArray.readLoginPacket(key: ByteArray, block: (Int, Map<Int, ByteArray>) -> Unit) {
     val reader = this.toByteReadPacket()
     reader.discardExact(1 + 2 + 2 + 2 + 2)
     // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)
