@@ -21,6 +21,7 @@
 
 package moe.ore.core.protocol.wtlogin
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import kotlinx.io.core.*
@@ -64,24 +65,42 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
     private fun invoke() {
         // println(Thread.currentThread().name)
         // 禁止使用nio线程进行堵塞等包操作
-        handle(sender = WtLoginPassword(uin).sendTo(client))
-        if (true)return
+//        handle(sender = WtLoginPassword(uin).sendTo(client))
+//        if (true)return
+        var json ="""
+            {
+              "uin": 3042628723,
+              "d2": "620a517209ca22545f929fd631ff6959cfa7103f1c1c497cca6881f1f555207f45d5ab5802bb9bf08d9501bf0cdd58ec507d2f017008c793f8caa857f0bf39cd",
+              "tgt": "846d7328d73da93e346b5ee44faf1f025af34dedfc9289f782da7ab7a2eb988743b6212d1ce315f65f72c7d1eca0a8d0d795d873e18332c4d0ee3b521cb32f50577616b7e6606c44",
+              "gtKey": "6e404176526d6737762b575366576b41",
+              "d2Key": "76615155562d232b75547d6923326d5f",
+              "encryptA1": "ffefcdc52b9417e9c1caac0addd2390dbfd3aef536d28adf2061a4c8f471b51107d6500d4b4ae17d80d888edf28592ed8cf7e15ae4bf4151b19ea76be740fd064849871c62ec845e1976e0503c16b3ccf04fab6bb462c7e03fe1b02e8a79ef6af37b28ffac56e76d068ce4ac179a905ed8209086340e6abc",
+              "tgtgt": "ffefcdc52b9417e9c1caac0addd2390dbfd3aef536d28adf2061a4c8f471b51107d6500d4b4ae17d80d888edf28592ed8cf7e15ae4bf4151b19ea76be740fd064849871c62ec845e1976e0503c16b3ccf04fab6bb462c7e03fe1b02e8a79ef6af37b28ffac56e76d068ce4ac179a905ed8209086340e6abc",
+              "noPicSig": "b99e8eddf14b2a02b35bf34071f2e7442a6d27c24ec9f67042a94c21d824a5c221b8e30e331cbd7269594d182042ee55b03e763638b53a4b",
+              "wtSessionTicketKey": "563b524950a4407373b2eca77cbf9dc7",
+              "wtSessionTicket": "c7f7b8af2df0b74efc27b564ac07f070f5d6259769eeff91e5a06b2f4fb010852c3fa7067899eb9689f944c0cc2b1948",
+              "G": "a0a27bf68810cae54c6f1b9cec8e899d",
+              "payToken": "",
+              "randSeed": "3733536d712c455d"
+            }
+        """.trimIndent()
+        val fromJson = Gson().fromJson(json, JsonObject::class.java)
 //        上线要的参数
-        userStInfo.d2 = BytesTicket("a7d6c39e3a9a039a945bbe7ca8c00b193278c75a82137b7d10530fde75adb47d0997b78a1a0b30a0f35b1c0cbf90d7eda07bb1453f115d2c25d587803d6e757a".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.d2Key = BytesTicket("704e774e2c412a47473b717432387549".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.tgt = BytesTicket("d28961ac3fdd8c9938aebe9e4343fb44f2fb7dd066288b2795309753d0c256e753639902709f19138ab7dccd573f27409e3dab5ee4b93adba0e6e438cddb6733b644db6fb2ba48e4".hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.d2 = BytesTicket(fromJson.get("d2").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.d2Key = BytesTicket(fromJson.get("d2Key").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.tgt = BytesTicket(fromJson.get("tgt").asString.hex2ByteArray(), System.currentTimeMillis())
 
 //        emp要的参数
-        userStInfo.encryptA1 = BytesTicket("a3e2071ae7b24b10bbf0c6a749d898eecfcae15e7b5a18376675a1583045ead81e2e23b48fdbf453f3ce18ec08597f2e70175fe9fdd8ebde410f455b8befa316a62419ebf3d792f1fda9b0fa6227cafa6b7bfccd19ed301f77a5b30b082bbce896c434b030e7f8c48a6d3cd61d8c48ed079103ffb3748f33".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.gtKey = BytesTicket("3f67254b684e496a7066524a4871534d".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.noPicSig = BytesTicket("99e5f1760879377b68e713d1a86dbf6b92bf14f8a6252cef2d573976274191a9e08abc7f0b903f4795251a4f783cba901c0c03cabeb3e47f".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.wtSessionTicket = BytesTicket("6ee7b5f7237fd575eb073cf991f01e107bdcadedfd74cf547dbdf66facc4bf6094a832bc6f792360813ffd67428430fe".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.wtSessionTicketKey = BytesTicket("45a77e0e3ee55319acd9f12e1d9529e6".hex2ByteArray(), System.currentTimeMillis())
-        userStInfo.G = "5ed21043bc88f1f7916e837c2b815d1d".hex2ByteArray()
-        userStInfo.d2Key =BytesTicket("704e774e2c412a47473b717432387549".hex2ByteArray(),System.currentTimeMillis())
-        device.tgtgt =BytesTicket("d94804d2ba7c69e3af5ee7298c8c6bc422ae0f3e7a092ded986817a0aecd56682334288c4164e4579b2bfb61d9e800d3fc6ab5164ab92bf749a8ec902500fea1beca992ce3bb12f0bac6c2fb1d97b53fc69e78dda18e59d4d8bac10dd740c8c6fc9c284dde2fc55b0f2dd110c1423d828eabdfb4f102dc55".hex2ByteArray(),System.currentTimeMillis()).ticket()
+        userStInfo.encryptA1 = BytesTicket(fromJson.get("encryptA1").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.gtKey = BytesTicket(fromJson.get("gtKey").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.noPicSig = BytesTicket(fromJson.get("noPicSig").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.wtSessionTicket = BytesTicket(fromJson.get("wtSessionTicket").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.wtSessionTicketKey = BytesTicket(fromJson.get("wtSessionTicketKey").asString.hex2ByteArray(), System.currentTimeMillis())
+        userStInfo.G = fromJson.get("G").asString.hex2ByteArray()
+        userStInfo.d2Key =BytesTicket(fromJson.get("d2Key").asString.hex2ByteArray(),System.currentTimeMillis())
+        device.tgtgt =BytesTicket(fromJson.get("tgtgt").asString.hex2ByteArray(),System.currentTimeMillis()).ticket()
 
-        session.randSeed="455e505d712d5a49".hex2ByteArray()
+        session.randSeed=fromJson.get("randSeed").asString.hex2ByteArray()
         val ret = SvcRegisterHelper(uin).register()
         println(ret)
         if (ret == 0) {
@@ -93,7 +112,7 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
         val sender = WtLoginEmp(uin).sendTo(client)
         val from = sender sync 20 * 1000
-        from?.body?.readLoginPacket(session.randomKey) { result, tlvMap ->
+        from?.body?.readLoginPacket(userStInfo.wtSessionTicketKey.ticket()) { result, tlvMap ->
             println("EMP : $result")
             tlvMap[0x146]?.let {
                 // TODO: 2021/6/16 错误消息解析
@@ -168,7 +187,7 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
             println("t119 --> tlvMap: " + map.keys.map { "0x" + it.toHexString() })
 //            lgi    t119 --> tlvMap: [0x103, 0x203, 0x143, 0x305, 0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
 //            exp    t119 --> tlvMap: [0x103, 0x203, 0x108,        0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
-//                     t119 --> tlvMap: [0x103, 0x203,               0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
+//                   t119 --> tlvMap: [0x103, 0x203,               0x106, 0x10a, 0x10c, 0x10d, 0x10e, 0x550, 0x512, 0x114, 0x118, 0x11a, 0x11d, 0x11f, 0x120, 0x322, 0x522, 0x163, 0x528, 0x16a, 0x16d, 0x130, 0x133, 0x134, 0x537, 0x138]
 
             val now = System.currentTimeMillis()
             val shelfLife = 86400L // 默认保质期一天
@@ -179,10 +198,12 @@ internal class WtLoginHelper(private val uin: Long, private val client: BotClien
 
             map[0x203]?.let { userStInfo.da2 = bsTicket(it) }
 
-            (map[0x143]!! to map[0x305]!!).run {
-                userStInfo.d2 = bsTicket(first)
-                userStInfo.d2Key = bsTicket(second)
-            }
+            map[0x143]?.let { userStInfo.d2 = bsTicket(it) }
+            map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
+//            (map[0x143]!! to map[0x305]!!).run {
+//                userStInfo.d2 = bsTicket(first)
+//                userStInfo.d2Key = bsTicket(second)
+//            }
 
             (map[0x106]!! to map[0x10c]!!).run {
                 userStInfo.tgtgt = bsTicket(first)
