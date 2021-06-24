@@ -53,6 +53,7 @@ class WtLoginSigInfo {
     // 用t106和t10c计算得到 from QQ 8.6.0
     lateinit var encryptA1: BytesTicket
 
+    // TODO: 2021/6/24 到底归属于 dev还是sig
     lateinit var tgtgt : BytesTicket
 
     // from 10c

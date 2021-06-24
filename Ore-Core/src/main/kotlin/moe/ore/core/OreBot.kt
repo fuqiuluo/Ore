@@ -77,6 +77,10 @@ class OreBot(val uin: Long) : Ore() {
         client.connect()
     }
 
+    fun loginWtToken(){
+
+    }
+
     override fun status() = status
 
     override fun shut() {
