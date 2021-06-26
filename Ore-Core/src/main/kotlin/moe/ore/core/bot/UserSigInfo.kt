@@ -22,7 +22,7 @@
 package moe.ore.core.bot
 
 import kotlinx.serialization.Serializable
-class WtLoginSigInfo {
+class UserSigInfo {
     lateinit var tgtKey: BytesTicket
     // A2
     lateinit var tgt: BytesTicket

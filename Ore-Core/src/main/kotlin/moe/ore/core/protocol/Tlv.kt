@@ -22,8 +22,10 @@
 package moe.ore.core.protocol
 
 import kotlinx.io.core.*
+import moe.ore.core.bot.BotAccount
+import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.bot.LoginExtraData
-import moe.ore.core.helper.DataManager
+import moe.ore.core.bot.SsoSession
 import moe.ore.core.helper.encodeProtobuf
 import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.*
@@ -31,21 +33,21 @@ import moe.ore.util.MD5
 import kotlin.random.Random
 import kotlin.experimental.or
 
-class Tlv(val uin: Long) {
-    private val dataManager = DataManager.manager(uin)
-    private val deviceInfo = dataManager.deviceInfo
-//    private val recorder = dataManager.recorder
-    private val session = dataManager.session
-
+class Tlv(
+    private val account: BotAccount,
+    private val deviceInfo : DeviceInfo,
+    private val session: SsoSession,
+    protocolType: ProtocolInternal.ProtocolType
+) {
     /**
      * 协议信息
      */
-    private val protocolInfo = ProtocolInternal[dataManager.protocolType]
+    private val protocolInfo = ProtocolInternal[protocolType]
 
     fun t1() = buildTlv(0x1) {
         writeShort(protocolInfo.ipVersion)
         writeInt(Random.nextInt())
-        writeLongToBuf32(uin)
+        writeLongToBuf32(account.uin)
         writeInt(currentTimeSeconds())
         writeFully(deviceInfo.clientIp)
         writeShort(0)
@@ -62,13 +64,13 @@ class Tlv(val uin: Long) {
         writeInt(protocolInfo.ssoVersion)
         writeInt(protocolInfo.subAppId)
         writeInt(0)
-        writeLongToBuf32(uin)
+        writeLongToBuf32(account.uin)
         writeInt(session.rollBackCount)
         // 默认开始是0，回滚（rollback）一次就+1
     }
 
-    fun t10a() = buildTlv(0x10a) {
-        writeBytesWithShortLen(dataManager.wLoginSigInfo.tgt.ticket())
+    fun t10a(tgt : ByteArray) = buildTlv(0x10a) {
+        writeBytesWithShortLen(tgt)
     }
 
     fun t100(appId : Int = protocolInfo.appId, mainSigMap : Int = protocolInfo.mainSigMap) = buildTlv(0x100) {
@@ -86,25 +88,25 @@ class Tlv(val uin: Long) {
     }
 
     fun t106() = buildTlv(0x106) {
-        writeTeaEncrypt(dataManager.botAccount.bytesMd5PasswordWithQQ) {
+        writeTeaEncrypt(account.bytesMd5PasswordWithQQ) {
             writeShort(protocolInfo.tgtgVersion)
             writeInt(Random.nextInt())
             writeInt(protocolInfo.msfSsoVersion)
             writeInt(protocolInfo.subAppId)
             writeInt(0)
             writeInt(0)
-            writeLongToBuf32(uin)
+            writeLongToBuf32(account.uin)
             writeInt(currentTimeSeconds())
             writeFully(deviceInfo.clientIp)
             writeByte(1.toByte())
-            writeBytes(dataManager.botAccount.bytesMd5Password)
+            writeBytes(account.bytesMd5Password)
             writeBytes(deviceInfo.tgtgt)
             writeInt(0)
             writeBoolean(protocolInfo.isGuidAvailable)
             writeBytes(deviceInfo.guid)
             writeInt(protocolInfo.appId)
             writeInt(protocolInfo.loginType)
-            writeStringWithShortLen(uin.toString())
+            writeStringWithShortLen(account.uin.toString())
             writeShort(0)
         }
     }
@@ -125,7 +127,7 @@ class Tlv(val uin: Long) {
     }
 
     fun t112() = buildTlv(0x112) {
-        writeString(uin.toString())
+        writeString(account.uin.toString())
     }
 
     fun t116(appidArray : IntArray = intArrayOf(0x5f5e10e2)) = buildTlv(0x116) {
@@ -171,8 +173,8 @@ class Tlv(val uin: Long) {
         writeStringWithShortLen(protocolInfo.packageName)
     }
 
-    fun t143() = buildTlv(0x143) {
-        writeBytesWithShortLen(dataManager.wLoginSigInfo.d2.ticket())
+    fun t143(d2 : ByteArray) = buildTlv(0x143) {
+        writeBytesWithShortLen(d2)
     }
 
     fun t144(key : ByteArray = deviceInfo.tgtgt) = buildTlv(0x144) {
@@ -281,8 +283,8 @@ class Tlv(val uin: Long) {
         writeByte(0.toByte())
     }
 
-    fun t201() = buildTlv(0x201) {
-        writeBytesWithShortLen(dataManager.wLoginSigInfo.payToken)
+    fun t201(payToken : ByteArray) = buildTlv(0x201) {
+        writeBytesWithShortLen(payToken)
         writeStringWithShortLen("")
         writeStringWithShortLen("qq")
         writeStringWithShortLen("") // channelId
@@ -296,7 +298,7 @@ class Tlv(val uin: Long) {
     fun t400(g: ByteArray) = buildTlv(0x400) {
         writeTeaEncrypt(g) {
             writeByte(1) // version
-            writeLong(uin)
+            writeLong(account.uin)
             writeFully(deviceInfo.guid)
             writeFully(session.pwd)
             writeInt(protocolInfo.appId)
@@ -306,13 +308,13 @@ class Tlv(val uin: Long) {
         }
     }
 
-    fun t401() = buildTlv(0x401) {
+    fun t401(g: ByteArray) = buildTlv(0x401) {
         /**
         builder.writeBytes(deviceInfo.guid)
         builder.writeBytes(dataManager.wLoginSigInfo.dpwd)
         builder.writeBytes(dt402)
          **/
-        writeBytes(dataManager.wLoginSigInfo.G)
+        writeBytes(g)
     }
 
     fun t402(dt402: ByteArray) = buildTlv(0x402) {
@@ -378,7 +380,7 @@ class Tlv(val uin: Long) {
         writeByte(1)
         writeByte(loginExtraData.size.toByte())
         for (extraData in loginExtraData) {
-            writeLong(uin)
+            writeLong(extraData.uin)
             writeByte(extraData.ip.size.toByte())
             writeBytes(extraData.ip)
             writeInt(extraData.time)

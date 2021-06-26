@@ -61,7 +61,7 @@ public class TarsOutputStream {
         this.sServerEncoding = se;
     }
 
-    private final BytePacketBuilder bs = BytePacketExtKt.createBuilder();
+    private final BytePacketBuilder bs = BytePacketExtKt.newBuilder();
 
     public BytePacketBuilder getByteBuilder() {
         return bs;

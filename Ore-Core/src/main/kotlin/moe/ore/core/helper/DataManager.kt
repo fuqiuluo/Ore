@@ -21,27 +21,37 @@
 
 package moe.ore.core.helper
 
-import kotlinx.serialization.Serializable
 import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
-//import moe.ore.core.bot.BotRecorder
+import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.bot.SsoSession
-import moe.ore.core.bot.WtLoginSigInfo
+import moe.ore.core.bot.UserSigInfo
+import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil.checkAccount
+import moe.ore.helper.runtimeError
+import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
-import moe.ore.util.BytesUtil
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
-import moe.ore.helper.hex2ByteArray
-import moe.ore.helper.runtimeError
-import moe.ore.helper.xor
 import java.io.File
-import java.util.*
 
-class DataManager private constructor(uin: Long, path: String, private val safePwd: String) : TarsStructBase() {
+class DataManager private constructor(
+    uin: Long,
+    /**
+     * 数据保存路径
+     */
+    path: String,
+    // 暂时移除
+    // private val safePwd: String
+    ) : TarsStructBase() {
+
+    /**
+     * 线程管理器
+     */
+    val threadManager = ThreadManager[uin]
 
     /**
      * 数据保存目录
@@ -61,10 +71,12 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
     lateinit var botAccount: BotAccount
 
+    val ecdh : PiratedEcdh by lazy { PiratedEcdh() }
+
     /**
      * 保存各种Token
      */
-    val wLoginSigInfo: WtLoginSigInfo = WtLoginSigInfo()
+    val userSigInfo: UserSigInfo = UserSigInfo()
 
     /**
      * 模拟的安卓信息
@@ -83,7 +95,11 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
      * 销毁
      */
     fun destroy() {
+        threadManager.shutdown()
+
         flush()
+
+
         println("destroy")
         // TODO: 2021/6/6 销毁之前序列化到本地文件
         // 清空自身类里面的map或存在引用关系的事务
@@ -98,102 +114,9 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
     }
 
-    private fun xor(value: ByteArray) = if (safePwd.isBlank()) value else value.xor(safePwd.toByteArray())
-
     @Override
     override fun readFrom(input: TarsInputStream) {
 
-    }
-
-    @Serializable
-    class DeviceInfo {
-        enum class NetworkType(val value: Int) {
-            /**
-             * 移动网络
-             */
-            MOBILE(1),
-
-            /**
-             * Wifi
-             */
-            WIFI(2),
-
-            /**
-             * 其他任何类型
-             */
-            OTHER(0),
-        }
-
-        var imei: String = " 867109044454073"
-        var androidId: String = "53f156a0b5b89966"
-        var imsi: String = "460023785098616"
-        var model: String = "M2002J9E"
-        var osType: String = "android"
-        var brand: String = "Xiaomi"
-        var androidVersion: String = "11"
-        var androidSdkVersion: Int = 30
-        var wifiSsid: String = "<unknown ssid>"
-        var wifiBSsid = "02:00:00:00:00:00"
-        var macAddress = "02:00:00:00:00:00"
-        var netType: NetworkType = NetworkType.WIFI
-
-        var apn = if (netType == NetworkType.WIFI) {
-            "wifi"
-        } else {
-            "cmnet"
-        }
-
-        var apnName = "中国移动"
-        var ksid: ByteArray = "31008c9064e89b48f20765fd739edd1e".hex2ByteArray()
-
-        // %4;7t>;28<fc.5*6
-        var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
-
-        // 实际上在逆向8.7.5时 并没有出现md5(macAddr) 而是随机了一个16字节的东西
-        // 不保存 懒加载在线合成
-        var tgtgt: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
-
-        // expamel 1, 0, 0, 127 是倒过来的哦！
-        var clientIp = byteArrayOf(0, 0, 0, 0)
-
-        companion object {
-            @JvmStatic
-            private fun getImei15(imei: String): String {
-                val imeiChar = imei.toCharArray()
-                var resultInt = 0
-                var i = 0
-                while (i < imeiChar.size) {
-                    val a = imeiChar[i].toString().toInt()
-                    i++
-                    val temp = imeiChar[i].toString().toInt() * 2
-                    val b = if (temp < 10) temp else temp - 9
-                    resultInt += a + b
-                    i++
-                }
-                resultInt %= 10
-                resultInt = if (resultInt == 0) 0 else 10 - resultInt
-                return imei + resultInt
-            }
-
-            @JvmStatic
-            private fun getRandomAndroidId(): String {
-                return UUID.randomUUID().toString().replace("-", "").substring(0, 16)
-            }
-
-            @JvmStatic
-            private fun getRandomMacAddress(): String {
-                val randomKey = BytesUtil.randomKey(6)
-                val sb = StringBuilder()
-                val length: Int = randomKey.size
-                for (i in 0 until length) {
-                    sb.append(String.format("%02X:", java.lang.Byte.valueOf(randomKey[i])))
-                }
-                if (sb.isNotEmpty()) {
-                    sb.deleteCharAt(sb.length - 1)
-                }
-                return sb.toString()
-            }
-        }
     }
 
     companion object {
@@ -213,12 +136,7 @@ class DataManager private constructor(uin: Long, path: String, private val safeP
 
         @JvmStatic
         fun init(uin: Long, path: String): DataManager {
-            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path, "") }
-        }
-
-        @JvmStatic
-        fun init(uin: Long, path: String, safePwd: String): DataManager {
-            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path, safePwd) }
+            return managerMap.getOrPut(checkAccount(uin)) { DataManager(uin, path) }
         }
 
         @JvmStatic

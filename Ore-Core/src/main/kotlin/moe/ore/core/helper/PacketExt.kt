@@ -48,7 +48,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
         // println("type : %s, packet : %s".format(keyType, packetType))
 
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
-            1 -> manager.wLoginSigInfo.d2Key.ticket()
+            1 -> manager.userSigInfo.d2Key.ticket()
             2 -> DEFAULT_TEA_KEY
             else -> runtimeError("unknown key type : $keyType")
         }).reader {

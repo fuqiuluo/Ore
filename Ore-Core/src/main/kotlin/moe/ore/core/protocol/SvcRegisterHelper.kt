@@ -18,7 +18,7 @@ class SvcRegisterHelper(val uin: Long) {
 
     val ore = OreManager.getBot(uin)!!
     val manager = DataManager.manager(uin)
-    val userStSig = manager.wLoginSigInfo
+    val userStSig = manager.userSigInfo
     val protocolInfo = ProtocolInternal[manager.protocolType]
     val session = manager.session
 

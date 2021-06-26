@@ -24,7 +24,6 @@ package moe.ore.core.net.packet
 import moe.ore.core.helper.*
 import moe.ore.core.net.BotClient
 import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.core.protocol.wtlogin.WtLogin
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
@@ -50,7 +49,7 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
 fun ToService.sendTo(client: BotClient) : PacketSender {
     val uin = client.uin
     val manager = DataManager.manager(uin)
-    val userStSig = manager.wLoginSigInfo
+    val userStSig = manager.userSigInfo
     val protocolInfo = ProtocolInternal[manager.protocolType]
     val session = manager.session
     val deviceInfo = manager.deviceInfo
@@ -60,7 +59,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         // PacketType.ServicePacket,
         PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
-    val out = createBuilder().apply { writeBlockWithIntLen(4) {
+    val out = newBuilder().apply { writeBlockWithIntLen( { it + 4 } ) {
         writeInt(packetType.flag1)
         writeByte(packetType.flag2)
         when(packetType) {
@@ -77,8 +76,8 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
             writeInt(it.length + 4)
             writeString(it)
         }
-        writeBytes(TeaUtil.encrypt(createBuilder().apply {
-            writeBlockWithIntLen(4) {
+        writeBytes(TeaUtil.encrypt(newBuilder().apply {
+            writeBlockWithIntLen({ it + 4 }) {
                 when(packetType) {
                     PacketType.SvcRegister, PacketType.LoginPacket -> {
                         writeInt(seq)
@@ -132,6 +131,9 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
             writeBytes(body)
         }.toByteArray(), teaKey))
     } }.toByteArray()
+
+    // println(out.toHexString())
+
     return PacketSender(client, out, commandName, seq)
 }
 

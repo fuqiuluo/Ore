@@ -48,7 +48,7 @@ import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import kotlin.text.toByteArray
 
-fun createBuilder() = BytePacketBuilder()
+fun newBuilder() = BytePacketBuilder()
 
 /**
  * 转字节组
@@ -113,17 +113,17 @@ fun BytePacketBuilder.writeBytesWithShortLen(bytes: ByteArray) {
     writeBytes(bytes)
 }
 
-fun BytePacketBuilder.writeBlockWithIntLen(increment : Int = 0, block: BytePacketBuilder.() -> Unit, ) {
-    val builder = createBuilder()
+fun BytePacketBuilder.writeBlockWithIntLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit, ) {
+    val builder = newBuilder()
     builder.block()
-    this.writeInt(builder.size + increment)
+    this.writeInt(len(builder.size))
     this.writePacket(builder)
 }
 
-fun BytePacketBuilder.writeBlockWithShortLen(increment : Int = 0, block: BytePacketBuilder.() -> Unit) {
-    val builder = createBuilder()
+fun BytePacketBuilder.writeBlockWithShortLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit) {
+    val builder = newBuilder()
     builder.block()
-    this.writeShort(builder.size + increment)
+    this.writeShort(len(builder.size))
     this.writePacket(builder)
 }
 
@@ -132,7 +132,7 @@ fun BytePacketBuilder.md5(): ByteArray {
 }
 
 inline fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBuilder.() -> Unit) {
-    val body = createBuilder()
+    val body = newBuilder()
     body.block()
     this.writeBytes(TeaUtil.encrypt(body.toByteArray(), key))
 }

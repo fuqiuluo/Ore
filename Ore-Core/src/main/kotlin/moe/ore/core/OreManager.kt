@@ -51,9 +51,9 @@ object OreManager {
      * @return Ore
      */
     fun addBot(uin: Long, password: String, path: String = "data/"): Ore {
-        val ore = OreBot(uin)
         val account = BotAccount(uin, password)
         val manager = DataManager.init(uin, path)
+        val ore = OreBot(uin)
         manager.botAccount = account
         botMap[uin] = ore
         return ore

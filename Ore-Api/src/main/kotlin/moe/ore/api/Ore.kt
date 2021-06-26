@@ -33,7 +33,6 @@ abstract class Ore {
      */
     var oreListener: OreListener? = null
 
-
     /**
      * 登录
      */
