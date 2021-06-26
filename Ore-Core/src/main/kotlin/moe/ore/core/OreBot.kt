@@ -80,7 +80,7 @@ class OreBot(val uin: Long) : Ore() {
 
 fun main() {
     // 3042628723
-    val ore = OreManager.addBot(3042628728, "911586abcd", "C:\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
 
     ore.oreListener = object : OreListener {
         override fun onLoginStart() {

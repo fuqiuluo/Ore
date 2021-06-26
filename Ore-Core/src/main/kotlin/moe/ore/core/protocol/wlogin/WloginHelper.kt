@@ -8,9 +8,11 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
+import moe.ore.core.protocol.wlogin.request.WtLoginDevicePass
 import moe.ore.core.protocol.wlogin.request.WtLoginPassword
 import moe.ore.core.protocol.wlogin.request.WtLoginSlider
 import moe.ore.helper.toByteReadPacket
+import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 
 class WloginHelper(val uin : Long,
@@ -41,6 +43,7 @@ class WloginHelper(val uin : Long,
                     0 -> eventHandler.onSuccess(tlvMap)
                     1 -> eventHandler.onPasswordWrong(tlvMap)
                     2 -> eventHandler.onCaptcha(tlvMap)
+                    204 -> eventHandler.onDevicePass(tlvMap)
                     else -> error("unknown login result : $result")
                 }
             }
@@ -86,15 +89,16 @@ class EventHandler(
     private val client: BotClient,
     private val helper: WloginHelper
 ) {
-    val manager = DataManager.manager(helper.uin)
-    val userStSig = manager.userSigInfo
+    private val manager = DataManager.manager(helper.uin)
+    private val userStSig = manager.userSigInfo
+    private val session = manager.session
+    private val device = manager.deviceInfo
 
     fun callback(result: LoginResult) {
         listener?.runCatching { onLoginFinish(result) }
     }
 
     fun onSuccess(tlvMap: Map<Int, ByteArray>) {
-
         callback(LoginResult.Success)
     }
 
@@ -114,6 +118,16 @@ class EventHandler(
                 helper.handle(WtLoginSlider(helper.uin, ticket, tlvMap[0x546]).sendTo(client))
             }
         })
+    }
+
+    fun onDevicePass(tlvMap: Map<Int, ByteArray>) {
+        // t402只有产生设备锁的时候产生
+        val t402 = tlvMap[0x402]?.also {
+            userStSig.G = MD5.toMD5Byte(device.guid + session.pwd + it)
+            // 字节组拼接
+        }!!
+        tlvMap[0x104]?.let { userStSig.t104 = it }
+        helper.handle(WtLoginDevicePass(helper.uin, userStSig.G, t402, tlvMap[0x403]).sendTo(client))
     }
 }
 
