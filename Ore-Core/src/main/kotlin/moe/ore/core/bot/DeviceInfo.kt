@@ -1,12 +1,10 @@
 package moe.ore.core.bot
 
-import kotlinx.serialization.Serializable
 import moe.ore.helper.hex2ByteArray
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import java.util.*
 
-@Serializable
 class DeviceInfo {
     enum class NetworkType(val value: Int) {
         /**
@@ -26,7 +24,7 @@ class DeviceInfo {
     }
 
     var imei: String = " 867109044454073"
-    // 53f156a0b5b89966
+    // 53f156a0b5b89966【真的】  53f256a0aaff9966【假的】
     var androidId: String = "53f156a0b5b89966"
     var imsi: String = "460023785098616"
     var model: String = "M2002J9E"

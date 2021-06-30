@@ -9,7 +9,7 @@ class WtLoginPassword(uin : Long) : WtRequest(uin, CMD_LOGIN, 0x810, 9, 0x87) {
     override fun packetType(): PacketType = PacketType.LoginPacket
 
     override fun makeTlv(seq : Int): ByteArray = newBuilder().apply {
-        writeShort(27)
+        writeShort(25)
         writeBytes(tlv.t18())
         writeBytes(tlv.t1())
         writeBytes(tlv.t106())
@@ -44,8 +44,9 @@ class WtLoginPassword(uin : Long) : WtRequest(uin, CMD_LOGIN, 0x810, 9, 0x87) {
         writeBytes(tlv.t516())
         writeBytes(tlv.t521())
         writeBytes(tlv.t525())
-        writeBytes(tlv.t544())
-        writeBytes(tlv.t545())
+        // writeBytes(tlv.t544())
+        // writeBytes(tlv.t545())
+        // 不需要
     }.toByteArray()
 
 }
