@@ -11,7 +11,9 @@ import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.wlogin.request.WtLoginDevicePass
 import moe.ore.core.protocol.wlogin.request.WtLoginPassword
 import moe.ore.core.protocol.wlogin.request.WtLoginSlider
+import moe.ore.helper.reader
 import moe.ore.helper.toByteReadPacket
+import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 
@@ -43,6 +45,7 @@ class WloginHelper(val uin : Long,
                     0 -> eventHandler.onSuccess(tlvMap)
                     1 -> eventHandler.onPasswordWrong(tlvMap)
                     2 -> eventHandler.onCaptcha(tlvMap)
+                    180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
                     else -> error("unknown login result : $result")
                 }
@@ -100,6 +103,10 @@ class EventHandler(
 
     fun onSuccess(tlvMap: Map<Int, ByteArray>) {
         callback(LoginResult.Success)
+
+
+
+
     }
 
     fun onPasswordWrong(tlvMap: Map<Int, ByteArray>) {
@@ -128,6 +135,31 @@ class EventHandler(
         }!!
         tlvMap[0x104]?.let { userStSig.t104 = it }
         helper.handle(WtLoginDevicePass(helper.uin, userStSig.G, t402, tlvMap[0x403]).sendTo(client))
+    }
+
+    fun onRollback(t161 : ByteArray?) {
+        t161?.reader {
+            val tlv = decodeTlv(this)
+
+            tlv[0x173]?.let {
+                println("t173 body : " + it.toHexString())
+            }
+
+            tlv[0x17f]?.let {
+                println("t17f body : " + it.toHexString())
+            }
+
+            tlv[0x172]?.let {
+                session.rollBackCount++
+                session.rollbackSig = it
+                client.connect()
+                /**
+                 * 回滚重新连接服务器
+                 */
+            // println("t173 body : " + it.toHexString())
+            }
+
+        }
     }
 }
 

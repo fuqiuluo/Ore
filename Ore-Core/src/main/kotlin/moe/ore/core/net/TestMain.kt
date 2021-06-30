@@ -21,41 +21,11 @@
 
 package moe.ore.core.net
 
-import com.google.gson.Gson
-import moe.ore.helper.hex2ByteArray
-import moe.ore.tars.UniPacket
-import moe.ore.util.OkhttpUtil
-import moe.ore.util.TeaUtil
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.util.*
-
 object TestMain {
     @Throws(InterruptedException::class)
     @JvmStatic
     fun main(args: Array<String>) {
 
-        var key = "F0441F5FF42DA58FDCF7949ABA62D411".hex2ByteArray()
-
-        val uniPacket = UniPacket()
-        uniPacket.servantName = "ConfigHttp"
-        uniPacket.funcName = "HttpServerListReq"
-        uniPacket.version = 3
-        uniPacket.put("HttpServerListReq", SsoServerInfoReq())
-
-        val encrypt = TeaUtil.encrypt(uniPacket.encode(), key)
-        val resp = OkhttpUtil().post("https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist", encrypt.toRequestBody())
-        val decrypt = TeaUtil.decrypt(resp?.body?.bytes(), key)
-        println(decrypt.toAsciiHexString())
-        val decode = UniPacket.decode(decrypt)
-        val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
-        println(Gson().toJson(findByClass))
-        for (ipAddressInfo in findByClass.b!!) {
-            println(ipAddressInfo.ip + ":" + ipAddressInfo.port)
-        }
-    }
-
-    fun ByteArray.toAsciiHexString() = joinToString("") {
-        if (it in 32..127) it.toInt().toChar().toString() else "{${it.toUByte().toString(16).padStart(2, '0').uppercase(Locale.getDefault())}}"
     }
 }
 

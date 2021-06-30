@@ -30,6 +30,7 @@ import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.protocol.wlogin.WloginHelper
+import moe.ore.core.util.QQUtil
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
 import java.util.*
@@ -95,6 +96,8 @@ fun main() {
         override fun onCaptcha(captchaChan: CaptchaChannel) {
 
             println(captchaChan.url)
+
+            print("请输入Ticket：")
             val ticket = Scanner(System.`in`).nextLine()
             captchaChan.submitTicket(ticket)
 

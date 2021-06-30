@@ -26,6 +26,7 @@ class DeviceInfo {
     }
 
     var imei: String = " 867109044454073"
+    // 53f156a0b5b89966
     var androidId: String = "53f156a0b5b89966"
     var imsi: String = "460023785098616"
     var model: String = "M2002J9E"
