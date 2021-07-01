@@ -4,3 +4,5 @@ include 'Ore-Base'
 include 'Ore-Core'
 include 'Ore-Api'
 include 'Ore-All'
+include 'Ore-Pay'
+

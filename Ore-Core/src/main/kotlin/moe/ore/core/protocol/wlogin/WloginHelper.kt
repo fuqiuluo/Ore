@@ -223,7 +223,7 @@ class WloginHelper(val uin : Long,
                 }
 
                 map[0x16d]?.let {
-                    userStInfo.superKey = bsTicket(it)
+                    userStInfo.superKey = strTicket(String(it))
                 }
 
                 map[0x16a]?.let {

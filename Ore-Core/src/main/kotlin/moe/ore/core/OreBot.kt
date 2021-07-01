@@ -21,22 +21,16 @@
 
 package moe.ore.core
 
-import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
-import moe.ore.api.listener.CaptchaChannel
-import moe.ore.api.listener.OreListener
-import moe.ore.api.listener.SmsHelper
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.protocol.wlogin.WloginHelper
-import moe.ore.core.util.QQUtil
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
-import java.util.*
 
-class OreBot(val uin: Long) : Ore() {
+class OreBot(uin: Long) : Ore(uin) {
     private val manager = DataManager.manager(uin)
 
     private val threadManager: ThreadManager = manager.threadManager
@@ -76,45 +70,7 @@ class OreBot(val uin: Long) : Ore() {
         // 关闭机器人
         this.status = OreStatus.Destroy
         DataManager.destroy(uin)
-
+        this.client.close()
     }
 }
 
-fun main() {
-    // 3042628723 911586abcd
-    val ore = OreManager.addBot(203411690, "911586ABc", "C:\\")
-
-    ore.oreListener = object : OreListener {
-        override fun onLoginStart() {
-            println("登录开始了，呼呼呼！！！")
-        }
-
-        override fun onLoginFinish(result: LoginResult) {
-            println("登录结果：$result")
-
-        }
-
-        override fun onCaptcha(captchaChan: CaptchaChannel) {
-
-            println(captchaChan.url)
-
-            print("请输入Ticket：")
-            val ticket = Scanner(System.`in`).nextLine()
-            captchaChan.submitTicket(ticket)
-
-
-        }
-
-        override fun onSms(sms: SmsHelper) {
-            println(sms)
-            println(sms.sendSms())
-            print("请输入SMSCode：")
-            val code = Scanner(System.`in`).nextLine()
-            sms.submitSms(code)
-        }
-
-
-    }
-    ore.login()
-
-}

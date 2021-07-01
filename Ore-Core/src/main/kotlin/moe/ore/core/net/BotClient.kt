@@ -107,4 +107,8 @@ class BotClient(val uin: Long) {
         connection.connect()
         return this
     }
+
+    fun close() {
+        connection.close()
+    }
 }
