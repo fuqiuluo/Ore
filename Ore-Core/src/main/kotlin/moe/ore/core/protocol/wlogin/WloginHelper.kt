@@ -4,6 +4,7 @@ import kotlinx.io.core.*
 import moe.ore.api.LoginResult
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
+import moe.ore.api.listener.SmsHelper
 import moe.ore.core.bot.BytesTicket
 import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.bot.StringTicket
@@ -13,6 +14,7 @@ import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
 import moe.ore.core.protocol.wlogin.request.WtLoginDevicePass
+import moe.ore.core.protocol.wlogin.request.WtLoginGetSmsCode
 import moe.ore.core.protocol.wlogin.request.WtLoginPassword
 import moe.ore.core.protocol.wlogin.request.WtLoginSlider
 import moe.ore.helper.readString
@@ -389,8 +391,32 @@ class WloginHelper(val uin : Long,
                 val mbGuideInfoMsg = reader.readString(reader.readUShort().toInt())
                 // 换绑操作
             }
+            listener?.onSms(object : SmsHelper() {
+                private var lastGetTime = 0L
+
+                override fun noticeStr(): String = noticeStr
+
+                override fun phoneNum(): String = smsInformation.phoneNum
+
+                override fun otherWayUrl(): String = otherWay
+
+                override fun sendSms(): Boolean {
+                    // 设置一分钟只能获取一次验证码
+                    if(lastGetTime + (60 * 1000) <= System.currentTimeMillis()) {
+                        val sender = WtLoginGetSmsCode(helper.uin).sendTo(client)
+                        val form = sender sync 20 * 1000
+                        if(form != null) {
 
 
+                        }
+                    }
+                    return false
+                }
+
+                override fun submitSms(code: String) {
+                    TODO("Not yet implemented")
+                }
+            })
         }
 
         fun onNetEnvWrong() {

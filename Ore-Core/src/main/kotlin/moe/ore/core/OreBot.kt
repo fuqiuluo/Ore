@@ -26,6 +26,7 @@ import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
+import moe.ore.api.listener.SmsHelper
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
@@ -102,6 +103,10 @@ fun main() {
             captchaChan.submitTicket(ticket)
 
 
+        }
+
+        override fun onSms(sms: SmsHelper) {
+            println(sms)
         }
 
 

@@ -27,6 +27,7 @@ import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.*
 import moe.ore.util.TeaUtil
+import java.util.*
 
 class ToService(val seq: Int, val commandName: String, val body: ByteArray) {
     var packetType: PacketType = PacketType.LoginPacket
@@ -158,7 +159,15 @@ open class PacketSender (
     /**
      * 异步
      */
-    fun call(block : ((FromService) -> Unit)? = null) {
+    fun call(block : ((FromService) -> Unit)? = null, timeout : Long = 5 * 1000) {
+        Timer().apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    client.unRegisterCommonHandler(handler.hashCode())
+                    this@apply.cancel()
+                }
+            }, timeout)
+        }
         this.client.send(body)
         this.block = block
     }

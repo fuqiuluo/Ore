@@ -25,30 +25,30 @@ import moe.ore.helper.hex2ByteArray
 import java.util.*
 
 class ProtocolInternal(
-    @JvmField internal var openAppId: Int,
-    @JvmField internal var appId: Int,
-    @JvmField internal var subAppId: Int,
-    @JvmField internal var pingVersion: Int,
-    @JvmField internal var ipVersion: Int,
-    @JvmField internal var ssoVersion: Int,
-    @JvmField internal var msfSsoVersion: Int,
-    @JvmField internal var tgtgVersion: Int,
-    @JvmField internal var mainSigMap: Int,
-    @JvmField internal var miscBitmap: Int,
-    @JvmField internal var subSigMap: Int,
-    @JvmField internal var dbVersion: Int,
-    @JvmField internal var buildTime: Int,
-    @JvmField internal var localId: Int,
-    @JvmField internal var protocolVersion: Int,
-    @JvmField internal var loginType: Int,
-    @JvmField internal var isGuidFromFileNull: Boolean = false, // 保存到文件的 GUID 是否为 null
-    @JvmField internal var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
-    @JvmField internal var isGuidChanged: Boolean = false, // GUID 是否有变动
-    @JvmField internal var buildVersion: String,
-    @JvmField internal var protocolDetail: String,
-    @JvmField internal var packageName: String,
-    @JvmField internal var packageVersion: String,
-    @JvmField internal var tencentSdkMd5: ByteArray,
+    @JvmField var openAppId: Int,
+    @JvmField var appId: Int,
+    @JvmField var subAppId: Int,
+    @JvmField var pingVersion: Int,
+    @JvmField var ipVersion: Int,
+    @JvmField var ssoVersion: Int,
+    @JvmField var msfSsoVersion: Int,
+    @JvmField var tgtgVersion: Int,
+    @JvmField var mainSigMap: Int,
+    @JvmField var miscBitmap: Int,
+    @JvmField var subSigMap: Int,
+    @JvmField var dbVersion: Int,
+    @JvmField var buildTime: Int,
+    @JvmField var localId: Int,
+    @JvmField var protocolVersion: Int,
+    @JvmField var loginType: Int,
+    @JvmField var isGuidFromFileNull: Boolean = false, // 保存到文件的 GUID 是否为 null
+    @JvmField var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
+    @JvmField var isGuidChanged: Boolean = false, // GUID 是否有变动
+    @JvmField var buildVersion: String,
+    @JvmField var protocolDetail: String,
+    @JvmField var packageName: String,
+    @JvmField var packageVersion: String,
+    @JvmField var tencentSdkMd5: ByteArray,
     ) {
 
     // TODO: 2021/6/6  待优化 这里静态有问题
