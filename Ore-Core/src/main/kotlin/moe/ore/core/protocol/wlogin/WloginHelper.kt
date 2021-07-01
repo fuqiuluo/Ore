@@ -24,6 +24,7 @@ import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
+import moe.ore.api.data.Result
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -38,7 +39,7 @@ class WloginHelper(val uin : Long,
     override fun run() {
 
         when(wtMode) {
-            MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client))
+            MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
 
         }
     }
@@ -393,6 +394,7 @@ class WloginHelper(val uin : Long,
             }
             listener?.onSms(object : SmsHelper() {
                 private var lastGetTime = 0L
+                private var timeLimited = 60 * 1000
 
                 override fun noticeStr(): String = noticeStr
 
@@ -400,17 +402,40 @@ class WloginHelper(val uin : Long,
 
                 override fun otherWayUrl(): String = otherWay
 
-                override fun sendSms(): Boolean {
+                override fun sendSms(): Result<Boolean> {
                     // 设置一分钟只能获取一次验证码
-                    if(lastGetTime + (60 * 1000) <= System.currentTimeMillis()) {
+                    if(lastGetTime + timeLimited <= System.currentTimeMillis()) {
+                        lastGetTime = System.currentTimeMillis()
                         val sender = WtLoginGetSmsCode(helper.uin).sendTo(client)
-                        val form = sender sync 20 * 1000
-                        if(form != null) {
+                        (sender sync 20 * 1000)?.body?.readLoginPacket(helper.ecdh.shareKey) { result, tlvMap ->
+                            println("SmsTlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
 
+                            tlvMap[0x146]?.let {
+                                println(String(it))
+                            }
 
+                            tlvMap[0x508]?.let {
+                                println(String(it))
+                            }
+
+                            return when(result) {
+                                161 -> Result(161, "今日操作次数过多，请等待一天后再试。", false)
+                                162 -> Result(162, "频繁发送验证码，请稍后再试。", false)
+                                160 -> {
+                                    tlvMap[0x17b]?.reader {
+                                        val availableMsgCnt = readShort()
+                                        timeLimited = readShort() * 1000
+                                        println("剩余短信次数：%s，间隔时间：%s ms".format(availableMsgCnt, timeLimited))
+                                    }
+                                    Result.success("验证码发送成功。", true)
+                                }
+                                else -> error("unknown sms status : $result")
+                            }
                         }
+                    } else {
+                        return Result.serverError("短信重新发送时间未到。", false)
                     }
-                    return false
+                    return Result.unknownError("未知错误。", false)
                 }
 
                 override fun submitSms(code: String) {

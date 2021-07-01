@@ -22,8 +22,7 @@
 package moe.ore.api.listener
 
 import moe.ore.api.LoginResult
-import moe.ore.api.Ore
-import java.util.concurrent.ArrayBlockingQueue
+import moe.ore.api.data.Result
 
 /**
  * 机器人事件监听器
@@ -62,7 +61,7 @@ abstract class SmsHelper {
 
     abstract fun otherWayUrl() : String
 
-    abstract fun sendSms() : Boolean
+    abstract fun sendSms() : Result<Boolean>
 
     abstract fun submitSms(code : String)
 

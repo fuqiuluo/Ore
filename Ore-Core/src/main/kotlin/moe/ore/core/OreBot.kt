@@ -107,6 +107,11 @@ fun main() {
 
         override fun onSms(sms: SmsHelper) {
             println(sms)
+
+            repeat(100) {
+                println(sms.sendSms())
+                Thread.sleep(60 * 1000)
+            }
         }
 
 
