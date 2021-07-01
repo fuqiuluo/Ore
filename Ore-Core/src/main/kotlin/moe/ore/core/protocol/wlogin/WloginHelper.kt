@@ -21,6 +21,7 @@ import moe.ore.helper.toByteReadPacket
 import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
+import okhttp3.internal.toHexString
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -46,6 +47,7 @@ class WloginHelper(val uin : Long,
             eventHandler.callback(LoginResult.ServerTimeout)
         } else {
             from.body.readLoginPacket(key) { result, tlvMap ->
+                println("tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
                 when(result) {
                     0 -> eventHandler.onSuccess(tlvMap[0x119])
                     1 -> eventHandler.onPasswordWrong()
@@ -54,6 +56,7 @@ class WloginHelper(val uin : Long,
                     180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
                     237 -> eventHandler.onNetEnvWrong()
+                    239 -> eventHandler.onDevicelock(tlvMap)
                     else -> error("unknown login result : $result")
                 }
             }
@@ -363,6 +366,30 @@ class WloginHelper(val uin : Long,
         }
 
         fun onDevicelock(tlvMap: Map<Int, ByteArray>) {
+            tlvMap[0x104]?.let { userStInfo.t104 = it }
+            tlvMap[0x174]?.let { userStInfo.t174 = it }
+            val smsInformation = tlvMap[0x178]!!.let {
+                val reader = it.toByteReadPacket()
+                SmsInformation(
+                    countryCode = reader.readBytes(reader.readUShort().toInt()),
+                    phoneNum = reader.readString(reader.readUShort().toInt()),
+                    smsStatus = reader.readInt(),
+                    availableMsgCnt = reader.readShort(),
+                    timeLimited = reader.readShort()
+                )
+            } // 手机号什么的
+            val noticeStr = String(tlvMap[0x17e]!!) // 提示信息
+            val otherWay = String(tlvMap[0x204]!!) // 其它验证方式的链接
+            // val verifyUrl = String(tlvMap[0x179]!!)
+            tlvMap[0x17d]?.let {
+                val reader = it.toByteReadPacket()
+                val mbGuideType = reader.readShort()
+                val mbGuideMsg = reader.readString(reader.readUShort().toInt())
+                val mbGuideInfoType = reader.readShort()
+                val mbGuideInfoMsg = reader.readString(reader.readUShort().toInt())
+                // 换绑操作
+            }
+
 
         }
 
@@ -411,3 +438,10 @@ internal fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
     return map
 }
 
+data class SmsInformation(
+    val countryCode : ByteArray,
+    val phoneNum : String,
+    val smsStatus : Int,
+    val availableMsgCnt : Short,
+    val timeLimited : Short
+)
