@@ -107,11 +107,10 @@ fun main() {
 
         override fun onSms(sms: SmsHelper) {
             println(sms)
-
-            repeat(100) {
-                println(sms.sendSms())
-                Thread.sleep(60 * 1000)
-            }
+            println(sms.sendSms())
+            print("请输入SMSCode：")
+            val code = Scanner(System.`in`).nextLine()
+            sms.submitSms(code)
         }
 
 
