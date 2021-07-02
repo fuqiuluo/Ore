@@ -36,7 +36,7 @@ class QPay(val uin : Long, var payWord : String) {
     fun getWalletBalanceV2() : Double {
         try {
             val skey = userStInfo.sKey.ticket()
-            val pskey = userStInfo.superKey.ticket()
+            //val pskey = userStInfo.superKey.ticket()
             val text = mapOf(
                 // "pskey" to pskey,
                 // "pskey_scene" to "client",
@@ -86,6 +86,69 @@ class QPay(val uin : Long, var payWord : String) {
         return 0.00
     }
 
+    fun getHBPack() : String {
+        try {
+            val skey = userStInfo.sKey.ticket()
+            val pskey = userStInfo.superKey.ticket()
+            print(skey)
+            print(pskey)
+            val text = mapOf(
+                "pskey" to pskey,
+                "subchannel" to "0",
+                "hb_from_type" to "0",
+                "skin_id" to "0",
+                "bus_type" to "2", //红包类型  1普通 2拼手气
+                "channel" to "1", //红包标识  1普通 1024专属 65536语音 32口令
+                "type" to "1",
+                "wishing" to "测试", //标题 口令 语音
+                "skey_type" to "2",
+                "total_amount" to "1", //金额 分为单位
+                "recv_type" to "3", //发送类型  1好友 3群 4非好友
+                "total_num" to "1", //包数
+                "recv_uin" to "1016398585", //群或者好友 uin groupid
+                //"grab_uin_list" to "1958068659|1372362033", //专属红包 用|隔开
+                "skey" to skey,
+                "uin" to uin.toString(),
+                "h_net_type" to "WIFI",
+                "h_model" to "android_mqq",
+                "h_edition" to "74",
+                "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                    // 这个0代表支付环境是否有root
+                    (if(hasRoot) 1 else 0)
+                }|",
+                "h_qq_guid" to device.guid.toHexString(),
+                "h_qq_appid" to "537068363",
+                "h_exten" to ""
+            )
+            val sourceBody = (text.toRequestString().toByteArray().toHexString() + "0000").hex2ByteArray()
+            println(sourceBody.toHexString())
+            val keyIndex = 8
+            val reqText =  DesECBUtil.encryptDES(sourceBody, desKeys[keyIndex]).toHexString()
+            val okhttp = OkhttpUtil()
+            val result = okhttp.post(
+                HbPackUrl, mapOf(
+                    "req_text" to reqText,
+                    "skey_type" to "2", // 0 为vkey 2 为skey
+                    "random" to "$keyIndex",
+                    // 密钥的标识
+                    "msgno" to "$uin${getTime()}0001",
+                    "skey" to skey
+                )
+            )
+            if(result?.code == 200) {
+                val bytes = DesECBUtil.decryptDES(result.body!!.string().hex2ByteArray(), desKeys[keyIndex])
+                val data = String(bytes).formatToJson()
+                println(data)
+                val hbWallet = Gson().fromJson(data, QPayWallet::class.java)
+                result.close()
+                return hbWallet.skey
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+        }
+        return null.toString()
+    }
+    
     private val paySeq = AtomicInteger(Random().nextInt(1))
 
     private fun nextSeqId(): Int {
@@ -163,8 +226,10 @@ fun main() {
             println("登录结果：$result")
 
 
-            val balance = ore.getPay("662899").getWalletBalanceV2()
-            println("钱包余额：$balance")
+            //val balance = ore.getPay("662899").getWalletBalanceV2()
+            val skey = ore.getPay("662899").getHBPack()
+            //println("钱包余额：$balance")
+            println("SKEY：$skey")
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {
