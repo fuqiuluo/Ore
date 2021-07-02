@@ -25,6 +25,7 @@ class QPay(val uin : Long, var payWord : String) {
     /**
      * 支付配置文件
      */
+
     var hasRoot : Boolean = true
 
     private val dataManager = DataManager.manager(uin)
