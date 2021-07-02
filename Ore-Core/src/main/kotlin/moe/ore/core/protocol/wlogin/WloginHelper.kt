@@ -37,7 +37,7 @@ class WloginHelper(val uin : Long,
 
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
-
+            MODE_EXCHANGE_EMP -> handle()
         }
     }
 
