@@ -38,16 +38,16 @@ class QPay(val uin : Long, var payWord : String) {
             val skey = userStInfo.sKey.ticket()
             val pskey = userStInfo.superKey.ticket()
             val text = mapOf(
-                "pskey" to pskey,
-                "pskey_scene" to "client",
+                // "pskey" to pskey,
+                // "pskey_scene" to "client",
                 "skey" to skey,
-                "skey_type" to "2",
-                "app_info" to "appid#0|bargainor_id#0|channel#wallet",
+                // "skey_type" to "2",
+                // "app_info" to "appid#0|bargainor_id#0|channel#wallet",
                 "uin" to uin.toString(),
-                "need_suggest" to "1",
+                // "need_suggest" to "1",
                 "h_net_type" to "WIFI",
                 "h_model" to "android_mqq",
-                "h_edition" to "70",
+                "h_edition" to "20",
                 "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                     // 这个0代表支付环境是否有root
                     (if(hasRoot) 1 else 0)
