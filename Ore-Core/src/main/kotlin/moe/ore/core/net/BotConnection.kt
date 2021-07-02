@@ -61,15 +61,19 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     //    max1个线程池 不允许再多
     private val scheduler = Executors.newScheduledThreadPool(1)
 
-    @Synchronized
-    @Throws(InterruptedException::class)
-    fun connect(host: String, port: Int) {
+    fun close() {
         if (this::channelFuture.isInitialized) {
             if (!channelFuture.isVoid || channelFuture.channel().isActive) {
-                // 断开原先的连接 重新建立连接
                 channelFuture.channel().close()
             }
         }
+    }
+
+    @Synchronized
+    @Throws(InterruptedException::class)
+    fun connect(host: String, port: Int) {
+        // 断开原先的连接 重新建立连接
+        this.close()
         channelFuture = init(Bootstrap()).connect(host, port).sync()
         scheduler.execute {
             try {

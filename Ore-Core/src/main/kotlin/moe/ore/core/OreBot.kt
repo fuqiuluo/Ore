@@ -21,28 +21,19 @@
 
 package moe.ore.core
 
-import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
-import moe.ore.api.listener.CaptchaChannel
-import moe.ore.api.listener.OreListener
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
-import moe.ore.core.protocol.tars.statsvc.RegisterReq
-import moe.ore.core.protocol.wtlogin.WtLoginHelper
+import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
-import moe.ore.helper.toHexString
-import moe.ore.tars.UniPacket
-import moe.ore.util.TarsUtil
-import java.util.*
 
-class OreBot(val uin: Long) : Ore() {
-    /**
-     * 机器人产生的线程全放这里
-     */
-    val threadManager: ThreadManager = ThreadManager.getInstance(uin)
+class OreBot(uin: Long) : Ore(uin) {
+    private val manager = DataManager.manager(uin)
+
+    private val threadManager: ThreadManager = manager.threadManager
 
     val client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
@@ -50,12 +41,11 @@ class OreBot(val uin: Long) : Ore() {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
-                        threadManager.addTask(WtLoginHelper(uin, this@apply, oreListener))
+                        WloginHelper(uin, this@apply, oreListener).loginByPassword()
                     }
                     OreStatus.Online -> {
                         // 重连
-
-
+                        WloginHelper(uin, this@apply).loginByToken()
                     }
                     else -> runtimeError("未知的错误操作")
                 }
@@ -63,9 +53,6 @@ class OreBot(val uin: Long) : Ore() {
         }
     }
 
-    /**
-     * 机器人状态
-     */
     private var status = OreStatus.NoLogin
 
     override fun login() {
@@ -77,44 +64,13 @@ class OreBot(val uin: Long) : Ore() {
         client.connect()
     }
 
-    fun loginWtToken(){
-
-    }
-
     override fun status() = status
 
     override fun shut() {
         // 关闭机器人
         this.status = OreStatus.Destroy
-        threadManager.shutdown()
         DataManager.destroy(uin)
-
+        this.client.close()
     }
 }
 
-fun main() {
-    // 3042628723
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
-    ore.oreListener = object : OreListener {
-        override fun onLoginStart() {
-            println("登录开始了，呼呼呼！！！")
-        }
-
-        override fun onLoginFinish(result: LoginResult) {
-            println("登录结果：$result")
-
-        }
-
-        override fun onCaptcha(captchaChan: CaptchaChannel) {
-
-            println(captchaChan.url)
-            val ticket = Scanner(System.`in`).nextLine()
-            captchaChan.submitTicket(ticket)
-
-
-        }
-
-
-    }
-    ore.login()
-}

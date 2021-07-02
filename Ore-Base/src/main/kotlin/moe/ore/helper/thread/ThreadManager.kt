@@ -128,6 +128,11 @@ class ThreadManager private constructor(val uin: Long = 0) {
         fun getInstance(uin: Long): ThreadManager {
             return THREAD_MAP.getOrPut(uin) { ThreadManager(uin) }
         }
+
+        @JvmStatic
+        operator fun get(uin: Long) : ThreadManager {
+            return getInstance(uin)
+        }
     }
 
     init {

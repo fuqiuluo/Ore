@@ -22,7 +22,7 @@
 package moe.ore.core.bot
 
 import kotlinx.serialization.Serializable
-class WtLoginSigInfo {
+class UserSigInfo {
     lateinit var tgtKey: BytesTicket
     // A2
     lateinit var tgt: BytesTicket
@@ -48,7 +48,7 @@ class WtLoginSigInfo {
     // from t16a
     lateinit var noPicSig: BytesTicket
 
-    lateinit var superKey : BytesTicket
+    lateinit var superKey : StringTicket
 
     // 用t106和t10c计算得到 from QQ 8.6.0
     lateinit var encryptA1: BytesTicket

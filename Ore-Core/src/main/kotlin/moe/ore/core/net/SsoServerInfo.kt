@@ -8,55 +8,36 @@ import moe.ore.tars.TarsStructBase
  *@author 飞翔的企鹅
  *create 2021-06-18 23:49
  */
-//class SsoServerInfoResp : TarsStructBase() {
-//    var server: String = ""
-//    var port: Int = 0
-//    var location: String = ""
-//
-//    override fun writeTo(output: TarsOutputStream) {
-//        output.write(server, 1)
-//        output.write(port, 2)
-//        output.write(location, 8)
-//    }
-//
-//    override fun readFrom(input: TarsInputStream) {
-//        server = input.read(server, 1, false)
-//        port = input.read(port, 2, false)
-//        location = input.read(location, 8, false)
-//    }
-//}
 
 class SsoServerInfoReq : TarsStructBase() {
-    var a1: Long = 0
-    var a2: Long = 0
-    var a3: Byte = 1
-    var a4: String = "46000"
-    var a5: Int = 100
-    var a6: Long = 0x200302d5
-    var a7: String = "867109044454073"
-    var a8: Long = 0
-    var a9: Long = 0
-    var a10: Long = 0
-    var a11: Long = 0
-    var a12: Byte = 0
-    var a13: Long = 0
-    var a14: Byte = 1
+    var a: Long = 0
+    var b: Long = 0
+    var c: Byte = 1
+    var d: String = "46000"
+    var e: Int = 100
+    var f: Long = 0
+    var g: String = "867109044454073"
+    var h: Long = 0
+    var i: Long = 0
+    var j: Long = 0
+    var k: Byte = 0
+    var l: Byte = 0
+    var m: Long = 0
 
     override fun writeTo(output: TarsOutputStream) {
-        output.write(a1, 1)
-        output.write(a2, 2)
-        output.write(a3, 3)
-        output.write(a4, 4)
-        output.write(a5, 5)
-        output.write(a6, 6)
-        output.write(a7, 7)
-        output.write(a8, 8)
-        output.write(a9, 9)
-        output.write(a10, 10)
-        output.write(a11, 11)
-        output.write(a12, 12)
-        output.write(a13, 13)
-        output.write(a14, 14)
+        output.write(a, 1)
+        output.write(b, 2)
+        output.write(c, 3)
+        output.write(d, 4)
+        output.write(e, 5)
+        output.write(f, 6)
+        output.write(g, 7)
+        output.write(h, 8)
+        output.write(i, 9)
+        output.write(j, 10)
+        output.write(k, 11)
+        output.write(l, 12)
+        output.write(m, 13)
     }
 }
 

@@ -43,10 +43,11 @@
 package moe.ore.helper
 
 import moe.ore.util.BytesUtil
+import java.util.*
 import kotlin.experimental.xor
 
 fun ByteArray.toHexString(): String = this.joinToString("") {
-    (it.toInt() and 0xFF).toString(16).padStart(2, '0')
+    (it.toInt() and 0xFF).toString(16).padStart(2, '0').uppercase(Locale.getDefault())
 }
 
 fun ByteArray.xor(key: ByteArray): ByteArray {
@@ -58,3 +59,8 @@ fun ByteArray.xor(key: ByteArray): ByteArray {
 }
 
 fun ByteArray.sub(offset: Int, length: Int) = BytesUtil.subByte(this, offset, length)
+
+fun ByteArray.toAsciiHexString() = joinToString("") {
+    if (it in 32..127) it.toInt().toChar().toString() else "{${it.toUByte().toString(16).padStart(2, '0').uppercase(
+        Locale.getDefault())}}"
+}

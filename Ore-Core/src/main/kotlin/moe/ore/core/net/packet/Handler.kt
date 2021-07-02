@@ -44,15 +44,14 @@ open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandNa
      */
     fun wait(timeout: Long = 20 * 1000): Boolean {
         if(isOver || queue.size >= 1) {
-            println("直接结束")
             // 已经结束了，没必要再继续同步接包
             return isSuccess
         }
         Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
-                    this@apply.cancel()
                     queue.add(false)
+                    this@apply.cancel()
                 }
             }, timeout)
         }

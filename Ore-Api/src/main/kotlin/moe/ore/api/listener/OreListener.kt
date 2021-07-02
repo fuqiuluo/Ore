@@ -22,8 +22,7 @@
 package moe.ore.api.listener
 
 import moe.ore.api.LoginResult
-import moe.ore.api.Ore
-import java.util.concurrent.ArrayBlockingQueue
+import moe.ore.api.data.Result
 
 /**
  * 机器人事件监听器
@@ -44,6 +43,11 @@ interface OreListener {
      * 遇到滑块 返回ticket
      */
     fun onCaptcha(captchaChan : CaptchaChannel)
+
+    /**
+     * 遇到短信验证
+     */
+    fun onSms(sms : SmsHelper)
 }
 
 abstract class CaptchaChannel(val url : String) {
@@ -51,7 +55,17 @@ abstract class CaptchaChannel(val url : String) {
 }
 
 abstract class SmsHelper {
+    abstract fun noticeStr() : String
 
-    abstract fun sendSms()
+    abstract fun phoneNum() : String
 
+    abstract fun otherWayUrl() : String
+
+    abstract fun sendSms() : Result<Boolean>
+
+    abstract fun submitSms(code : String)
+
+    override fun toString(): String {
+        return "notice = %s,phone = %s, other = %s".format(noticeStr(), phoneNum(), otherWayUrl())
+    }
 }

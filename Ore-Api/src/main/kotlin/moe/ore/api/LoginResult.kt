@@ -43,6 +43,16 @@ enum class LoginResult {
     SliderVerifyFail,
 
     /**
+     * 网络环境错误 禁止登录
+     */
+    NetEnvWrong,
+
+    /**
+     * 账号冻结
+     */
+    AccountFreeze,
+
+    /**
      * 上线失败
      */
     RegisterFail

@@ -41,6 +41,7 @@ object OreManager {
      * @param uin Long
      * @return Ore?
      */
+    @JvmStatic
     fun getBot(uin : Long) = botMap[uin]
 
     /**
@@ -50,10 +51,11 @@ object OreManager {
      * @param password String
      * @return Ore
      */
+    @JvmStatic
     fun addBot(uin: Long, password: String, path: String = "data/"): Ore {
-        val ore = OreBot(uin)
         val account = BotAccount(uin, password)
         val manager = DataManager.init(uin, path)
+        val ore = OreBot(uin)
         manager.botAccount = account
         botMap[uin] = ore
         return ore
