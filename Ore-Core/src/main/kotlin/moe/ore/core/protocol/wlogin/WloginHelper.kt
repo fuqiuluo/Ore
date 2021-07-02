@@ -13,10 +13,6 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
-import moe.ore.core.protocol.wlogin.request.WtLoginDevicePass
-import moe.ore.core.protocol.wlogin.request.WtLoginGetSmsCode
-import moe.ore.core.protocol.wlogin.request.WtLoginPassword
-import moe.ore.core.protocol.wlogin.request.WtLoginSlider
 import moe.ore.helper.readString
 import moe.ore.helper.reader
 import moe.ore.helper.toByteReadPacket
@@ -25,6 +21,7 @@ import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 import moe.ore.api.data.Result
+import moe.ore.core.protocol.wlogin.request.*
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -86,7 +83,7 @@ class WloginHelper(val uin : Long,
      */
     fun refreshA1() {
         this.wtMode = MODE_EXCHANGE_EMP
-
+        threadManager.addTask(this)
     }
 
     /**
@@ -121,8 +118,14 @@ class WloginHelper(val uin : Long,
 
                 val now = System.currentTimeMillis()
                 val shelfLife = 86400L // 默认保质期一天
-                val bsTicket: (ByteArray) -> BytesTicket = { key -> BytesTicket(key, now, shelfLife) }
-                val strTicket: (String) -> StringTicket = { key -> StringTicket(key.toByteArray(), now, shelfLife) }
+                val bsTicket: (ByteArray) -> BytesTicket = { key ->
+                    // println(String(key))
+                    BytesTicket(key, now, shelfLife)
+                }
+                val strTicket: (String) -> StringTicket = { key ->
+                    // println(key)
+                    StringTicket(key.toByteArray(), now, shelfLife)
+                }
 
                 map[0x103]?.let { userStInfo.webSig = bsTicket(it) }
 
@@ -158,6 +161,7 @@ class WloginHelper(val uin : Long,
                             "pskey" to strTicket(pskey),
                             "p4token" to strTicket(p4token)
                         )
+                        // println(domain + " ==> " + session.pSKeyMap[domain])
                     }
                 }
 
@@ -340,7 +344,7 @@ class WloginHelper(val uin : Long,
                 // 字节组拼接
             }!!
             tlvMap[0x104]?.let { userStInfo.t104 = it }
-            helper.handle(WtLoginDevicePass(helper.uin, userStInfo.G, t402, tlvMap[0x403]).sendTo(client))
+            helper.handle(WtLoginDevicePass(helper.uin, t402, tlvMap[0x403]).sendTo(client))
         }
 
         fun onRollback(t161 : ByteArray?) {
@@ -439,8 +443,9 @@ class WloginHelper(val uin : Long,
                 }
 
                 override fun submitSms(code: String) {
-                    TODO("Not yet implemented")
+                    helper.handle(WtLoginSubmitSms(helper.uin, code).sendTo(client))
                 }
+
             })
         }
 

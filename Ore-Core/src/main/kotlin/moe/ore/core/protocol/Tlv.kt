@@ -344,7 +344,8 @@ class Tlv(
             "y.qq.com",
             "v.qq.com",
             "t.qq.com",
-            "om.qq.com"
+            "om.qq.com",
+            "myun.tenpay.com"
         )
         writeShort(domains.size)
         for (domain in domains) {
