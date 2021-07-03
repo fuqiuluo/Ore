@@ -13,10 +13,6 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
-import moe.ore.core.protocol.wlogin.request.WtLoginDevicePass
-import moe.ore.core.protocol.wlogin.request.WtLoginGetSmsCode
-import moe.ore.core.protocol.wlogin.request.WtLoginPassword
-import moe.ore.core.protocol.wlogin.request.WtLoginSlider
 import moe.ore.helper.readString
 import moe.ore.helper.reader
 import moe.ore.helper.toByteReadPacket
@@ -25,6 +21,7 @@ import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 import moe.ore.api.data.Result
+import moe.ore.core.protocol.wlogin.request.*
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -40,7 +37,8 @@ class WloginHelper(val uin : Long,
 
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
-
+            MODE_EXCHANGE_EMP_A1 -> handle(WtLoginGetA1(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
+            MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
         }
     }
 
@@ -60,7 +58,16 @@ class WloginHelper(val uin : Long,
                     204 -> eventHandler.onDevicePass(tlvMap)
                     237 -> eventHandler.onNetEnvWrong()
                     239 -> eventHandler.onDevicelock(tlvMap)
-                    else -> error("unknown login result : $result")
+                    else -> {
+                        tlvMap[0x146]?.let {
+                            println(String(it))
+                        }
+
+                        tlvMap[0x508]?.let {
+                            println(String(it))
+                        }
+                        error("unknown login result : $result")
+                    }
                 }
             }
         }
@@ -70,6 +77,7 @@ class WloginHelper(val uin : Long,
      * 使用token登录
      */
     fun loginByToken() {
+        this.wtMode = MODE_TOKEN_LOGIN
 
     }
 
@@ -85,16 +93,16 @@ class WloginHelper(val uin : Long,
      * 刷新Cookie
      */
     fun refreshA1() {
-        this.wtMode = MODE_EXCHANGE_EMP
-
+        this.wtMode = MODE_EXCHANGE_EMP_A1
+        threadManager.addTask(this)
     }
 
     /**
      * 刷新ClientToken
      */
     fun refreshSt() {
-        this.wtMode = MODE_EXCHANGE_EMP
-
+        this.wtMode = MODE_EXCHANGE_EMP_ST
+        threadManager.addTask(this)
     }
 
     class EventHandler(
@@ -115,24 +123,40 @@ class WloginHelper(val uin : Long,
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
-                    MODE_EXCHANGE_EMP -> userStInfo.gtKey.ticket()
+                    MODE_EXCHANGE_EMP_A1, MODE_EXCHANGE_EMP_ST -> userStInfo.gtKey.ticket()
                     else -> error("unknown wtlogin mode")
                 }).toByteReadPacket())
 
+                println("T119 tlvMap: " + map.keys.map { "0x" + it.toHexString() })
+
                 val now = System.currentTimeMillis()
                 val shelfLife = 86400L // 默认保质期一天
-                val bsTicket: (ByteArray) -> BytesTicket = { key -> BytesTicket(key, now, shelfLife) }
-                val strTicket: (String) -> StringTicket = { key -> StringTicket(key.toByteArray(), now, shelfLife) }
+                val bsTicket: (ByteArray) -> BytesTicket = { key ->
+                    // println(String(key))
+                    BytesTicket(key, now, shelfLife)
+                }
+                val strTicket: (String) -> StringTicket = { key ->
+                    // println(key)
+                    StringTicket(key.toByteArray(), now, shelfLife)
+                }
 
                 map[0x103]?.let { userStInfo.webSig = bsTicket(it) }
 
                 map[0x203]?.let { userStInfo.da2 = bsTicket(it) }
 
-                map[0x143]?.let { userStInfo.d2 = bsTicket(it) }
+                map[0x143]?.let {
+                    println("input d2")
+                    userStInfo.d2 = bsTicket(it)
+                }
                 map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
 
+                map[0x120]?.let {
+                    // println("input skey")
+                    userStInfo.sKey = strTicket(String(it))
+                }
+
                 (map[0x106]!! to map[0x10c]!!).run {
-                    userStInfo.tgtgt = bsTicket(first)
+                    userStInfo.t10c = bsTicket(first)
                     userStInfo.gtKey = bsTicket(second)
                     // println("t106 size : %s".format(first.size))
                     // println("t10c size : %s".format(second.size))
@@ -158,6 +182,7 @@ class WloginHelper(val uin : Long,
                             "pskey" to strTicket(pskey),
                             "p4token" to strTicket(p4token)
                         )
+                        // println(domain + " ==> " + session.pSKeyMap[domain])
                     }
                 }
 
@@ -193,10 +218,6 @@ class WloginHelper(val uin : Long,
                     session.appPri = readUInt().toLong()
                 }
 
-                map[0x120]?.let {
-                    userStInfo.sKey = strTicket(String(it))
-                }
-
                 map[0x322]?.let {
                     userStInfo.deviceToken = bsTicket(it)
                 }
@@ -223,7 +244,7 @@ class WloginHelper(val uin : Long,
                 }
 
                 map[0x16d]?.let {
-                    userStInfo.superKey = bsTicket(it)
+                    userStInfo.superKey = strTicket(String(it))
                 }
 
                 map[0x16a]?.let {
@@ -340,7 +361,7 @@ class WloginHelper(val uin : Long,
                 // 字节组拼接
             }!!
             tlvMap[0x104]?.let { userStInfo.t104 = it }
-            helper.handle(WtLoginDevicePass(helper.uin, userStInfo.G, t402, tlvMap[0x403]).sendTo(client))
+            helper.handle(WtLoginDevicePass(helper.uin, t402, tlvMap[0x403]).sendTo(client))
         }
 
         fun onRollback(t161 : ByteArray?) {
@@ -439,8 +460,9 @@ class WloginHelper(val uin : Long,
                 }
 
                 override fun submitSms(code: String) {
-                    TODO("Not yet implemented")
+                    helper.handle(WtLoginSubmitSms(helper.uin, code).sendTo(client))
                 }
+
             })
         }
 
@@ -455,7 +477,9 @@ class WloginHelper(val uin : Long,
 
     companion object {
         const val MODE_PASSWORD_LOGIN = 0
-        const val MODE_EXCHANGE_EMP = 1
+        const val MODE_EXCHANGE_EMP_A1 = 1
+        const val MODE_EXCHANGE_EMP_ST = 2
+        const val MODE_TOKEN_LOGIN = 3
     }
 }
 

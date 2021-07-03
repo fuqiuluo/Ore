@@ -27,7 +27,7 @@ import moe.ore.api.listener.OreListener
 /**
  * Ore实体对象接口文件
  */
-abstract class Ore {
+abstract class Ore(val uin : Long) {
     /**
      * 事件监听器
      */

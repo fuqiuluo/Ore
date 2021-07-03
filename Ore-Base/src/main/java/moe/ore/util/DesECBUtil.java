@@ -53,12 +53,11 @@ public class DesECBUtil {
      * 加密数据
      * 注意：这里的数据长度只能为8的倍数
      */
-    public static String encryptDES(String encryptString, String encryptKey) throws Exception {
+    public static byte[] encryptDES(byte[] enc, String encryptKey) throws Exception {
         SecretKeySpec key = new SecretKeySpec(getKey(encryptKey), "DES");
         Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encryptedData = cipher.doFinal(setStuff(encryptString.getBytes()));
-        return HexUtil.Bin2Hex(encryptedData);
+        return cipher.doFinal(setStuff(enc));
     }
 
     /**
@@ -80,12 +79,11 @@ public class DesECBUtil {
     /***
      * 解密数据
      */
-    public static String decryptDES(String decryptString, String decryptKey) throws Exception {
+    public static byte[] decryptDES(byte[] decrypt, String decryptKey) throws Exception {
         SecretKeySpec key = new SecretKeySpec(getKey(decryptKey), "DES");
         Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding");
         cipher.init(Cipher.DECRYPT_MODE, key);
-        byte decryptedData[] = cipher.doFinal(HexUtil.Hex2Bin(decryptString));
-        return new String(decryptedData);
+        return cipher.doFinal(decrypt);
     }
 
     /***

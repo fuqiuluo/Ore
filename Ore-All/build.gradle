@@ -18,6 +18,9 @@ dependencies {
     implementation project(":Ore-Api")
 
     implementation project(":Ore-Core")
+
+    // Ore功能实现模块
+    implementation project(":Ore-Pay")
 }
 
 test {

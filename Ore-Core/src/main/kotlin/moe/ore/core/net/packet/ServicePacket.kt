@@ -43,7 +43,7 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
      */
     LoginPacket(0xa, 0x2),
     SvcRegister(0xa, 0x1),
-    ExChangeEmp(0xb, 0x2),
+    ExChangeEmpA1(0xb, 0x2),
     // ServicePacket(0xb, 0x2)
 }
 
@@ -56,7 +56,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
     val deviceInfo = manager.deviceInfo
 
     val teaKey = when (packetType) {
-        PacketType.ExChangeEmp, PacketType.LoginPacket -> DEFAULT_TEA_KEY
+        PacketType.ExChangeEmpA1, PacketType.LoginPacket -> DEFAULT_TEA_KEY
         // PacketType.ServicePacket,
         PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
@@ -70,7 +70,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                 writeInt(token.size + 4)
                 writeBytes(token)
             }
-            PacketType.ExChangeEmp -> writeInt(seq)
+            PacketType.ExChangeEmpA1 -> writeInt(seq)
         }
         writeByte(0)
         uin.toString().let {
@@ -115,7 +115,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         writeInt(4) // qimei 的位置
                     }
 
-                    PacketType.ExChangeEmp -> {
+                    PacketType.ExChangeEmpA1 -> {
                         commandName.let {
                             writeInt(it.length + 4)
                             writeString(it)

@@ -324,6 +324,7 @@ class Tlv(
     fun t403(dt403: ByteArray) = buildTlv(0x403) {
         writeBytes(dt403)
     }
+
     fun t511() = buildTlv(0x511) {
         // 备选  "haoma.qq.com","mma.qq.com","om.qq.com","kg.qq.com",
         val domains = arrayOf(
