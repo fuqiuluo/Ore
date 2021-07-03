@@ -2,12 +2,15 @@ package moe.ore.pay
 
 import moe.ore.helper.hex2ByteArray
 import moe.ore.helper.toHexString
+import moe.ore.util.BytesUtil
 import moe.ore.util.DesECBUtil
+import org.jetbrains.annotations.TestOnly
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 
 internal object QPayUtil {
+    @JvmStatic
     private val desKeys = arrayOf(
         "9973e345",
         "5dac6cf7",
@@ -34,7 +37,7 @@ internal object QPayUtil {
     }
 
     @JvmStatic
-    fun encryptToReqText(map: Map<String, String>, keyIndex: Int): String {
+    fun encryptToReqText(map: Map<String, Any>, keyIndex: Int): String {
         val sourceBody = (map.toRequestString().toByteArray().toHexString() + "0000").hex2ByteArray()
         // println(sourceBody.toHexString())
         return DesECBUtil.encryptDES(sourceBody, desKeys[keyIndex]).toHexString()
@@ -59,10 +62,17 @@ internal object QPayUtil {
         return String(toByteArray().toHexString().replace("00".toRegex(), "").hex2ByteArray())
     }
 
-    fun Map<String, String>.toRequestString() : String {
+    @JvmStatic
+    fun getMsgno(uin : Long, seq : Int) : String {
+        return "$uin${getTime()}${BytesUtil.int16ToBuf(seq).toHexString()}"
+    }
+
+    @JvmStatic
+    fun Map<String, Any>.toRequestString() : String {
+        // println(this)
         val buffer = StringBuffer()
         var isFirst = true
-        this.forEach { key, value ->
+        this.forEach { (key, value) ->
             if(isFirst) {
                 buffer.append(key)
                 isFirst = false
@@ -70,7 +80,7 @@ internal object QPayUtil {
                 buffer.append("&$key")
             }
             buffer.append("=")
-            buffer.append(URLEncoder.encode(value, "UTF-8"))
+            buffer.append(URLEncoder.encode(value.toString(), "UTF-8"))
         }
         return buffer.toString()
     }

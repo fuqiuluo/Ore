@@ -12,6 +12,9 @@ Tencent Protocol Project [8.7.5]
  
  - 本项目采用了**kotlinx序列化**在获取依赖库时容易失败(遇到过) 可以请使用加速器再build
 
+ - **QQ群聊介绍界面的群号是GroupId(GroupCode)不是GroupUin**
+
+
 
 
 

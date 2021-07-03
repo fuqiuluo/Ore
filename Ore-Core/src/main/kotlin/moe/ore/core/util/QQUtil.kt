@@ -34,6 +34,70 @@ object QQUtil {
     private val ConfigSvrKey = "F0441F5FF42DA58FDCF7949ABA62D411".hex2ByteArray()
 
     @JvmStatic
+    fun groupCode2GroupUin(groupcode: Long): Long {
+        var calc = groupcode / 1000000L
+        loop@ while (true) calc += when (calc) {
+            in 0..10 -> {
+                (202 - 0).toLong()
+            }
+            in 11..19 -> {
+                (480 - 11).toLong()
+            }
+            in 20..66 -> {
+                (2100 - 20).toLong()
+            }
+            in 67..156 -> {
+                (2010 - 67).toLong()
+            }
+            in 157..209 -> {
+                (2147 - 157).toLong()
+            }
+            in 210..309 -> {
+                (4100 - 210).toLong()
+            }
+            in 310..499 -> {
+                (3800 - 310).toLong()
+            }
+            else -> {
+                break@loop
+            }
+        }
+        return calc * 1000000L + groupcode % 1000000L
+    }
+
+    @JvmStatic
+    fun groupUin2GroupCode(groupuin: Long): Long {
+        var calc = groupuin / 1000000L
+        loop@ while (true) calc -= when {
+            calc >= 0 + 202 && calc + 202 <= 10 -> {
+                (202 - 0).toLong()
+            }
+            calc >= 11 + 480 && calc <= 19 + 480 -> {
+                (480 - 11).toLong()
+            }
+            calc >= 20 + 2100 && calc <= 66 + 2100 -> {
+                (2100 - 20).toLong()
+            }
+            calc >= 67 + 2010 && calc <= 156 + 2010 -> {
+                (2010 - 67).toLong()
+            }
+            calc >= 157 + 2147 && calc <= 209 + 2147 -> {
+                (2147 - 157).toLong()
+            }
+            calc >= 210 + 4100 && calc <= 309 + 4100 -> {
+                (4100 - 210).toLong()
+            }
+            calc >= 310 + 3800 && calc <= 499 + 3800 -> {
+                (3800 - 310).toLong()
+            }
+            else -> {
+                break@loop
+            }
+        }
+        return calc * 1000000L + groupuin % 1000000L
+    }
+
+    @JvmStatic
     fun getOicqServer(appId : Long = 0x200302d5) : Pair<String, Int>? {
         val isUseDebugSo = false
         try {
