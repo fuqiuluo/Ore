@@ -6,9 +6,11 @@ import moe.ore.api.Ore
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
+import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.hex2ByteArray
 import moe.ore.helper.toHexString
 import moe.ore.pay.QPayUtil.decryptToJsonStr
@@ -183,13 +185,7 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-
-            val pay = ore.getPay("662899")
-            val balance = pay.getWalletBalance()
-
-            pay.getHBPack()
-
-            println("钱包余额：$balance")
+            WloginHelper(ore.uin, (ore as OreBot).client).refreshA1()
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

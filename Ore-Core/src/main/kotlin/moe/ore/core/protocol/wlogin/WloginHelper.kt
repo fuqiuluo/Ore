@@ -37,7 +37,7 @@ class WloginHelper(val uin : Long,
 
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
-            MODE_EXCHANGE_EMP -> handle()
+            MODE_EXCHANGE_EMP -> handle(WtLoginGetA1(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
         }
     }
 
@@ -131,8 +131,16 @@ class WloginHelper(val uin : Long,
 
                 map[0x203]?.let { userStInfo.da2 = bsTicket(it) }
 
-                map[0x143]?.let { userStInfo.d2 = bsTicket(it) }
+                map[0x143]?.let {
+                    println("input d2")
+                    userStInfo.d2 = bsTicket(it)
+                }
                 map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
+
+                map[0x120]?.let {
+                    // println("input skey")
+                    userStInfo.sKey = strTicket(String(it))
+                }
 
                 (map[0x106]!! to map[0x10c]!!).run {
                     userStInfo.tgtgt = bsTicket(first)
@@ -195,10 +203,6 @@ class WloginHelper(val uin : Long,
                 map[0x11f]?.reader {
                     session.appPriChangeTime = readUInt().toLong()
                     session.appPri = readUInt().toLong()
-                }
-
-                map[0x120]?.let {
-                    userStInfo.sKey = strTicket(String(it))
                 }
 
                 map[0x322]?.let {
