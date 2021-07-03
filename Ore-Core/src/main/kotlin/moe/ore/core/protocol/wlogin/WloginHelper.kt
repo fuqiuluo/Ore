@@ -37,7 +37,8 @@ class WloginHelper(val uin : Long,
 
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
-            MODE_EXCHANGE_EMP -> handle(WtLoginGetA1(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
+            MODE_EXCHANGE_EMP_A1 -> handle(WtLoginGetA1(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
+            MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
         }
     }
 
@@ -57,7 +58,16 @@ class WloginHelper(val uin : Long,
                     204 -> eventHandler.onDevicePass(tlvMap)
                     237 -> eventHandler.onNetEnvWrong()
                     239 -> eventHandler.onDevicelock(tlvMap)
-                    else -> error("unknown login result : $result")
+                    else -> {
+                        tlvMap[0x146]?.let {
+                            println(String(it))
+                        }
+
+                        tlvMap[0x508]?.let {
+                            println(String(it))
+                        }
+                        error("unknown login result : $result")
+                    }
                 }
             }
         }
@@ -67,6 +77,7 @@ class WloginHelper(val uin : Long,
      * 使用token登录
      */
     fun loginByToken() {
+        this.wtMode = MODE_TOKEN_LOGIN
 
     }
 
@@ -82,7 +93,7 @@ class WloginHelper(val uin : Long,
      * 刷新Cookie
      */
     fun refreshA1() {
-        this.wtMode = MODE_EXCHANGE_EMP
+        this.wtMode = MODE_EXCHANGE_EMP_A1
         threadManager.addTask(this)
     }
 
@@ -90,8 +101,8 @@ class WloginHelper(val uin : Long,
      * 刷新ClientToken
      */
     fun refreshSt() {
-        this.wtMode = MODE_EXCHANGE_EMP
-
+        this.wtMode = MODE_EXCHANGE_EMP_ST
+        threadManager.addTask(this)
     }
 
     class EventHandler(
@@ -112,9 +123,11 @@ class WloginHelper(val uin : Long,
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
-                    MODE_EXCHANGE_EMP -> userStInfo.gtKey.ticket()
+                    MODE_EXCHANGE_EMP_A1, MODE_EXCHANGE_EMP_ST -> userStInfo.gtKey.ticket()
                     else -> error("unknown wtlogin mode")
                 }).toByteReadPacket())
+
+                println("T119 tlvMap: " + map.keys.map { "0x" + it.toHexString() })
 
                 val now = System.currentTimeMillis()
                 val shelfLife = 86400L // 默认保质期一天
@@ -143,7 +156,7 @@ class WloginHelper(val uin : Long,
                 }
 
                 (map[0x106]!! to map[0x10c]!!).run {
-                    userStInfo.tgtgt = bsTicket(first)
+                    userStInfo.t10c = bsTicket(first)
                     userStInfo.gtKey = bsTicket(second)
                     // println("t106 size : %s".format(first.size))
                     // println("t10c size : %s".format(second.size))
@@ -464,7 +477,9 @@ class WloginHelper(val uin : Long,
 
     companion object {
         const val MODE_PASSWORD_LOGIN = 0
-        const val MODE_EXCHANGE_EMP = 1
+        const val MODE_EXCHANGE_EMP_A1 = 1
+        const val MODE_EXCHANGE_EMP_ST = 2
+        const val MODE_TOKEN_LOGIN = 3
     }
 }
 

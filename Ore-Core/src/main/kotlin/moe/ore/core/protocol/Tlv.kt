@@ -122,7 +122,7 @@ class Tlv(
         writeBytes(deviceInfo.ksid)
     }
 
-    private fun t109() = buildTlv(0x109) {
+    fun t109() = buildTlv(0x109) {
         writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
     }
 
@@ -345,7 +345,7 @@ class Tlv(
             "v.qq.com",
             "t.qq.com",
             "om.qq.com",
-            "myun.tenpay.com"
+            "tenpay.com"
         )
         writeShort(domains.size)
         for (domain in domains) {

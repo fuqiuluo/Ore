@@ -90,7 +90,7 @@ class QPay(val uin : Long, var payWord : String) {
     fun getHBPack() : String {
         try {
             val skey = userStInfo.sKey.ticket()
-            val pskey = userStInfo.superKey.ticket()
+            val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbPackUrl, mapOf(
@@ -185,7 +185,7 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            WloginHelper(ore.uin, (ore as OreBot).client).refreshA1()
+            WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

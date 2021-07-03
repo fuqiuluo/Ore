@@ -56,5 +56,5 @@ class WtLoginGetA1(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 15, 0x45
         // writeBytes(tlv.t545())
     }.toByteArray()
 
-    override fun packetType(): PacketType = PacketType.ExChangeEmp
+    override fun packetType(): PacketType = PacketType.ExChangeEmpA1
 }

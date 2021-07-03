@@ -23,7 +23,9 @@ package moe.ore.core.bot
 
 import kotlinx.serialization.Serializable
 class UserSigInfo {
+
     lateinit var tgtKey: BytesTicket
+
     // A2
     lateinit var tgt: BytesTicket
 
@@ -53,8 +55,7 @@ class UserSigInfo {
     // 用t106和t10c计算得到 from QQ 8.6.0
     lateinit var encryptA1: BytesTicket
 
-    // TODO: 2021/6/24 到底归属于 dev还是sig
-    lateinit var tgtgt : BytesTicket
+    lateinit var t10c : BytesTicket
 
     // from 10c
     lateinit var gtKey : BytesTicket
