@@ -40,14 +40,14 @@ class OkhttpUtil(
     /**
      * 禁止使用代理
      */
-    private val proxy : Boolean = true) {
+    private val proxy: Boolean = true) {
     private val clientBuilder = OkHttpClient.Builder().apply {
         readTimeout(readTimeOut, TimeUnit.SECONDS)
         connectTimeout(connectTimeout, TimeUnit.SECONDS)
         writeTimeout(writeTimeout, TimeUnit.SECONDS)
         sslSocketFactory(getSSLSocketFactory()!!, getX509TrustManager()!!)
         hostnameVerifier(getHostnameVerifier())
-        if(!proxy) proxy(Proxy.NO_PROXY)
+        if (!proxy) proxy(Proxy.NO_PROXY)
     }
     private val requestBuilder = Request.Builder()
 
@@ -67,15 +67,15 @@ class OkhttpUtil(
             clientBuilder.writeTimeout(field, TimeUnit.SECONDS)
         }
 
-    fun cookie(content : String) = header("cookie", content)
+    fun cookie(content: String) = header("cookie", content)
 
     fun removeCookie() = removeHeader("cookie")
 
-    fun header(key : String, content : String) = requestBuilder.addHeader(key, content)
+    fun header(key: String, content: String) = requestBuilder.addHeader(key, content)
 
     fun removeHeader(key: String) = requestBuilder.removeHeader(key)
 
-    fun get(url : String) : Response? {
+    fun get(url: String): Response? {
         val request = requestBuilder.get().url(url).build()
         val call = clientBuilder.build().newCall(request)
         var response: Response? = null
@@ -87,7 +87,7 @@ class OkhttpUtil(
         return response
     }
 
-    fun getSync(url : String, netCall: NetCall) {
+    fun getSync(url: String, netCall: NetCall) {
         val request = requestBuilder.get().url(url).build()
         val call = clientBuilder.build().newCall(request)
         call.enqueue(object : Callback {
@@ -97,7 +97,7 @@ class OkhttpUtil(
         })
     }
 
-    fun post(url : String, body : RequestBody) : Response? {
+    fun post(url: String, body: RequestBody): Response? {
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         var response: Response? = null
         try {
@@ -108,12 +108,12 @@ class OkhttpUtil(
         return response
     }
 
-    fun post(url : String, bodyParams : Map<String, String>) : Response? {
+    fun post(url: String, bodyParams: Map<String, Any>): Response? {
         val body = toRequestBody(bodyParams)
         return post(url, body)
     }
 
-    fun postSync(url : String, bodyParams : Map<String, String>, netCall: NetCall) {
+    fun postSync(url: String, bodyParams: Map<String, Any>, netCall: NetCall) {
         val body = toRequestBody(bodyParams)
         clientBuilder.build().newCall(requestBuilder.post(body).url(url).build()).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) = netCall.failed(call, e)
@@ -122,7 +122,7 @@ class OkhttpUtil(
         })
     }
 
-    fun postData(url : String, data : String) : Response? {
+    fun postData(url: String, data: String): Response? {
         val body = RequestBody.create("text/html;charset=utf-8".toMediaTypeOrNull(), data)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         var response: Response? = null
@@ -134,7 +134,7 @@ class OkhttpUtil(
         return response
     }
 
-    fun postDataSync(url : String, data: String, netCall: NetCall) {
+    fun postDataSync(url: String, data: String, netCall: NetCall) {
         val body = RequestBody.create("text/html;charset=utf-8".toMediaTypeOrNull(), data)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         call.enqueue(object : Callback {
@@ -144,7 +144,7 @@ class OkhttpUtil(
         })
     }
 
-    fun postJson(url : String, json : String) : Response? {
+    fun postJson(url: String, json: String): Response? {
         val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         var response: Response? = null
@@ -156,7 +156,7 @@ class OkhttpUtil(
         return response
     }
 
-    fun postJsonSync(url : String, json: String, netCall: NetCall) {
+    fun postJsonSync(url: String, json: String, netCall: NetCall) {
         val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         call.enqueue(object : Callback {
@@ -176,14 +176,14 @@ class OkhttpUtil(
          *
          * @param bodyParams 请求参数
          */
-        private fun toRequestBody(bodyParams: Map<String, String>?): RequestBody {
+        private fun toRequestBody(bodyParams: Map<String, Any>?): RequestBody {
             val formEncodingBuilder = FormBody.Builder()
             if (bodyParams != null) {
                 val iterator = bodyParams.keys.iterator()
                 var key = ""
                 while (iterator.hasNext()) {
                     key = iterator.next()
-                    bodyParams[key]?.let { formEncodingBuilder.add(key, it) }
+                    bodyParams[key]?.let { formEncodingBuilder.add(key, it.toString()) }
                 }
             }
             return formEncodingBuilder.build()
@@ -211,15 +211,13 @@ class OkhttpUtil(
 
             //获取TrustManager
             private fun getTrustManager(): Array<TrustManager> {
-                return arrayOf(
-                    object : X509TrustManager {
-                        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-                        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-                        override fun getAcceptedIssuers(): Array<X509Certificate> {
-                            return arrayOf()
-                        }
+                return arrayOf(object : X509TrustManager {
+                    override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                    override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                    override fun getAcceptedIssuers(): Array<X509Certificate> {
+                        return arrayOf()
                     }
-                )
+                })
             }
 
             fun getHostnameVerifier(): HostnameVerifier {
@@ -233,9 +231,7 @@ class OkhttpUtil(
                     trustManagerFactory.init(null as KeyStore?)
                     val trustManagers = trustManagerFactory.trustManagers
                     check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
-                        "Unexpected default trust managers:" + Arrays.toString(
-                            trustManagers
-                        )
+                        "Unexpected default trust managers:" + Arrays.toString(trustManagers)
                     }
                     trustManager = trustManagers[0] as X509TrustManager
                 } catch (e: Exception) {
