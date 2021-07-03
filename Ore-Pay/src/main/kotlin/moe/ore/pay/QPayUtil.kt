@@ -48,6 +48,13 @@ internal object QPayUtil {
     }
 
     @JvmStatic
+    fun getTimes(): String {
+        val data = Date()
+        val sd = SimpleDateFormat("yyyy-MM-dd HH")
+        return sd.format(data).replace("-".toRegex(), "").replace(":".toRegex(), "").replace(" ".toRegex(), "")
+    }
+
+    @JvmStatic
     fun String.formatToJson() : String {
         return String(toByteArray().toHexString().replace("00".toRegex(), "").hex2ByteArray())
     }

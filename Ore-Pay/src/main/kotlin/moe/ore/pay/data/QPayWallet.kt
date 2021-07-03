@@ -1,6 +1,7 @@
 package moe.ore.pay.data
 
 data class QPayWallet(
+    val token_id: String,
     val ad_display: String,
     val authen_account_type: String,
     val authen_channel_state: String,

@@ -9,6 +9,7 @@ import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
+import moe.ore.core.helper.toByteArray
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.hex2ByteArray
@@ -17,11 +18,10 @@ import moe.ore.pay.QPayUtil.decryptToJsonStr
 import moe.ore.pay.QPayUtil.encryptToReqText
 import moe.ore.pay.QPayUtil.formatToJson
 import moe.ore.pay.QPayUtil.getTime
+import moe.ore.pay.QPayUtil.getTimes
 import moe.ore.pay.QPayUtil.toRequestString
 import moe.ore.pay.data.QPayWallet
-import moe.ore.util.DesECBUtil
-import moe.ore.util.MD5
-import moe.ore.util.OkhttpUtil
+import moe.ore.util.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
@@ -41,7 +41,7 @@ class QPay(val uin : Long, var payWord : String) {
     private val device = dataManager.deviceInfo
     private val session = dataManager.session
 
-    private val defaultKeyIndex : Int = Random.nextInt(0, 16)
+    private var defaultKeyIndex : Int = Random.nextInt(0, 16)
 
     /**
      * 获取钱包余额
@@ -114,13 +114,13 @@ class QPay(val uin : Long, var payWord : String) {
                         "uin" to uin.toString(),
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
-                        "h_edition" to "19",
+                        "h_edition" to "74",
                         "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
                             (if(hasRoot) 1 else 0)
                         }|",
                         "h_qq_guid" to device.guid.toHexString(),
-                        "h_qq_appid" to "537070774",
+                        "h_qq_appid" to "537068363",
                         "h_exten" to ""
                     ), defaultKeyIndex),
                     "skey_type" to "2", // 0 为vkey 2 为skey
@@ -132,9 +132,56 @@ class QPay(val uin : Long, var payWord : String) {
             )
             if(result?.code == 200) {
                 val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
-                println(data)
                 val hbWallet = Gson().fromJson(data, QPayWallet::class.java)
                 result.close()
+                return hbWallet.token_id
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+        }
+        return null.toString()
+    }
+
+    fun getHBGate(token_id: String) : String {
+        try {
+            val skey = userStInfo.sKey.ticket()
+            val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
+            val okhttp = OkhttpUtil()
+            val result = okhttp.post(
+                HbGateUrl, mapOf(
+                    "req_text" to encryptToReqText(mapOf(
+                        "pskey" to pskey,
+                        "pskey_scene" to "client",
+                        "skey_type" to "2",
+                        "come_from" to "2",
+                        "token_id" to token_id,
+                        "skey" to skey,
+                        "uin" to uin.toString(),
+                        "sdk_channel" to "0",
+                        "soter_flag" to "2",
+                        "h_net_type" to "WIFI",
+                        "h_model" to "android_mqq",
+                        "h_edition" to "74",
+                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                            // 这个0代表支付环境是否有root
+                            (if(hasRoot) 1 else 0)
+                        }|",
+                        "h_qq_guid" to device.guid.toHexString(),
+                        "h_qq_appid" to "537068363",
+                        "h_exten" to ""
+                    ), defaultKeyIndex),
+                    "skey_type" to "2", // 0 为vkey 2 为skey
+                    "random" to "$defaultKeyIndex",
+                    // 密钥的标识
+                    "msgno" to "$uin${getTime()}0002",
+                    "skey" to skey
+                )
+            )
+            if(result?.code == 200) {
+                val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
+                val hbWallet = Gson().fromJson(data, QPayWallet::class.java)
+                result.close()
+                defaultKeyIndex=hbWallet.trans_seq.toInt()
                 return hbWallet.skey
             }
         } catch (e : Exception) {
@@ -142,7 +189,57 @@ class QPay(val uin : Long, var payWord : String) {
         }
         return null.toString()
     }
-    
+
+    fun getHBBalance(token_id: String, vskey: String) : String {
+        try {
+            val time = HexUtil.Bin2Hex(getTimes().toByteArray()).replace(" ", "")
+            val mkey = MD5.hexdigest(payWord)
+            val winm = "F0D6C4CEE093903BFD05D6303A581B97E8442ABD"
+            var data = BytesUtil.byteMerger(byteArrayOf(0x00.toByte(),0x05.toByte()), BytesUtil.randomKey(69))
+            data = BytesUtil.byteMerger(data, byteArrayOf(0x00.toByte()))
+            data = BytesUtil.byteMerger(data, getTimes().toByteArray())
+            data = BytesUtil.byteMerger(data, HexUtil.Hex2Bin("FFFFFFFFFFFFFFFFFFFFFFFFFFFF"))
+            data = BytesUtil.byteMerger(data, mkey.toByteArray())
+            val rsa = RsaUtil.encode(data)
+            val p = time + winm + rsa
+            val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
+            val okhttp = OkhttpUtil()
+            val result = okhttp.post(
+                HbBalanceUrl, mapOf(
+                    "req_text" to encryptToReqText(mapOf(
+                        "pskey" to pskey,
+                        "p" to p,
+                        "token_id" to token_id,
+                        "is_reentry" to "0",
+                        "skey" to vskey,
+                        "timestamp" to getTimes(),
+                        "h_net_type" to "WIFI",
+                        "h_model" to "android_mqq",
+                        "h_edition" to "74",
+                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                            // 这个0代表支付环境是否有root
+                            (if(hasRoot) 1 else 0)
+                        }|",
+                        "h_qq_guid" to device.guid.toHexString(),
+                        "h_qq_appid" to "537068363",
+                        "h_exten" to ""
+                    ), defaultKeyIndex),
+                    "msgno" to "$uin${getTime()}0003",
+                    "skey" to vskey
+                )
+            )
+            if(result?.code == 200) {
+                val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
+                val hbWallet = Gson().fromJson(data, QPayWallet::class.java)
+                result.close()
+                return data
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+        }
+        return null.toString()
+    }
+
     private val paySeq = AtomicInteger(Random.nextInt(1))
 
     private fun nextSeqId(): Int {
@@ -185,7 +282,13 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
+            //WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
+            val HongBao = ore.getPay("170086")
+            val token_id =HongBao.getHBPack()
+            val vskey = HongBao.getHBGate(token_id)
+            val data = HongBao.getHBBalance(token_id, vskey)
+            print(data)
+
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {
