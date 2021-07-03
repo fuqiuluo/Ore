@@ -324,27 +324,10 @@ class Tlv(
     fun t403(dt403: ByteArray) = buildTlv(0x403) {
         writeBytes(dt403)
     }
-
     fun t511() = buildTlv(0x511) {
+        // 备选  "haoma.qq.com","mma.qq.com","om.qq.com","kg.qq.com",
         val domains = arrayOf(
-            "office.qq.com",
-            "qun.qq.com",
-            "gamecenter.qq.com",
-            "docs.qq.com",
-            "mail.qq.com",
-            "ti.qq.com",
-            "vip.qq.com",
-            "tenpay.qq.com",
-            "qqqweb.qq.com",
-            "qzone.qq.com",
-            "mma.qq.com",
-            "game.qq.com",
-            "openmobile.qq.com",
-            "conect.qq.com",
-            "y.qq.com",
-            "v.qq.com",
-            "t.qq.com",
-            "om.qq.com"
+            "accounts.qq.com","aq.qq.com","buluo.qq.com","connect.qq.com","docs.qq.com","game.qq.com","gamecenter.qq.com","graph.qq.com","id.qq.com","imgcache.qq.com","mail.qq.com","openmobile.qq.com","qun.qq.com","qzone.com", "tenpay.com","ti.qq.com","v.qq.com","vip.qq.com","y.qq.com","office.qq.com"
         )
         writeShort(domains.size)
         for (domain in domains) {
