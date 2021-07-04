@@ -27,6 +27,8 @@ fun main() {
 
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
+
+            WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

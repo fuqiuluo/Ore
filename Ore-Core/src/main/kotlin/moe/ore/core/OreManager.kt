@@ -21,11 +21,9 @@
 
 package moe.ore.core
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import moe.ore.api.Ore
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
-import java.io.File
 
 /**
  * Ore管理器
@@ -33,6 +31,7 @@ import java.io.File
  * 批量管理已登录QQ
  */
 object OreManager {
+    @JvmStatic
     private val botMap = hashMapOf<Long, Ore>()
 
     /**
@@ -61,5 +60,8 @@ object OreManager {
         return ore
     }
 
-
+    @JvmStatic
+    fun shutBot(uin: Long) {
+        getBot(uin)?.shut()
+    }
 }

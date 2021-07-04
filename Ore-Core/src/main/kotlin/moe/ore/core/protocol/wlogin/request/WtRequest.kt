@@ -59,8 +59,6 @@ abstract class WtRequest(
         to.firstToken = firstToken
         to.secondToken = secondToken
 
-        // println(to.body.toHexString())
-
         // println("key : " + teaKey().toHexString())
 
         return to.sendTo(client)
@@ -72,7 +70,9 @@ abstract class WtRequest(
         val tlvBody = newBuilder().apply {
             writeTeaEncrypt(teaKey()) {
                 writeShort(subCmd)
-                writeBytes(makeTlv(seq))
+                val tlv = makeTlv(seq)
+                // println("TLV ： " + tlv.toHexString())
+                writeBytes(tlv)
             }
         }
 

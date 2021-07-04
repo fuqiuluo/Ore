@@ -31,17 +31,13 @@ import java.lang.InterruptedException
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.Synchronized
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.handler.timeout.IdleStateHandler
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.ChannelOption
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
-import moe.ore.helper.toHexString
 import moe.ore.util.DebugUtil
-import java.net.InetSocketAddress
 import kotlin.random.Random
 
 /**
@@ -121,8 +117,8 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
             public override fun initChannel(socketChannel: SocketChannel) {
                 //  注意添加顺序决定执行的先后
                 // TODO socketChannel.pipeline().addLast("reConnection", reConnectionAndExceptionListener)
-                // socketChannel.pipeline().addLast("ping", idleStateHandler)
-                // socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
+                socketChannel.pipeline().addLast("ping", idleStateHandler)
+                socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
                 socketChannel.pipeline().addLast("handler", usefulListener)

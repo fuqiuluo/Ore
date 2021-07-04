@@ -147,7 +147,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
-    // println(out.toHexString())
+    // println("最外层" + out.toHexString())
 
     return PacketSender(client, out, commandName, seq)
 }
