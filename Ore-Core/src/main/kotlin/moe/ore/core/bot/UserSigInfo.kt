@@ -55,8 +55,6 @@ class UserSigInfo {
     // 用t106和t10c计算得到 from QQ 8.6.0
     lateinit var encryptA1: BytesTicket
 
-    lateinit var t10c : BytesTicket
-
     // from 10c
     lateinit var gtKey : BytesTicket
 

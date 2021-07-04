@@ -42,8 +42,22 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
      * 登录包
      */
     LoginPacket(0xa, 0x2),
+
+    /**
+     * 刷新st
+     */
+    ExChangeEmpSt(0xa, 0x2),
+
+    /**
+     * 上线包
+     */
     SvcRegister(0xa, 0x1),
+
+    /**
+     * 刷新cookie
+     */
     ExChangeEmpA1(0xb, 0x2),
+
     // ServicePacket(0xb, 0x2)
 }
 
@@ -56,7 +70,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
     val deviceInfo = manager.deviceInfo
 
     val teaKey = when (packetType) {
-        PacketType.ExChangeEmpA1, PacketType.LoginPacket -> DEFAULT_TEA_KEY
+        PacketType.ExChangeEmpSt, PacketType.ExChangeEmpA1, PacketType.LoginPacket -> DEFAULT_TEA_KEY
         // PacketType.ServicePacket,
         PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
@@ -65,7 +79,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         writeByte(packetType.flag2)
         when(packetType) {
             // write token
-            PacketType.LoginPacket, PacketType.SvcRegister -> {
+            PacketType.ExChangeEmpSt, PacketType.LoginPacket, PacketType.SvcRegister -> {
                 val token = firstToken ?: EMPTY_BYTE_ARRAY
                 writeInt(token.size + 4)
                 writeBytes(token)
@@ -80,14 +94,14 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         writeBytes(TeaUtil.encrypt(newBuilder().apply {
             writeBlockWithIntLen({ it + 4 }) {
                 when(packetType) {
-                    PacketType.SvcRegister, PacketType.LoginPacket -> {
+                    PacketType.ExChangeEmpSt, PacketType.SvcRegister, PacketType.LoginPacket -> {
                         writeInt(seq)
                         writeInt(protocolInfo.appId)
                         writeInt(protocolInfo.appId)
                         writeInt(16777216)
                         writeInt(0)
 
-                        writeInt(if(secondToken == null) 0 else 256) // Token Type 如果有Token就是256
+                        writeInt(256) // Token Type 如果有Token就是256
                         val token = secondToken ?: EMPTY_BYTE_ARRAY
                         writeInt(token.size + 4)
                         writeBytes(token)

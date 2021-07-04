@@ -70,7 +70,7 @@ class Tlv(
     }
 
     fun t10a(tgt : ByteArray) = buildTlv(0x10a) {
-        writeBytesWithShortLen(tgt)
+        writeBytes(tgt)
     }
 
     fun t100(appId : Int = protocolInfo.appId, mainSigMap : Int = protocolInfo.mainSigMap) = buildTlv(0x100) {
@@ -174,7 +174,8 @@ class Tlv(
     }
 
     fun t143(d2 : ByteArray) = buildTlv(0x143) {
-        writeBytesWithShortLen(d2)
+        writeBytes(d2)
+        // writeBytesWithShortLen(d2)
     }
 
     fun t144(key : ByteArray = deviceInfo.tgtgt) = buildTlv(0x144) {
@@ -325,11 +326,8 @@ class Tlv(
         writeBytes(dt403)
     }
 
-    fun t511() = buildTlv(0x511) {
+    fun t511(domains : Array<String> = arrayOf("accounts.qq.com","aq.qq.com","buluo.qq.com","connect.qq.com","docs.qq.com","game.qq.com","gamecenter.qq.com","graph.qq.com","id.qq.com","imgcache.qq.com","mail.qq.com","openmobile.qq.com","qun.qq.com","qzone.com", "tenpay.com","ti.qq.com","v.qq.com","vip.qq.com","y.qq.com","office.qq.com")) = buildTlv(0x511) {
         // 备选  "haoma.qq.com","mma.qq.com","om.qq.com","kg.qq.com",
-        val domains = arrayOf(
-            "accounts.qq.com","aq.qq.com","buluo.qq.com","connect.qq.com","docs.qq.com","game.qq.com","gamecenter.qq.com","graph.qq.com","id.qq.com","imgcache.qq.com","mail.qq.com","openmobile.qq.com","qun.qq.com","qzone.com", "tenpay.com","ti.qq.com","v.qq.com","vip.qq.com","y.qq.com","office.qq.com"
-        )
         writeShort(domains.size)
         for (domain in domains) {
             val start = domain.indexOf('(')

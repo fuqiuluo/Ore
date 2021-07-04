@@ -123,7 +123,8 @@ class WloginHelper(val uin : Long,
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
-                    MODE_EXCHANGE_EMP_A1, MODE_EXCHANGE_EMP_ST -> userStInfo.gtKey.ticket()
+                    MODE_EXCHANGE_EMP_A1 -> userStInfo.gtKey.ticket()
+                    MODE_EXCHANGE_EMP_ST -> MD5.toMD5Byte(userStInfo.d2Key.ticket())
                     else -> error("unknown wtlogin mode")
                 }).toByteReadPacket())
 
@@ -145,7 +146,6 @@ class WloginHelper(val uin : Long,
                 map[0x203]?.let { userStInfo.da2 = bsTicket(it) }
 
                 map[0x143]?.let {
-                    println("input d2")
                     userStInfo.d2 = bsTicket(it)
                 }
                 map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
@@ -155,16 +155,12 @@ class WloginHelper(val uin : Long,
                     userStInfo.sKey = strTicket(String(it))
                 }
 
-                (map[0x106]!! to map[0x10c]!!).run {
-                    userStInfo.t10c = bsTicket(first)
-                    userStInfo.gtKey = bsTicket(second)
-                    // println("t106 size : %s".format(first.size))
-                    // println("t10c size : %s".format(second.size))
-                    userStInfo.encryptA1 = bsTicket(first)
-                    // userStInfo.encryptA1 = bsTicket(first + sec)
-                    // 傻卵，不知道你去什么鸟屎开源协议项目看来的代码，
-                    // 自己逆向QQ去看，a1就是这么算 天王老子来了也是这样
-                    // QQ 8.6.0
+                map[0x106]?.let {
+                    userStInfo.encryptA1 = bsTicket(it)
+                }
+
+                map[0x10c]?.let {
+                    userStInfo.gtKey = bsTicket(it)
                 }
 
                 map[0x10a]?.let { userStInfo.tgt = bsTicket(it) }

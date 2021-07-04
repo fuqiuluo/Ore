@@ -43,6 +43,9 @@ abstract class WtRequest(
         writeShort(ECDH_VERSION.toShort())
     }.toByteArray()
 
+    open var firstToken : ByteArray? = null
+    open var secondToken : ByteArray? = null
+
     open fun packetType() : PacketType = PacketType.LoginPacket
 
     open fun publicKey() : ByteArray = ecdh.publicKey
@@ -53,6 +56,8 @@ abstract class WtRequest(
         val seq = session.nextSeqId()
         val to = ToService(seq, commandName, makeBody(seq))
         to.packetType = packetType()
+        to.firstToken = firstToken
+        to.secondToken = secondToken
 
         // println(to.body.toHexString())
 
