@@ -38,7 +38,7 @@ internal object QPayUtil {
 
     @JvmStatic
     fun encryptToReqText(map: Map<String, Any>, keyIndex: Int): String {
-        val sourceBody = (map.toRequestString().toByteArray().toHexString() + "0000").hex2ByteArray()
+        val sourceBody = map.toRequestString().toByteArray()
         // println(sourceBody.toHexString())
         return DesECBUtil.encryptDES(sourceBody, desKeys[keyIndex]).toHexString()
     }

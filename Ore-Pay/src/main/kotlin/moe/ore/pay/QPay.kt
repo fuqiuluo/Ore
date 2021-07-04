@@ -25,7 +25,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
-class QPay(val uin : Long, var payWord : String) {
+class QPay(val uin : Long, var payWord : String) : IQPay {
     /**
      * 支付配置文件
      */
@@ -40,10 +40,9 @@ class QPay(val uin : Long, var payWord : String) {
 
     private var defaultKeyIndex : Int = Random.nextInt(0, 16)
 
-    /**
-     * 获取钱包余额
-     */
-    fun getWalletBalance() : Double {
+    // =========================================================================
+
+    override fun getWalletBalance() : Double {
         try {
             val skey = userStInfo.sKey.ticket()
             val okhttp = OkhttpUtil()
@@ -67,7 +66,7 @@ class QPay(val uin : Long, var payWord : String) {
                     "skey_type" to "2", // 0 为vkey 2 为skey
                     "random" to "$defaultKeyIndex",
                     // 密钥的标识
-                    "msgno" to "$uin${getTime()}0001",
+                    "msgno" to getMsgno(uin, nextSeqId()),
                     "skey" to skey
                 )
             )
@@ -83,22 +82,69 @@ class QPay(val uin : Long, var payWord : String) {
         return 0.00
     }
 
-    /**
-     * 发送群聊红包
-     */
-    fun sendTrHb(
-        groupId : Long,
+    override fun sendTrCommonHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int) : QPayBalance? {
+        return sendTrHb(groupId, HbType.Common, wishing, totalAmount, totalNum)
+    }
+
+    override fun sendTrLuckyHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int) : QPayBalance? {
+        return sendTrHb(groupId, HbType.Lucky, wishing, totalAmount, totalNum)
+    }
+
+    override fun sendTrExclusiveHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int, grabUinList: Array<Long>) : QPayBalance? {
+        return sendTrHb(groupId, HbType.Exclusive, wishing, totalAmount, totalNum, mapOf("grab_uin_list" to fun () : String {
+            var buffer = ""
+            grabUinList.forEachIndexed { index, grabUin ->
+                if(index == 0) {
+                    buffer += grabUin
+                } else {
+                    buffer += "|$grabUin"
+                }
+            }
+            return buffer
+        }()))
+    }
+
+    override fun sendTrPasswordHb(groupId: Long, word: String, totalAmount: Int, totalNum: Int): QPayBalance? {
+        return sendTrHb(groupId, HbType.Password, word, totalAmount, totalNum)
+    }
+
+    override fun sendTrVoiceHb(groupId: Long, word: String, totalAmount: Int, totalNum: Int): QPayBalance? {
+        return sendTrHb(groupId, HbType.Voice, word, totalAmount, totalNum)
+    }
+
+    override fun sendTrRareHb(groupId: Long, word: String, totalAmount: Int, totalNum: Int): QPayBalance? {
+        return sendTrHb(groupId, HbType.Rare, word, totalAmount, totalNum, mapOf(
+            "client_extend" to "{\"type\":\"shengpizi\"}"
+        ))
+    }
+
+    // =========================================================================
+
+    private fun sendTrHb(
+        groupId: Long,
         hbType: HbType,
+        /**
+         * 祝福
+         */
         wishing: String,
+        /**
+         * 红包总金额
+         */
         totalAmount: Int,
-        totalNum: Int
-    ) {
+        /**
+         * 红包数量
+         */
+        totalNum: Int,
+        textMap: Map<String, Any> = mapOf()
+    ): QPayBalance? {
         val skey = userStInfo.sKey.ticket()
         val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
-        val tokenId = getHBPack(skey, pskey, groupId, 0, hbType.busType, hbType.channel, wishing, totalAmount, totalNum, 3)
-        val gate = getHBGate(skey, pskey, tokenId)
-        val balance = getHBBalance(tokenId, gate!!)
-        println(balance)
+        val hbPack = getHBPack(skey, pskey, groupId, 0, hbType.busType, hbType.channel, wishing, totalAmount, totalNum, 3, textMap)!!
+        if(hbPack.retcode != 0) {
+            error(hbPack.retmsg)
+        }
+        val gate = getHBGate(skey, pskey, hbPack.token_id)
+        return getHBBalance(hbPack.token_id, gate!!)
     }
 
     private fun getHBPack(
@@ -134,23 +180,18 @@ class QPay(val uin : Long, var payWord : String) {
          * 1好友 3群 4非好友
          */
         recvType: Int,
-        /**
-         * 专享红包
-         */
-        grabUinList: Array<Long>? = null
-    ) : String {
+        textMap : Map<String, Any>
+    ) : QPayHbPack? {
         /**
          * 最多发200块的红包
          */
         check(totalAmount in 1 .. 200 * 10 * 10) { "总金额不合法" }
         check(totalNum in 1 .. 100) { "红包个数不合法" }
-        check((!grabUinList.isNullOrEmpty() && channel == 1024) ||
-                (channel != 1024 && grabUinList == null)) { "专享红包目标不合法" }
         try {
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbPackUrl, mapOf(
-                    "req_text" to encryptToReqText(mapOf(
+                    "req_text" to encryptToReqText(hashMapOf(
                         "pskey" to pskey,
                         "subchannel" to "0",
                         "hb_from_type" to "0",
@@ -164,20 +205,6 @@ class QPay(val uin : Long, var payWord : String) {
                         "recv_type" to recvType,
                         "total_num" to totalNum,
                         "recv_uin" to recvUin,
-                        (if (channel == 1024)
-                            "grab_uin_list" to fun () : String {
-                                var buffer = ""
-                                grabUinList!!.forEachIndexed { index , grabUin ->
-                                    if(index == 0) {
-                                        buffer += grabUin
-                                    } else {
-                                        buffer += "|$grabUin"
-                                    }
-                                }
-                                return buffer
-                            }()
-                        else
-                            "name" to ""),
                         "skey" to skey,
                         "uin" to uin.toString(),
                         "h_net_type" to "WIFI",
@@ -190,7 +217,7 @@ class QPay(val uin : Long, var payWord : String) {
                         "h_qq_guid" to device.guid.toHexString(),
                         "h_qq_appid" to "537068363",
                         "h_exten" to ""
-                    ), defaultKeyIndex),
+                    ).also { textMap.forEach { (t, u) -> it[t] = u.toString() } }, defaultKeyIndex),
                     "skey_type" to "2",
                     "random" to "$defaultKeyIndex",
                     // 密钥的标识
@@ -203,12 +230,12 @@ class QPay(val uin : Long, var payWord : String) {
                 // println(data)
                 val hbPack = Gson().fromJson(data, QPayHbPack::class.java)
                 result.close()
-                return hbPack.token_id
+                return hbPack
             }
         } catch (e : Exception) {
             e.printStackTrace()
         }
-        return null.toString()
+        return null
     }
 
     private fun getHBGate(skey: String, pskey: String, token_id: String) : QPayHbGate? {
@@ -320,60 +347,5 @@ class QPay(val uin : Long, var payWord : String) {
         private const val HbWallet = "https://myun.tenpay.com/cgi-bin/clientv1.0/qwallet.cgi?ver=2.0&chv=3"
         private const val HbBalanceUrl = "https://myun.tenpay.com/cgi-bin/clientv1.0/qpay_balance.cgi?ver=2.0&chv=3"
     }
-}
-
-fun Ore.getPay(payWord: String) : QPay {
-    check(payWord.length == 6) { "支付密码不合法" }
-    return QPay(this.uin, payWord)
-}
-
-fun main() {
-    // val ore = OreManager.addBot(203411690, "911586ABc", "C:\\")
-
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
-
-    ore.oreListener = object : OreListener {
-        override fun onLoginStart() {
-            println("登录开始了，呼呼呼！！！")
-        }
-
-        override fun onLoginFinish(result: LoginResult) {
-            println("登录结果：$result")
-
-            val pay = ore.getPay("170086")
-            pay.sendTrHb(1016398585, HbType.Common, "哈哈哈", 1, 1)
-
-            //WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
-            /**val HongBao = ore.getPay("170086")
-            val token_id =HongBao.getHBPack("", "", 1)
-            val vskey = HongBao.getHBGate(token_id)
-            val data = HongBao.getHBBalance(token_id, vskey)
-            print(data)
-            **/
-        }
-
-        override fun onCaptcha(captchaChan: CaptchaChannel) {
-
-            println(captchaChan.url)
-
-            print("请输入Ticket：")
-            val ticket = Scanner(System.`in`).nextLine()
-            captchaChan.submitTicket(ticket)
-
-
-        }
-
-        override fun onSms(sms: SmsHelper) {
-            println(sms)
-            println(sms.sendSms())
-            print("请输入SMSCode：")
-            val code = Scanner(System.`in`).nextLine()
-            sms.submitSms(code)
-        }
-
-    }
-    ore.login()
-
-
 }
 
