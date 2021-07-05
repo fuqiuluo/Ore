@@ -1,14 +1,13 @@
 package moe.ore.core.protocol.wlogin.request
 
 import moe.ore.core.net.packet.PacketType
-import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.newBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
 import moe.ore.util.MD5
 
 class WtLoginGetSt(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 11, 0x7)  {
-    override fun packetType(): PacketType = PacketType.ExChangeEmpA1
+    override fun packetType(): PacketType = PacketType.ExChangeEmpSt
 
     override var secondToken: ByteArray? = userStSig.tgt.ticket()
 

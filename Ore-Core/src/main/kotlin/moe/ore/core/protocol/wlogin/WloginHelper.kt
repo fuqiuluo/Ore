@@ -148,7 +148,10 @@ class WloginHelper(val uin : Long,
                 map[0x143]?.let {
                     userStInfo.d2 = bsTicket(it)
                 }
-                map[0x305]?.let {  userStInfo.d2Key = bsTicket(it) }
+                map[0x305]?.let {
+                    println("载入d2key")
+                    userStInfo.d2Key = bsTicket(it)
+                }
 
                 map[0x120]?.let {
                     // println("input skey")
