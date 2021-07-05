@@ -798,7 +798,7 @@ public final class TarsInputStream {
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
         }
-        return DebugUtil.forcedConvert(o, ref);
+        return DebugUtil.forcedConvert(ref);
     }
 
     public TarsStructBase[] read(TarsStructBase[] o, int tag, boolean isRequire) {

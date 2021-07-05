@@ -68,17 +68,17 @@ public class DesECBUtil {
      * 填充数据
      */
     public static byte[] setStuff(byte[] msg){
-        int i=msg.length % 8;
+        int i = msg.length % 8;
         if(i == 0){
             return msg;
-        }else {
-            int a=8-i;
-            StringBuffer sb=new StringBuffer();
-            for (int s=0;s<a;s++){
+        } else {
+            int a= 8 - i;
+            StringBuilder sb=new StringBuilder();
+            for (int s = 0; s < a; s++){
                 sb.append(" ");
             }
             byte[] data=sb.toString().getBytes();
-            data=ByteBuffer.allocate(msg.length + data.length).put(msg).put(data).array();
+            data = ByteBuffer.allocate(msg.length + data.length).put(msg).put(data).array();
             return data;
         }
     }

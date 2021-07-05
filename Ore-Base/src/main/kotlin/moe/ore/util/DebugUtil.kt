@@ -37,7 +37,7 @@ object DebugUtil {
      * @param any Any 被强转对象
      */
     @JvmStatic
-    fun <T> forcedConvert(source : T?, any: Any?) : T? {
+    fun <T> forcedConvert(any: Any?) : T? {
         return any as? T
     }
 
@@ -66,26 +66,6 @@ object DebugUtil {
         } catch (e: Exception) {
             throw RuntimeException("forName Class: " + className + " with ex: " + e.message, e)
         }
-    }
-
-    @JvmStatic
-    fun isEmpty(input: String?): Boolean {
-        return null == input || input.trim { it <= ' ' }.isEmpty()
-    }
-
-    @JvmStatic
-    fun isEmptyArray(array: Array<Any?>?): Boolean {
-        return null == array || array.isEmpty()
-    }
-
-    @JvmStatic
-    fun isEmptyCollection(collection: Collection<*>?): Boolean {
-        return collection == null || collection.isEmpty()
-    }
-
-    @JvmStatic
-    fun isEmptyMap(map: Map<*, *>?): Boolean {
-        return map == null || map.isEmpty()
     }
 
     @JvmStatic
@@ -121,17 +101,4 @@ object DebugUtil {
     @JvmStatic
     fun getMixThreadPoolSize() = (getCpuThreadPoolSize() + getIoThreadPoolSize()) / 2
 
-    @JvmStatic
-    fun getIPAndPort(remoteAddress: InetSocketAddress): String {
-        return String.format("%s:%s", remoteAddress.hostString, remoteAddress.port)
-    }
-
-    @JvmStatic
-    fun convertMap(strMap: Map<String, String>): Map<String, Any> {
-        val hashmap: MutableMap<String, Any> = HashMap()
-        for ((key, value) in strMap) {
-            hashmap[key] = value
-        }
-        return hashmap
-    }
 }

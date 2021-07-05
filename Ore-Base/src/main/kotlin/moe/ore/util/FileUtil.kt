@@ -87,7 +87,6 @@ object FileUtil {
         if (!file.exists()) {
             checkParentFile(file.parentFile)
             if (!file.createNewFile()) {
-                // logger.warn(String.format("[%S] File creation failed!", path))
                 return
             }
         }
@@ -96,6 +95,7 @@ object FileUtil {
         fileOutputStream.close()
     }
 
+    @JvmStatic
     private fun checkParentFile(file: File) {
         if (!file.exists()) {
             file.mkdirs()
