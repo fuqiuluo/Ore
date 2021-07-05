@@ -7,7 +7,14 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
+import moe.ore.core.helper.DataManager
+import moe.ore.core.helper.sendPacket
+import moe.ore.core.net.packet.PacketSender.Companion.sync
+import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.pb.safe.SafeReport
+import moe.ore.core.protocol.pb.safe.SafeReportReq
 import moe.ore.core.protocol.wlogin.WloginHelper
+import moe.ore.helper.toHexString
 import java.util.*
 
 fun Ore.getPay(payWord: String) : IQPay {
@@ -28,7 +35,13 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            WloginHelper(ore.uin, (ore as OreBot).client).refreshSt()
+            val o = ore as OreBot
+            val manager = DataManager.manager(o.uin)
+
+            println("d2Key : " + manager.userSigInfo.d2Key.ticket().toHexString())
+
+            val req = SafeReport.encode(manager.deviceInfo, ProtocolInternal[manager.protocolType])
+            o.sendPacket("MqqSafeDataRpt.MQDun", req) sync 2000 * 10
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

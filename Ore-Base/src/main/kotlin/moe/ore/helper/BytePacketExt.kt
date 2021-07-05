@@ -113,14 +113,14 @@ fun BytePacketBuilder.writeBytesWithShortLen(bytes: ByteArray) {
     writeBytes(bytes)
 }
 
-fun BytePacketBuilder.writeBlockWithIntLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit, ) {
+inline fun BytePacketBuilder.writeBlockWithIntLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit) {
     val builder = newBuilder()
     builder.block()
     this.writeInt(len(builder.size))
     this.writePacket(builder)
 }
 
-fun BytePacketBuilder.writeBlockWithShortLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit) {
+inline fun BytePacketBuilder.writeBlockWithShortLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit) {
     val builder = newBuilder()
     builder.block()
     this.writeShort(len(builder.size))

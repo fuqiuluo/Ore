@@ -29,6 +29,11 @@ import moe.ore.api.listener.OreListener
  */
 abstract class Ore(val uin : Long) {
     /**
+     * 机器人状态
+     */
+    protected var status = OreStatus.NoLogin
+
+    /**
      * 事件监听器
      */
     var oreListener: OreListener? = null
@@ -42,10 +47,17 @@ abstract class Ore(val uin : Long) {
      * 获取机器人状态
      * @return OreStatus
      */
-    abstract fun status() : OreStatus
+    fun status() : OreStatus = status
 
     /**
      * 关闭机器人
      */
     abstract fun shut()
+
+    /**
+     * 改变状态
+     */
+    fun changeStatus(status: OreStatus) {
+        this.status = status
+    }
 }

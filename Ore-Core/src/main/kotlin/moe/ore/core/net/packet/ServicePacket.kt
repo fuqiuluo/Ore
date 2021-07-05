@@ -58,7 +58,10 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
      */
     ExChangeEmpA1(0xb, 0x2),
 
-    // ServicePacket(0xb, 0x2)
+    /**
+     * 服务包
+     */
+    ServicePacket(0xb, 0x2)
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
@@ -72,7 +75,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
     val teaKey = when (packetType) {
         PacketType.ExChangeEmpSt, PacketType.ExChangeEmpA1, PacketType.LoginPacket -> DEFAULT_TEA_KEY
         // PacketType.ServicePacket,
-        PacketType.SvcRegister -> userStSig.d2Key.ticket()
+        PacketType.ServicePacket, PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
     val out = newBuilder().apply { writeBlockWithIntLen( { it + 4 } ) {
         writeInt(packetType.flag1)
@@ -84,7 +87,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                 writeInt(token.size + 4)
                 writeBytes(token)
             }
-            PacketType.ExChangeEmpA1 -> writeInt(seq)
+            PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> writeInt(seq)
         }
         writeByte(0)
         uin.toString().let {
@@ -129,7 +132,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         writeInt(4) // qimei 的位置
                     }
 
-                    PacketType.ExChangeEmpA1 -> {
+                    PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> {
                         commandName.let {
                             writeInt(it.length + 4)
                             writeString(it)
@@ -142,12 +145,13 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                     }
                 }
             }
-            writeInt(body.size + 4)
-            writeBytes(body)
+            writeBlockWithIntLen({ it + 4 }) {
+                writeBytes(body)
+            }
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
-    // println("最外层" + out.toHexString())
+    println("最外层" + out.toHexString())
 
     return PacketSender(client, out, commandName, seq)
 }

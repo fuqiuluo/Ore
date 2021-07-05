@@ -23,6 +23,7 @@ package moe.ore.core.helper
 
 import kotlinx.io.core.*
 import moe.ore.api.Ore
+import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
 import moe.ore.core.net.packet.*
 import moe.ore.helper.*
@@ -87,10 +88,16 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
     }
 }
 
+@JvmOverloads
 fun Ore.sendPacket(
     cmd: String,
     body: ByteArray,
-    packetType: PacketType = PacketType.LoginPacket,
+
+    packetType: PacketType = if(this.status() == OreStatus.Online)
+        PacketType.ServicePacket
+    else
+        PacketType.LoginPacket,
+
     firstToken : ByteArray? = null,
     secondToken : ByteArray? = null
 ) : PacketSender {

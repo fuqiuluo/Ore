@@ -2,6 +2,7 @@ package moe.ore.core.protocol.wlogin
 
 import kotlinx.io.core.*
 import moe.ore.api.LoginResult
+import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
@@ -21,6 +22,7 @@ import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 import moe.ore.api.data.Result
+import moe.ore.core.OreManager
 import moe.ore.core.protocol.wlogin.request.*
 
 class WloginHelper(val uin : Long,
@@ -328,6 +330,7 @@ class WloginHelper(val uin : Long,
                 if(ret == 0) {
                     // 清空回滚
                     session.rollBackCount = 0
+                    OreManager.changeStatus(helper.uin, OreStatus.Online)
                     callback(LoginResult.Success)
                 } else callback(LoginResult.RegisterFail)
 

@@ -53,8 +53,6 @@ class OreBot(uin: Long) : Ore(uin) {
         }
     }
 
-    private var status = OreStatus.NoLogin
-
     override fun login() {
         // 登录开始传递登录开始事件
         threadManager.addTask {
@@ -63,9 +61,6 @@ class OreBot(uin: Long) : Ore(uin) {
         // 连接到服务器会自动发送登录包
         client.connect()
     }
-
-    override fun status() = status
-
     override fun shut() {
         // 关闭机器人
         this.status = OreStatus.Destroy

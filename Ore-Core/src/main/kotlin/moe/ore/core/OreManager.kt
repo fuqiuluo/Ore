@@ -22,6 +22,7 @@
 package moe.ore.core
 
 import moe.ore.api.Ore
+import moe.ore.api.OreStatus
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.helper.DataManager
 
@@ -63,5 +64,14 @@ object OreManager {
     @JvmStatic
     fun shutBot(uin: Long) {
         getBot(uin)?.shut()
+    }
+
+    @JvmStatic
+    internal fun changeStatus(uin: Long, status: OreStatus) : Boolean {
+        getBot(uin)?.let {
+            (it as OreBot).changeStatus(status)
+            return true
+        }
+        return false
     }
 }

@@ -21,11 +21,9 @@
 
 package moe.ore.core.helper
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 
-@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T> encodeProtobuf(value: T): ByteArray {
     return ProtoBuf.encodeToByteArray(value)
 }
