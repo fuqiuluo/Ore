@@ -21,8 +21,6 @@
 
 package moe.ore.core.net.decoder
 
-import io.netty.buffer.ByteBuf
-
 data class PacketResponse (
     val body : ByteArray,
     val charsetName : String = "utf-8"

@@ -39,8 +39,6 @@ import java.util.*
 class ReConnectionAndExceptionListener(private val botConnection: BotConnection) : ChannelHandlerAdapter(), ChannelFutureListener {
     private val timer = Timer()
 
-//    两个Override不会同时执行的 对应不同的断线场景 合并到了一起
-
     @Override
     override fun channelInactive(ctx: ChannelHandlerContext) {
         System.err.println("ChannelHandlerAdapter掉线了...")
@@ -76,7 +74,7 @@ class ReConnectionAndExceptionListener(private val botConnection: BotConnection)
                         timer.cancel()
                         return
                     }
-                    System.err.println("正在重连中...")
+                    println("断线重连开始...")
                     botConnection.connect()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()

@@ -1,7 +1,6 @@
 package moe.ore.core.client;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class PowValue {
     public int version;

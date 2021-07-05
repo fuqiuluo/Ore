@@ -49,14 +49,16 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
             when {
                 evt.state() == IdleState.WRITER_IDLE -> {
                     // 心跳发送成功
-                    // println("发送心态")
+                    println("send a heartbeat packet")
                     connection.send(makeHeartBeatPacket())
                 }
                 evt.state() == IdleState.READER_IDLE -> {
+                    println("not receive any packet, went to reconnect")
                     connection.connect()
                 }
                 evt.state() == IdleState.ALL_IDLE -> {
                     // 有一定时间没有接收数据 也没有发送数据
+                    println("not write and read, the ore will be thrown")
                     OreManager.shutBot(connection.uin)
                 }
             }

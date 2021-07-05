@@ -30,7 +30,6 @@ class BotDecoder : ByteToMessageDecoder() {
     private val charsetName = "UTF-8"
 
     override fun decode(ctx: ChannelHandlerContext, byteBuf: ByteBuf, list: MutableList<Any>) {
-        // println("Start")
         do {
             val saveReaderIndex = byteBuf.readerIndex()
             val msg = decodeResponse(byteBuf)
@@ -50,7 +49,6 @@ class BotDecoder : ByteToMessageDecoder() {
         if (channelBuffer.readableBytes() < 4) {
             return null
         }
-        // println("My Name")
         val length = channelBuffer.readInt() - 4
         if (length > 10 * 1024 * 1024 || length <= 0) {
             throw RuntimeException(

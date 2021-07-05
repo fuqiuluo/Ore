@@ -6,34 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class ClientPow {
-    // boolean hasSoLib = false;
-
-    // public native byte[] nativeGetPow(byte[] bArr);
-
-    // public native byte[] nativeGetTestData();
-
-    public ClientPow() {
-        try {
-            // System.loadLibrary("pow");
-            // this.hasSoLib = true;
-        } catch (UnsatisfiedLinkError e) {
-            // So Lib 载入失败
-        }
-    }
-
     public byte[] calc(byte[] t546) {
         byte[] ret = new byte[0];
         if (t546 == null || t546.length == 0) {
             return ret;
         }
-        /*
-        if (this.hasSoLib) {
-            try {
-                ret = nativeGetPow(t546);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }*/
         try {
             ret = javaGetPow(t546);
         } catch (Exception e) {
@@ -76,19 +53,16 @@ public class ClientPow {
         }
     }
 
-    private int hashSha(byte[] content, byte[] dst) {
+    private void hashSha(byte[] content, byte[] dst) {
         if (content == null || content.length == 0) {
-            return 1;
+            return;
         }
         try {
             MessageDigest instance = MessageDigest.getInstance("SHA-256");
             instance.update(content);
             byte[] digest = instance.digest();
             System.arraycopy(digest, 0, dst, 0, digest.length);
-            return 0;
-        } catch (NoSuchAlgorithmException e) {
-            return 2;
-        }
+        } catch (NoSuchAlgorithmException ignored) { }
     }
 
     private int calcCostCount(PowValue value) {
@@ -149,8 +123,8 @@ public class ClientPow {
         return -1;
     }
 
-    private byte[] sm3(byte[] bArr) {
-        return new byte[0];
+    private void sm3(byte[] bArr) {
+
     }
 
     int check(byte[] in, int count) {

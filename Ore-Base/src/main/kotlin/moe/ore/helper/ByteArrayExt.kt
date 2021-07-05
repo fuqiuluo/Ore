@@ -46,6 +46,10 @@ import moe.ore.util.BytesUtil
 import java.util.*
 import kotlin.experimental.xor
 
+fun ByteArray.toInt() = BytesUtil.bufToInt32(this, 0)
+
+fun ByteArray.toShort(): Short = BytesUtil.bufToInt16(this, 0).toShort()
+
 fun ByteArray.toHexString(): String = this.joinToString("") {
     (it.toInt() and 0xFF).toString(16).padStart(2, '0').uppercase(Locale.getDefault())
 }

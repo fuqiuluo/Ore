@@ -24,9 +24,7 @@ package moe.ore.core.bot
 import kotlinx.io.core.BytePacketBuilder
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.md5
-import moe.ore.helper.toHexString
 import moe.ore.helper.writeBytes
-import moe.ore.helper.writeLongToBuf32
 import moe.ore.util.MD5
 
 /**
