@@ -145,8 +145,12 @@ public class UniPacket {
     }
 
     public static UniPacket decode(byte[] bytes) {
+        return decode(bytes, 0);
+    }
+
+    public static UniPacket decode(byte[] bytes, int index) {
         UniPacket uniPacket = new UniPacket();
-        TarsInputStream input = new TarsInputStream(bytes, 0);
+        TarsInputStream input = new TarsInputStream(bytes, index);
         uniPacket._package.readFrom(input);
         input = new TarsInputStream(uniPacket._package.buffer);
         uniPacket.version = uniPacket._package.getVersion();

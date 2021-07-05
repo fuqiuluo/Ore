@@ -30,6 +30,7 @@ import moe.ore.helper.*
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
+import java.net.Inet4Address
 
 val DEFAULT_TEA_KEY = ByteArray(16)
 
@@ -50,6 +51,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 
         TeaUtil.decrypt(ByteArray(remaining.toInt()).apply { readAvailable(this) }, when (keyType) {
             0 -> {
+                println("receive heartbeat")
                 // println("接到心跳")
                 return
             }

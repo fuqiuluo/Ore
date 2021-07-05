@@ -23,11 +23,11 @@ package moe.ore.core.util
 
 import moe.ore.core.net.SsoServerInfoReq
 import moe.ore.core.net.SsoServerInfoResp
-import moe.ore.helper.hex2ByteArray
+import moe.ore.helper.*
 import moe.ore.tars.UniPacket
+import moe.ore.util.OkhttpUtil
 import moe.ore.util.TeaUtil
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.RequestBody.Companion.toRequestBody
 
 object QQUtil {
     @JvmStatic
@@ -99,8 +99,9 @@ object QQUtil {
 
     @JvmStatic
     fun getOicqServer(appId : Long = 0x200302d5) : Pair<String, Int>? {
-        val isUseDebugSo = false
+        val isUseDebugSo = true
         try {
+
             val uniPacket = UniPacket()
             uniPacket.servantName = "ConfigHttp"
             uniPacket.funcName = "HttpServerListReq"
@@ -119,49 +120,21 @@ object QQUtil {
                 this.l = 0
                 this.m = 0
             })
-            val encrypt = TeaUtil.encrypt(uniPacket.encode(), ConfigSvrKey)
-            val url = if (isUseDebugSo) URL("https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist") else URL("https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist")
-            val conn = url.openConnection() as HttpURLConnection
-            conn.doOutput = true
-            conn.requestMethod = "POST"
-            conn.connectTimeout = 20000
-            conn.readTimeout = 20000
-            conn.outputStream.let {
-                it.write(encrypt)
-                it.flush()
-                it.close()
-            }
-            if(conn.responseCode == 200) {
-                var size = 0
-                val bytes = ByteArray(128)
-                val tmp = arrayListOf<ByteArray>()
-                val input = conn.inputStream
-                while (true) {
-                    val read : Int = input.read(bytes)
-                    if(read == -1) {
-                        break
-                    }
-                    val bs = ByteArray(read).also { System.arraycopy(bytes, 0, it, 0, read) }
-                    tmp.add(bs)
-                    size += read
+            val encrypt = TeaUtil.encrypt(newBuilder().apply {
+                writeBlockWithIntLen({ it + 4 }) {
+                    writeBytes(uniPacket.encode())
                 }
-                val barr = if(tmp.size == 1) {
-                    tmp[0]
-                } else {
-                    ByteArray(size).also { `in` ->
-                        var i = 0
-                        tmp.forEach {
-                            System.arraycopy(it, 0, `in`, i, it.size)
-                            i += it.size
-                        }
-                    }
-                }
-                val decrypt = TeaUtil.decrypt(barr, ConfigSvrKey)
-                val decode = UniPacket.decode(decrypt)
-                val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
-                for (ipAddressInfo in findByClass.b!!) {
-                    return ipAddressInfo.ip to ipAddressInfo.port
-                }
+            }.toByteArray(), ConfigSvrKey)
+            val url = if (isUseDebugSo) "https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist" else "https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist"
+            val resp = OkhttpUtil().also { it.defaultUserAgent() }.post(url, encrypt.toRequestBody())
+            val code = resp?.code
+            val result = resp?.body?.bytes()
+            resp?.close()
+            val decrypt = TeaUtil.decrypt(result!!, ConfigSvrKey)
+            val decode = UniPacket.decode(decrypt, 4)
+            val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
+            for (ipAddressInfo in findByClass.b!!) {
+                return ipAddressInfo.ip to ipAddressInfo.port
             }
         } catch (e : Exception) {
             e.printStackTrace()

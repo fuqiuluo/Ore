@@ -14,7 +14,9 @@ import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.pb.safe.SafeReport
 import moe.ore.core.protocol.pb.safe.SafeReportReq
 import moe.ore.core.protocol.wlogin.WloginHelper
+import moe.ore.core.util.QQUtil
 import moe.ore.helper.toHexString
+import java.net.Inet4Address
 import java.util.*
 
 fun Ore.getPay(payWord: String) : IQPay {
@@ -40,8 +42,7 @@ fun main() {
 
             println("d2Key : " + manager.userSigInfo.d2Key.ticket().toHexString())
 
-            val req = SafeReport.encode(manager.deviceInfo, ProtocolInternal[manager.protocolType])
-            o.sendPacket("MqqSafeDataRpt.MQDun", req) sync 2000 * 10
+            println(QQUtil.getOicqServer())
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

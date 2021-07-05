@@ -21,7 +21,8 @@
 
 package moe.ore.core.net.packet
 
-import moe.ore.core.helper.*
+import moe.ore.core.helper.DEFAULT_TEA_KEY
+import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil
@@ -131,7 +132,6 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         }
                         writeInt(4) // qimei 的位置
                     }
-
                     PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> {
                         commandName.let {
                             writeInt(it.length + 4)
@@ -151,7 +151,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
-    println("最外层" + out.toHexString())
+    // println("最外层" + out.toHexString())
 
     return PacketSender(client, out, commandName, seq)
 }
@@ -228,5 +228,9 @@ data class FromService(
 
     override fun hashCode(): Int {
         return QQUtil.hash(seq, commandName)
+    }
+
+    override fun toString(): String {
+        return "FromService(seq=" + seq + ", commandName=" + commandName + ", body= " + body.toHexString() + " )"
     }
 }

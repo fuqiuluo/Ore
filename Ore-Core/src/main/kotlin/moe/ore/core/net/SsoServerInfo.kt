@@ -169,7 +169,9 @@ class SsoServerInfoResp : TarsStructBase() {
         s = jceInputStream.read(s, 19, false)
         t = jceInputStream.readString(20, false)
     }
-    class IPAddressInfo : TarsStructBase {
+
+
+    class IPAddressInfo : TarsStructBase() {
         var ip = ""
         var port = 0
         var c: Byte = 0
@@ -179,19 +181,6 @@ class SsoServerInfoResp : TarsStructBase() {
         var g: Byte = 0
         var h = ""
         var i = ""
-
-        constructor() {}
-        constructor(str: String, i2: Int, b2: Byte, b3: Byte, b4: Byte, i3: Int, b5: Byte, str2: String, str3: String) {
-            ip = str
-            port = i2
-            c = b2
-            d = b3
-            e = b4
-            f = i3
-            g = b5
-            h = str2
-            i = str3
-        }
 
         // com.qq.taf.jce.JceStruct
         override fun writeTo(jceOutputStream: TarsOutputStream) {

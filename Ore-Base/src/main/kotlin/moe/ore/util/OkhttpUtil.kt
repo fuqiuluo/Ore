@@ -26,6 +26,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getHostnameVerifier
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getSSLSocketFactory
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getX509TrustManager
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.io.IOException
 import java.lang.Exception
 import java.net.Proxy
@@ -40,7 +42,8 @@ class OkhttpUtil(
     /**
      * 禁止使用代理
      */
-    private val proxy: Boolean = true) {
+    private val proxy: Boolean = false) {
+
     private val clientBuilder = OkHttpClient.Builder().apply {
         readTimeout(readTimeOut, TimeUnit.SECONDS)
         connectTimeout(connectTimeout, TimeUnit.SECONDS)
@@ -122,7 +125,7 @@ class OkhttpUtil(
         })
     }
 
-    fun postData(url: String, data: String): Response? {
+    fun postParam(url: String, data: String): Response? {
         val body = RequestBody.create("text/html;charset=utf-8".toMediaTypeOrNull(), data)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         var response: Response? = null
@@ -134,7 +137,7 @@ class OkhttpUtil(
         return response
     }
 
-    fun postDataSync(url: String, data: String, netCall: NetCall) {
+    fun postParamSync(url: String, data: String, netCall: NetCall) {
         val body = RequestBody.create("text/html;charset=utf-8".toMediaTypeOrNull(), data)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
         call.enqueue(object : Callback {
@@ -221,7 +224,7 @@ class OkhttpUtil(
             }
 
             fun getHostnameVerifier(): HostnameVerifier {
-                return HostnameVerifier { s: String?, _: SSLSession? -> true }
+                return HostnameVerifier { _: String?, _: SSLSession? -> true }
             }
 
             fun getX509TrustManager(): X509TrustManager? {
