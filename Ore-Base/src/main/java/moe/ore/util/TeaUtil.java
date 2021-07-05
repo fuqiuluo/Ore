@@ -23,22 +23,22 @@ package moe.ore.util;
 
 public class TeaUtil {
     public static byte[] encrypt(byte[] data, byte[] key) {
-        Crypter crypter = new Crypter();
-        return crypter.encrypt(data, key);
+        Cryptor cryptor = new Cryptor();
+        return cryptor.encrypt(data, key);
     }
 
     public static byte[] encrypt(byte[] data, byte[] key, int offset, int len) {
-        Crypter crypter = new Crypter();
-        return crypter.encrypt(data, offset, len, key);
+        Cryptor cryptor = new Cryptor();
+        return cryptor.encrypt(data, offset, len, key);
     }
 
     public static byte[] decrypt(byte[] data, byte[] key) {
-        Crypter crypter = new Crypter();
-        return crypter.decrypt(data, key);
+        Cryptor cryptor = new Cryptor();
+        return cryptor.decrypt(data, key);
     }
 
     public static byte[] decrypt(byte[] data, byte[] key, int offset, int len) {
-        Crypter crypter = new Crypter();
-        return crypter.decrypt(data, offset, len, key);
+        Cryptor cryptor = new Cryptor();
+        return cryptor.decrypt(data, offset, len, key);
     }
 }

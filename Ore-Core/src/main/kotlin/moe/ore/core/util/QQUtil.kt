@@ -133,9 +133,10 @@ object QQUtil {
             val decrypt = TeaUtil.decrypt(result!!, ConfigSvrKey)
             val decode = UniPacket.decode(decrypt, 4)
             val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
-            for (ipAddressInfo in findByClass.b!!) {
-                return ipAddressInfo.ip to ipAddressInfo.port
-            }
+            val info = findByClass.b!![0]
+            val ret = info.ip to info.port
+            println("get sso server by configsvr : $ret")
+            return ret
         } catch (e : Exception) {
             e.printStackTrace()
         }

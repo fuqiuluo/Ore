@@ -25,7 +25,7 @@ import java.util.Random;
  * </code>
  * </pre> 
  */
-public class Crypter {
+public class Cryptor {
     // 指向当前的明文块
     private byte[] plain;
     // 这指向前面一个明文块
@@ -47,15 +47,15 @@ public class Crypter {
     // 后面已经没有数据，这时候就会出错，这个变量就是用来判断这种情况免得出错
     private int contextStart;
     // 随机数对象
-    private static Random random = CrypterUtil.random();
+    private static final Random random = CrypterUtil.random();
     // 字节输出流
-    private ByteArrayOutputStream baos;
+    private final ByteArrayOutputStream bas;
 
     /**
      * 构造函数
      */
-    public Crypter() {
-        baos = new ByteArrayOutputStream(8);
+    public Cryptor() {
+        bas = new ByteArrayOutputStream(8);
     }
 
     /**
@@ -113,7 +113,7 @@ public class Crypter {
             }
             if(pos == 8) {
                 m = in;
-                if(!decrypt8Bytes(in, offset, len)) return null;
+                if(decrypt8Bytes(in, offset, len)) return null;
             }
         }
 
@@ -130,7 +130,7 @@ public class Crypter {
             if(pos == 8) {
                 m = in;
                 preCrypt = crypt - 8;
-                if(!decrypt8Bytes(in, offset, len)) 
+                if(decrypt8Bytes(in, offset, len))
                     return null;
             }
         }
@@ -146,7 +146,7 @@ public class Crypter {
             if(pos == 8) {
                 m = in;
                 preCrypt = crypt;
-                if(!decrypt8Bytes(in, offset, len)) 
+                if(decrypt8Bytes(in, offset, len))
                     return null;
             }
         }
@@ -287,10 +287,10 @@ public class Crypter {
         }
 
         // 最后，我们输出密文，因为我用的long，所以需要强制转换一下变成int
-        baos.reset();
+        bas.reset();
         writeInt((int)y);
         writeInt((int)z);
-        return baos.toByteArray();
+        return bas.toByteArray();
     }
 
     /**
@@ -333,22 +333,20 @@ public class Crypter {
             sum &= 0xFFFFFFFFL;
         }
 
-        baos.reset();
+        bas.reset();
         writeInt((int)y);
         writeInt((int)z);
-        return baos.toByteArray();
+        return bas.toByteArray();
     }
 
     /**
      * 写入一个整型到输出流，高字节优先
-     * 
-     * @param t
      */
     private void writeInt(int t) {
-        baos.write(t >>> 24);
-        baos.write(t >>> 16);
-        baos.write(t >>> 8);
-        baos.write(t);
+        bas.write(t >>> 24);
+        bas.write(t >>> 16);
+        bas.write(t >>> 8);
+        bas.write(t);
     }
 
     /**
@@ -407,22 +405,20 @@ public class Crypter {
         // 这里第一步就是判断后面还有没有数据，没有就返回，如果有，就执行 crypt ^ prePlain
         for(pos = 0; pos < 8; pos++) {
             if(contextStart + pos >= len) 
-                return true;
+                return false;
             prePlain[pos] ^= in[offset + crypt + pos];
         }
 
         // 好，这里执行到了 d(crypt ^ prePlain)
         prePlain = decipher(prePlain);
-        if(prePlain == null)
-            return false;
 
-        // 解密完成，最后一步好像没做？ 
+        // 解密完成，最后一步好像没做？
         // 这里最后一步放到decrypt里面去做了，因为解密的步骤有点不太一样
         // 调整这些变量的值先
         contextStart += 8;
         crypt += 8;
         pos = 0;
-        return true;
+        return false;
     }
 
     /**

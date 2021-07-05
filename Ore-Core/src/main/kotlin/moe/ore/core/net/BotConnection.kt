@@ -37,6 +37,7 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
+import moe.ore.core.util.QQUtil
 import moe.ore.util.DebugUtil
 import kotlin.random.Random
 
@@ -86,7 +87,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     @Synchronized
     @Throws(InterruptedException::class)
     fun connect() {
-        val server = oicqServer[Random.nextInt(oicqServer.size)]
+        val server = QQUtil.getOicqServer() ?: oicqServer[Random.nextInt(oicqServer.size)]
         // println("TencentServer: $server")
         this.connect(server.first, server.second)
     }

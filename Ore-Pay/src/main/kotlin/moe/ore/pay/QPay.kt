@@ -1,12 +1,6 @@
 package moe.ore.pay
 
 import com.google.gson.Gson
-import moe.ore.api.LoginResult
-import moe.ore.api.Ore
-import moe.ore.api.listener.CaptchaChannel
-import moe.ore.api.listener.OreListener
-import moe.ore.api.listener.SmsHelper
-import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
@@ -21,7 +15,6 @@ import moe.ore.pay.data.QPayHbPack
 import moe.ore.pay.data.QPayWallet
 import moe.ore.pay.util.HbRSA
 import moe.ore.util.*
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -54,7 +47,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "20",
-                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
                             (if(hasRoot) 1 else 0)
                         }|",
@@ -210,7 +203,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "74",
-                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
                             (if(hasRoot) 1 else 0)
                         }|",
@@ -256,7 +249,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "74",
-                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
                             (if(hasRoot) 1 else 0)
                         }|",
@@ -303,7 +296,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "74",
-                        "h_location" to "${MD5.hexdigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexdigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
                             (if(hasRoot) 1 else 0)
                         }|",

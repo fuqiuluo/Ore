@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class MD5 {
     static final byte[] PADDING = {Byte.MIN_VALUE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -17,7 +16,7 @@ public class MD5 {
     private final byte[] digest = new byte[16];
     private final long[] state = new long[4];
 
-    public static String hexdigest(String str) {
+    public static String hexDigest(String str) {
         if (str == null) {
             return "";
         }
@@ -46,7 +45,7 @@ public class MD5 {
         return new String(cArr2);
     }
 
-    public static String hexdigest(byte[] bArr) {
+    public static String hexDigest(byte[] bArr) {
         if (bArr == null) {
             return "";
         }

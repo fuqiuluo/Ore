@@ -79,27 +79,24 @@ class ThreadManager private constructor(val uin: Long = 0) {
      */
     fun shutdown() {
         linkedBlockingQueue.clear()
+        threadPool.shutdown() // 使新任务无法提交.
         try {
-            val restThread = threadPool.shutdownNow()
-            restThread.forEach {
-                if (it is Thread && it.name.contains("must", true)) {
-                    try {
-                        /**
-                         * 将必须要执行的线程执行完，否则将导致错误
-                         */
-                        it.start()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
+            // 等待未完成任务结束
+            if (!threadPool.awaitTermination(1000 * 60 * 3, TimeUnit.MILLISECONDS)) {
+                threadPool.shutdownNow() // 取消当前执行的任务
+                // 等待任务取消的响应
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (ie: InterruptedException) {
+            // 重新取消当前线程进行中断
+            threadPool.shutdownNow()
+            // 保留中断状态
+            Thread.currentThread().interrupt()
         }
         THREAD_MAP.remove(uin)
     }
 
     companion object {
+        @JvmStatic
         private val THREAD_MAP = hashMapOf<Long, ThreadManager>()
 
         /**
@@ -117,7 +114,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
         /**
          * 空闲线程最大存活时间（毫秒）
          */
-        private const val keepAliveTime = 3 * 1000
+        private const val keepAliveTime = 3 * 1000L
 
         /**
          * 创建一个Bot专属的线程池
@@ -136,6 +133,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
     }
 
     init {
+        threadPool.setKeepAliveTime(keepAliveTime, TimeUnit.MILLISECONDS)
         threadPool.allowCoreThreadTimeOut(true)
         /**
          * 将缓冲队列中的任务重新加载到线程池

@@ -42,7 +42,7 @@ fun main() {
 
             println("d2Key : " + manager.userSigInfo.d2Key.ticket().toHexString())
 
-            println(QQUtil.getOicqServer())
+
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {
