@@ -39,6 +39,7 @@ import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
 import moe.ore.core.util.QQUtil
 import moe.ore.util.DebugUtil
+import java.lang.RuntimeException
 import java.net.InetAddress
 import kotlin.random.Random
 
@@ -48,7 +49,7 @@ import kotlin.random.Random
  */
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
-    private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup(DebugUtil.getIoThreadPoolSize())
+    private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
     private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
@@ -75,7 +76,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     @Throws(InterruptedException::class)
     fun connect(host: String, port: Int) {
         // 断开原先的连接 重新建立连接
-        this.close()
+//        this.close()
         scheduler.execute {
             channelFuture = init(Bootstrap()).connect(host, port)
             channelFuture.addListener(usefulListener).sync()
@@ -88,7 +89,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         val server = QQUtil.getOicqServer() ?: oicqServer[Random.nextInt(0, oicqServer.size - 1)]
         // println("TencentServer: $server")
         // 手动解析域名
-        this.connect(InetAddress.getByName(server.first).hostAddress, server.second)
+        this.connect(server.first, server.second)
     }
 
     fun send(bytes: ByteArray) {
@@ -124,10 +125,10 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 // 注意添加顺序决定执行的先后
                 socketChannel.pipeline().addLast("ping", idleStateHandler)
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
-                // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
                 socketChannel.pipeline().addLast("handler", usefulListener)
                 socketChannel.pipeline().addLast("caughtHandler", caughtHandler)
+//                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
             }
         })
         return bootstrap

@@ -76,6 +76,7 @@ class OreBot(uin: Long) : Ore(uin) {
     }
     override fun shut() {
         // 关闭机器人
+        println("shut...")
         this.status = OreStatus.Destroy
         DataManager.destroy(uin)
         this.client.close()
