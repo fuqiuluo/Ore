@@ -39,6 +39,7 @@ import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
 import moe.ore.core.util.QQUtil
 import moe.ore.util.DebugUtil
+import java.net.InetAddress
 import kotlin.random.Random
 
 /**
@@ -86,7 +87,8 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     fun connect() {
         val server = QQUtil.getOicqServer() ?: oicqServer[Random.nextInt(0, oicqServer.size - 1)]
         // println("TencentServer: $server")
-        this.connect(server.first, server.second)
+        // 手动解析域名
+        this.connect(InetAddress.getByName(server.first).hostAddress, server.second)
     }
 
     fun send(bytes: ByteArray) {

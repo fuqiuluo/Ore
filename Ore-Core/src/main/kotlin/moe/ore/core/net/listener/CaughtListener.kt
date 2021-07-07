@@ -42,6 +42,11 @@ import java.util.*
 @Sharable
 class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
     @Override
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+         reconnect()
+    }
+
+    @Override
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         when (cause) {
             is IOException -> {
