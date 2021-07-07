@@ -22,6 +22,8 @@
 package moe.ore.api
 
 import moe.ore.api.listener.OreListener
+import org.omg.CORBA.portable.Delegate
+import kotlin.properties.Delegates
 
 
 /**
@@ -31,7 +33,10 @@ abstract class Ore(val uin : Long) {
     /**
      * 机器人状态
      */
-    protected var status = OreStatus.NoLogin
+    protected var status : OreStatus by Delegates.observable(OreStatus.NoLogin) { _, _, newValue ->
+        // typealias
+        oreListener?.onStatusChanged(newValue)
+    }
 
     /**
      * 事件监听器
@@ -59,6 +64,5 @@ abstract class Ore(val uin : Long) {
      */
     fun changeStatus(status: OreStatus) {
         this.status = status
-        oreListener?.onStatusChanged(status)
     }
 }
