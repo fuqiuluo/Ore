@@ -46,7 +46,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         // System.err.println("userEventTriggered1 = $ctx, evt = $evt")
-        if (evt is IdleStateEvent) {
+        if (evt is IdleStateEvent && OreManager.getOreStatus(connection.uin) != OreStatus.Reconnecting) {
             when {
                 evt.state() == IdleState.WRITER_IDLE -> {
                     // 心跳发送成功

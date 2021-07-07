@@ -49,7 +49,7 @@ import kotlin.random.Random
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup(DebugUtil.getIoThreadPoolSize())
-    private val eventListener: EventListener = EventListener(this)
+    // private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
     // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
@@ -124,7 +124,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 // 注意添加顺序决定执行的先后
                 socketChannel.pipeline().addLast("ping", idleStateHandler)
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
-                // TODO socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
+                // socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
                 socketChannel.pipeline().addLast("handler", usefulListener)
                 socketChannel.pipeline().addLast("caughtHandler", caughtHandler)
