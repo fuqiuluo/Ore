@@ -35,5 +35,10 @@ enum class OreStatus {
     /**
      * 在线状态
      */
-    Online
+    Online,
+
+    /**
+     * 重新连接服务器中
+     */
+    Reconnecting
 }

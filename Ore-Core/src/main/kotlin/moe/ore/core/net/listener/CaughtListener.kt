@@ -26,7 +26,11 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandler.Sharable
+import moe.ore.api.OreStatus
+import moe.ore.core.OreManager
 import moe.ore.core.net.BotConnection
+import moe.ore.core.net.exc.HeartbeatTimeoutException
+import java.io.IOException
 import java.lang.InterruptedException
 import java.util.concurrent.TimeUnit
 import java.util.*
@@ -36,50 +40,32 @@ import java.util.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class ReConnectionAndExceptionListener(private val botConnection: BotConnection) : ChannelHandlerAdapter(), ChannelFutureListener {
-    private val timer = Timer()
-
+class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
     @Override
-    override fun channelInactive(ctx: ChannelHandlerContext) {
-        System.err.println("ChannelHandlerAdapter掉线了...")
-        // reconnect()
-    }
-
-    @Override
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable?) {
-        //todo  关闭网络一段时间后 再次打开网络就会报错这个  java.io.IOException: Connection reset by peer
-        System.err.println("exceptionCaught..")
-        cause?.printStackTrace()
-        ctx.close()
-        // reconnect()
-        // TODO: 2021/6/1 有待测试异常之后的重连
-    }
-
-    @Override
-    override fun operationComplete(channelFuture: ChannelFuture) {
-        // println("ChannelFutureListener掉线了...")
-        // TODO 不是掉线了，是与服务器连接状态发生变化，就会触发这个
-        if (!channelFuture.isSuccess) {
-            // reconnect()
-        } else {
-            System.err.println("服务端链接成功...")
+    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        when (cause) {
+            is IOException -> {
+                /**
+                 * 更换网络将导致 远程主机强制关闭连接
+                 */
+                reconnect()
+            }
+            is HeartbeatTimeoutException -> {
+                reconnect()
+            }
+            is UnknownError -> {
+                /**
+                 * 未知的错误 先将机器人关闭 再甩出错误
+                 */
+                OreManager.shutBot(connection.uin)
+                throw cause
+            }
+            else -> cause.printStackTrace()
         }
     }
 
     private fun reconnect() {
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                try {
-                    if (botConnection.channelFuture.channel().isActive) {
-                        timer.cancel()
-                        return
-                    }
-                    println("断线重连开始...")
-                    botConnection.connect()
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }
-        }, TimeUnit.SECONDS.toMillis(5))
+        OreManager.changeStatus(connection.uin, OreStatus.Reconnecting)
+        connection.connect()
     }
 }

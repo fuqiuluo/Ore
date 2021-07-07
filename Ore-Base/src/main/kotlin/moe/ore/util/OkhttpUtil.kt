@@ -78,14 +78,14 @@ class OkhttpUtil(
 
     fun removeHeader(key: String) = requestBuilder.removeHeader(key)
 
-    fun get(url: String): Response? {
+    fun get(url: String): Response {
         val request = requestBuilder.get().url(url).build()
         val call = clientBuilder.build().newCall(request)
-        var response: Response? = null
+        val response: Response
         try {
             response = call.execute()
         } catch (e: IOException) {
-            e.printStackTrace()
+            throw e
         }
         return response
     }
@@ -100,13 +100,13 @@ class OkhttpUtil(
         })
     }
 
-    fun post(url: String, body: RequestBody): Response? {
+    fun post(url: String, body: RequestBody): Response {
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
-        var response: Response? = null
+        val response: Response
         try {
             response = call.execute()
         } catch (e: IOException) {
-            e.printStackTrace()
+            throw e
         }
         return response
     }
@@ -125,14 +125,14 @@ class OkhttpUtil(
         })
     }
 
-    fun postParam(url: String, data: String): Response? {
+    fun postParam(url: String, data: String): Response {
         val body = RequestBody.create("text/html;charset=utf-8".toMediaTypeOrNull(), data)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
-        var response: Response? = null
+        val response: Response
         try {
             response = call.execute()
         } catch (e: IOException) {
-            e.printStackTrace()
+            throw e
         }
         return response
     }
@@ -147,14 +147,14 @@ class OkhttpUtil(
         })
     }
 
-    fun postJson(url: String, json: String): Response? {
+    fun postJson(url: String, json: String): Response {
         val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
         val call = clientBuilder.build().newCall(requestBuilder.post(body).url(url).build())
-        var response: Response? = null
+        val response: Response
         try {
             response = call.execute()
         } catch (e: IOException) {
-            e.printStackTrace()
+            throw e
         }
         return response
     }

@@ -74,4 +74,12 @@ object OreManager {
         }
         return false
     }
+
+    @JvmStatic
+    fun getOreStatus(uin: Long) : OreStatus {
+        getBot(uin)?.let {
+            return (it as OreBot).status()
+        }
+        return OreStatus.NoLogin
+    }
 }

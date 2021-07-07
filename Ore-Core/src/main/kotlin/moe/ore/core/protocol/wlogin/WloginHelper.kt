@@ -80,7 +80,7 @@ class WloginHelper(val uin : Long,
      */
     fun loginByToken() {
         this.wtMode = MODE_TOKEN_LOGIN
-
+        TODO("token登录暂时不支持")
     }
 
     /**

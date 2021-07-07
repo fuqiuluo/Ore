@@ -28,10 +28,10 @@ import io.netty.channel.ChannelHandler.Sharable
 import moe.ore.core.net.BotConnection
 import io.netty.handler.timeout.IdleStateEvent
 import io.netty.handler.timeout.IdleState
-import io.netty.buffer.Unpooled
 import moe.ore.api.OreStatus
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
+import moe.ore.core.net.exc.HeartbeatTimeoutException
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
 import java.lang.Exception
@@ -42,6 +42,7 @@ import java.lang.Exception
  */
 @Sharable
 class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
+
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         // System.err.println("userEventTriggered1 = $ctx, evt = $evt")
@@ -50,20 +51,23 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
                 evt.state() == IdleState.WRITER_IDLE -> {
                     // 心跳发送成功
                     println("send a heartbeat packet")
+                    // 无任何写操作发生 即开始发送心跳包
                     connection.send(makeHeartBeatPacket())
                 }
                 evt.state() == IdleState.READER_IDLE -> {
                     println("not receive any packet, went to reconnect")
-                    connection.connect()
+                    // 调出错误交给错误处理器处理
+                    ctx.fireExceptionCaught(HeartbeatTimeoutException())
                 }
                 evt.state() == IdleState.ALL_IDLE -> {
                     // 有一定时间没有接收数据 也没有发送数据
                     println("not write and read, the ore will be thrown")
-                    OreManager.shutBot(connection.uin)
+                    // OreManager.shutBot(connection.uin)
+                    // 没有读操作 没有写操作
+                    ctx.fireExceptionCaught(UnknownError())
                 }
             }
         }
-        //        super.userEventTriggered(ctx, evt); //彻底拦截事件独享
     }
 
     private fun makeHeartBeatPacket(): ByteArray = newBuilder().apply {
@@ -79,7 +83,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
             }
             writeByte(0)
             writeBlockWithIntLen({it + 4}) {
-                writeString(if(ore.status() == OreStatus.Online) ore.uin.toString() else "0")
+                writeString(if(ore.status() == OreStatus.Online) ore.uin.toString() else "")
             }
             writeBlockWithIntLen({ it + 4 }) {
                 writeInt(session.nextSeqId())

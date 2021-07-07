@@ -22,22 +22,22 @@
 package moe.ore.api.listener
 
 import moe.ore.api.LoginResult
+import moe.ore.api.OreStatus
 import moe.ore.api.data.Result
 
 /**
  * 机器人事件监听器
  */
 interface OreListener {
+    /**
+     * 机器人状态码改变
+     */
+    fun onStatusChanged(status: OreStatus)
 
     /**
      * 开始登录
      */
     fun onLoginStart()
-
-    /**
-     * 登录结束
-     */
-    fun onLoginFinish(result: LoginResult)
 
     /**
      * 遇到滑块 返回ticket

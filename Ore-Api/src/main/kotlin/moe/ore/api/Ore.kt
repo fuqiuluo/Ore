@@ -59,5 +59,6 @@ abstract class Ore(val uin : Long) {
      */
     fun changeStatus(status: OreStatus) {
         this.status = status
+        oreListener?.onStatusChanged(status)
     }
 }

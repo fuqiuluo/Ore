@@ -38,7 +38,6 @@ import java.lang.Exception
 abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
-        // println("SB一个")
         msg?.let {
             this.onMassage(msg as PacketResponse)
         }
@@ -46,7 +45,6 @@ abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
 
     override fun channelActive(ctx: ChannelHandlerContext?) {
         // println(System.currentTimeMillis())
-        // this.onConnect()
         // 握手成功 并沒有载入服务器
     }
 
@@ -54,12 +52,14 @@ abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
         if (future != null && future.isSuccess) {
             // println("成功接入服务器")
             this.onConnect()
+        } else {
+            this.onFailConnect()
         }
     }
 
     protected abstract fun onConnect()
 
+    protected abstract fun onFailConnect()
+
     protected abstract fun onMassage(msg: PacketResponse)
-
-
 }

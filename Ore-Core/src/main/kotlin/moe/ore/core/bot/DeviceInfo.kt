@@ -4,6 +4,7 @@ import moe.ore.helper.hex2ByteArray
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import java.util.*
+import kotlin.random.Random
 
 class DeviceInfo {
     enum class NetworkType(val value: Int) {
@@ -51,7 +52,7 @@ class DeviceInfo {
 
     // 实际上在逆向8.7.5时 并没有出现md5(macAddr) 而是随机了一个16字节的东西
     // 不保存 懒加载在线合成
-    var tgtgt: ByteArray = MD5.toMD5Byte(BytesUtil.byteMerger(MD5.toMD5Byte(macAddress), guid))
+    var tgtgt: ByteArray = MD5.toMD5Byte(Random.nextBytes(16) + guid)
 
     // expamel 1, 0, 0, 127 是倒过来的哦！
     var clientIp = byteArrayOf(0, 0, 0, 0)

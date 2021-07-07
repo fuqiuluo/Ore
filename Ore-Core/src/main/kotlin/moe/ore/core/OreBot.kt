@@ -21,6 +21,7 @@
 
 package moe.ore.core
 
+import moe.ore.api.LoginResult
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.helper.DataManager
@@ -43,12 +44,24 @@ class OreBot(uin: Long) : Ore(uin) {
                         // 登录
                         WloginHelper(uin, this@apply, oreListener).loginByPassword()
                     }
-                    OreStatus.Online -> {
+
+                    /**
+                     * 重连或者在线状态下被触发操作
+                     */
+                    OreStatus.Reconnecting, OreStatus.Online -> {
                         // 重连
                         WloginHelper(uin, this@apply).loginByToken()
                     }
                     else -> runtimeError("未知的错误操作")
                 }
+            }
+
+            override fun onFailConnect() {
+                /**
+                 * 服务器连接失败 则继续尝试重连
+                 * 重连线程受线程池管理 可通过shutBot结束重连
+                 */
+                this@apply.connect()
             }
         }
     }

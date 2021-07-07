@@ -1,22 +1,11 @@
 package moe.ore.pay
 
-import moe.ore.api.LoginResult
 import moe.ore.api.Ore
+import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
-import moe.ore.core.OreBot
 import moe.ore.core.OreManager
-import moe.ore.core.helper.DataManager
-import moe.ore.core.helper.sendPacket
-import moe.ore.core.net.packet.PacketSender.Companion.sync
-import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.core.protocol.pb.safe.SafeReport
-import moe.ore.core.protocol.pb.safe.SafeReportReq
-import moe.ore.core.protocol.wlogin.WloginHelper
-import moe.ore.core.util.QQUtil
-import moe.ore.helper.toHexString
-import java.net.Inet4Address
 import java.util.*
 
 fun Ore.getPay(payWord: String) : IQPay {
@@ -30,19 +19,12 @@ fun main() {
     val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
 
     ore.oreListener = object : OreListener {
-        override fun onLoginStart() {
-            println("登录开始了，呼呼呼！！！")
+        override fun onStatusChanged(status: OreStatus) {
+            println("机器人状态改变为：$status")
         }
 
-        override fun onLoginFinish(result: LoginResult) {
-            println("登录结果：$result")
-
-            val o = ore as OreBot
-            val manager = DataManager.manager(o.uin)
-
-            println("d2Key : " + manager.userSigInfo.d2Key.ticket().toHexString())
-
-
+        override fun onLoginStart() {
+            println("登录开始了，呼呼呼！！！")
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

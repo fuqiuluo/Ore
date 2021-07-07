@@ -26,4 +26,9 @@ interface ClientListener {
      * 连接成功的事件
      */
     fun onConnect()
+
+    /**
+     * 无法连接到腾讯服务器
+     */
+    fun onFailConnect()
 }

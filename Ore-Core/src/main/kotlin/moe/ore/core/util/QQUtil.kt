@@ -101,7 +101,6 @@ object QQUtil {
     fun getOicqServer(appId : Long = 0x200302d5) : Pair<String, Int>? {
         val isUseDebugSo = true
         try {
-
             val uniPacket = UniPacket()
             uniPacket.servantName = "ConfigHttp"
             uniPacket.funcName = "HttpServerListReq"
@@ -128,18 +127,18 @@ object QQUtil {
             val url = if (isUseDebugSo) "https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist" else "https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist"
             val resp = OkhttpUtil().also { it.defaultUserAgent() }.post(url, encrypt.toRequestBody())
             val code = resp?.code
-            val result = resp?.body?.bytes()
-            resp?.close()
-            val decrypt = TeaUtil.decrypt(result!!, ConfigSvrKey)
-            val decode = UniPacket.decode(decrypt, 4)
-            val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
-            val info = findByClass.b!![0]
-            val ret = info.ip to info.port
-            println("get sso server by configsvr : $ret")
-            return ret
-        } catch (e : Exception) {
-            e.printStackTrace()
-        }
+            if(code == 200) {
+                val result = resp.body?.bytes()
+                resp.close()
+                val decrypt = TeaUtil.decrypt(result!!, ConfigSvrKey)
+                val decode = UniPacket.decode(decrypt, 4)
+                val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
+                val info = findByClass.b!![0]
+                val ret = info.ip to info.port
+                println("get sso server by configsvr : $ret")
+                return ret
+            }
+        } catch (e : Exception) { }
         return null
     }
 
