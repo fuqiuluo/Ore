@@ -39,7 +39,6 @@ import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.*
 import moe.ore.core.util.QQUtil
 import moe.ore.util.DebugUtil
-import java.lang.RuntimeException
 import java.net.InetAddress
 import kotlin.random.Random
 
@@ -50,7 +49,7 @@ import kotlin.random.Random
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
-    private val eventListener: EventListener = EventListener(this)
+//    private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
     // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作

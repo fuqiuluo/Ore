@@ -57,9 +57,7 @@ class BotClient(val uin: Long) {
         }
 
         override fun onFailConnect() {
-
             listener?.onFailConnect()
-
         }
 
         override fun onMassage(msg: PacketResponse) {

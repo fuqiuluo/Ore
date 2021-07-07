@@ -41,12 +41,6 @@ import java.util.*
  */
 @Sharable
 class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
-    @Override
-    override fun channelInactive(ctx: ChannelHandlerContext) {
-         reconnect()
-    }
-
-    @Override
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         when (cause) {
             is IOException -> {
@@ -67,6 +61,13 @@ class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdap
             }
             else -> cause.printStackTrace()
         }
+    }
+
+    override fun channelInactive(ctx: ChannelHandlerContext?) {
+        /**
+         * 奇怪的断线 开始重连
+         */
+        reconnect()
     }
 
     private fun reconnect() {
