@@ -118,7 +118,7 @@ class WloginHelper(val uin : Long,
         private val device = manager.deviceInfo
 
         fun callback(result: LoginResult) {
-            listener?.runCatching { onLoginFinish(result) }
+            listener?.runCatching { listener.onLoginFinish(result) }
         }
 
         fun onSuccess(t119 : ByteArray?) {

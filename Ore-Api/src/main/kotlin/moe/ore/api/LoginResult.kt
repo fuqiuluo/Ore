@@ -23,11 +23,6 @@ package moe.ore.api
 
 enum class LoginResult {
     /**
-     * 无法连接腾讯服务器
-     */
-    ServerConnectFail,
-
-    /**
      * 服务器响应超时
      */
     ServerTimeout,

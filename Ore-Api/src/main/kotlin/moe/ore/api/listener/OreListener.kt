@@ -40,6 +40,11 @@ interface OreListener {
     fun onLoginStart()
 
     /**
+     * 登录结束
+     */
+    fun onLoginFinish(result: LoginResult)
+
+    /**
      * 遇到滑块 返回ticket
      */
     fun onCaptcha(captchaChan : CaptchaChannel)
