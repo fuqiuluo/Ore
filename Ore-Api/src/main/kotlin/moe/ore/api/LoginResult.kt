@@ -38,11 +38,6 @@ enum class LoginResult {
     Success,
 
     /**
-     * 滑块验证失败
-     */
-    SliderVerifyFail,
-
-    /**
      * 网络环境错误 禁止登录
      */
     NetEnvWrong,
