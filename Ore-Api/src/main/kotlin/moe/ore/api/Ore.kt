@@ -23,8 +23,6 @@ package moe.ore.api
 
 import moe.ore.api.listener.OreListener
 import kotlin.properties.Delegates
-import kotlin.reflect.KProperty
-
 
 /**
  * Ore实体对象接口文件

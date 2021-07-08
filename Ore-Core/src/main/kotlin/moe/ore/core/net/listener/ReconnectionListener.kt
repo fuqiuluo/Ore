@@ -40,7 +40,7 @@ import java.util.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
+class ReconnectionListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         when (cause) {
             is IOException -> {
@@ -63,7 +63,7 @@ class CaughtListener(private val connection: BotConnection) : ChannelHandlerAdap
         }
     }
 
-    override fun channelInactive(ctx: ChannelHandlerContext?) {
+    override fun channelInactive(ctx: ChannelHandlerContext) {
         /**
          * 奇怪的断线 开始重连
          */

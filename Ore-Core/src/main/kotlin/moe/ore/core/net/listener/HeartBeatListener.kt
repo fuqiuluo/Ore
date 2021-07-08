@@ -83,7 +83,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
             }
             writeByte(0)
             writeBlockWithIntLen({it + 4}) {
-                writeString(if(ore.status() == OreStatus.Online) ore.uin.toString() else "")
+                writeString(if(ore.status() == OreStatus.Online) ore.uin.toString() else "0")
             }
             writeBlockWithIntLen({ it + 4 }) {
                 writeInt(session.nextSeqId())

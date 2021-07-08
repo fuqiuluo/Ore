@@ -90,8 +90,7 @@ object DebugUtil {
     @JvmStatic
     fun getIoThreadPoolSize(): Int {
         val processors = Runtime.getRuntime().availableProcessors()
-        val dev = ((1 + 2) / 1) * processors
-        return (processors * 2) + dev
+        return processors * 2
     }
 
     /**
