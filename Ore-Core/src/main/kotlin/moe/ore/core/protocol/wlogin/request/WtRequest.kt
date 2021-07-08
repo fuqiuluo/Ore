@@ -8,6 +8,7 @@ import moe.ore.core.net.packet.ToService
 import moe.ore.core.net.packet.sendTo
 import moe.ore.core.protocol.ECDH_VERSION
 import moe.ore.core.protocol.Tlv
+import moe.ore.core.protocol.wlogin.EncryptMethod
 import moe.ore.helper.*
 
 abstract class WtRequest(
@@ -15,7 +16,8 @@ abstract class WtRequest(
     private val commandName: String,
     private val commandId: Int,
     private val subCmd : Int,
-    private val ecdhType: Int
+    private val ecdhType: Int,
+    private val encryptMethod: EncryptMethod = EncryptMethod.EM_ECDH
 ) {
     val manager = DataManager.manager(uin)
     private val account = manager.botAccount
@@ -35,22 +37,14 @@ abstract class WtRequest(
 
     abstract fun makeTlv(seq : Int) : ByteArray
 
-    open fun ecdhEncryptBody() : ByteArray = newBuilder().apply {
-        writeByte(2)
-        writeByte(1)
-        writeBytes(session.randomKey)
-        writeShort(0x131)
-        writeShort(ECDH_VERSION.toShort())
-    }.toByteArray()
-
     open var firstToken : ByteArray? = null
     open var secondToken : ByteArray? = null
 
     open fun packetType() : PacketType = PacketType.LoginPacket
 
-    open fun publicKey() : ByteArray = ecdh.publicKey
+    // open fun publicKey() : ByteArray = ecdh.publicKey
 
-    open fun teaKey() : ByteArray = ecdh.shareKey
+    // open fun teaKey() : ByteArray = ecdh.shareKey
 
     fun sendTo(client: BotClient) : PacketSender {
         val seq = session.nextSeqId()
@@ -65,10 +59,25 @@ abstract class WtRequest(
     }
 
     private fun makeBody(seq: Int) : ByteArray = newBuilder().apply {
-        val encryptBody = ecdhEncryptBody()
-        val publicKey = publicKey()
+        val encryptBody = when(encryptMethod) {
+            EncryptMethod.EM_ST -> EMPTY_BYTE_ARRAY
+            EncryptMethod.EM_ECDH -> newBuilder().apply {
+                writeByte(2)
+                writeByte(1)
+                writeBytes(session.randomKey)
+                writeShort(0x131)
+                writeShort(ECDH_VERSION.toShort())
+            }.toByteArray()
+        }
+        val publicKey = when(encryptMethod) {
+            EncryptMethod.EM_ST -> userStSig.wtSessionTicket.ticket()
+            EncryptMethod.EM_ECDH -> ecdh.publicKey
+        }
         val tlvBody = newBuilder().apply {
-            writeTeaEncrypt(teaKey()) {
+            writeTeaEncrypt(when(encryptMethod) {
+                EncryptMethod.EM_ST -> userStSig.wtSessionTicketKey.ticket()
+                EncryptMethod.EM_ECDH -> ecdh.shareKey
+            }) {
                 writeShort(subCmd)
                 val tlv = makeTlv(seq)
                 // println("TLV ： " + tlv.toHexString())

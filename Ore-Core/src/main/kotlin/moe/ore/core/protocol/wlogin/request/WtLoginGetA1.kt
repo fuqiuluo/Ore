@@ -2,18 +2,13 @@ package moe.ore.core.protocol.wlogin.request
 
 import moe.ore.core.net.packet.PacketType
 import moe.ore.core.protocol.buildTlv
+import moe.ore.core.protocol.wlogin.EncryptMethod
 import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.newBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
 
-class WtLoginGetA1(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 15, 0x45)  {
-    override fun ecdhEncryptBody(): ByteArray = EMPTY_BYTE_ARRAY
-
-    override fun publicKey(): ByteArray = userStSig.wtSessionTicket.ticket()
-
-    override fun teaKey(): ByteArray = userStSig.wtSessionTicketKey.ticket()
-
+class WtLoginGetA1(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 15, 0x45, EncryptMethod.EM_ST)  {
     override fun makeTlv(seq: Int): ByteArray = newBuilder().apply {
         writeShort(21)
         writeBytes(tlv.t18())
