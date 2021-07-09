@@ -6,13 +6,9 @@ import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
+import moe.ore.core.OreBot
 import moe.ore.core.OreManager
-import moe.ore.core.protocol.pb.safe.SafeReport
-import moe.ore.core.protocol.pb.safe.SafeReportReq
 import moe.ore.core.protocol.wlogin.WloginHelper
-import moe.ore.core.util.QQUtil
-import moe.ore.helper.toHexString
-import java.net.Inet4Address
 import java.util.*
 
 fun Ore.getPay(payWord: String) : IQPay {
@@ -37,6 +33,9 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
+            val ore = (ore as OreBot);
+
+            WloginHelper(ore.uin, ore.client).refreshSig()
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

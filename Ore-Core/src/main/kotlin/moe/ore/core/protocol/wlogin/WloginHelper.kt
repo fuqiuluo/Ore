@@ -39,7 +39,7 @@ class WloginHelper(val uin : Long,
 
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
-            MODE_EXCHANGE_EMP_A1 -> handle(WtLoginGetA1(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
+            MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
         }
     }
@@ -95,8 +95,8 @@ class WloginHelper(val uin : Long,
     /**
      * 刷新Cookie
      */
-    fun refreshA1() {
-        this.wtMode = MODE_EXCHANGE_EMP_A1
+    fun refreshSig() {
+        this.wtMode = MODE_EXCHANGE_EMP_SIG
         threadManager.addTask(this)
     }
 
@@ -126,7 +126,7 @@ class WloginHelper(val uin : Long,
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
-                    MODE_EXCHANGE_EMP_A1 -> userStInfo.gtKey.ticket()
+                    MODE_EXCHANGE_EMP_SIG -> userStInfo.gtKey.ticket()
                     MODE_EXCHANGE_EMP_ST -> MD5.toMD5Byte(userStInfo.d2Key.ticket())
                     else -> error("unknown wtlogin mode")
                 }).toByteReadPacket())
@@ -487,7 +487,7 @@ class WloginHelper(val uin : Long,
 
     companion object {
         const val MODE_PASSWORD_LOGIN = 0
-        const val MODE_EXCHANGE_EMP_A1 = 1
+        const val MODE_EXCHANGE_EMP_SIG = 1
         const val MODE_EXCHANGE_EMP_ST = 2
         const val MODE_TOKEN_LOGIN = 3
     }
@@ -519,6 +519,8 @@ internal fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
         val tSize = bs.readUShort().toInt()
         val content = bs.readBytes(tSize)
         map[ver] = content
+
+        // println("tlv[${ver.toHexString()}]: " + content.toHexString())
     }
     return map
 }

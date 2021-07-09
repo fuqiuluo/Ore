@@ -151,7 +151,15 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
-    // println("最外层" + out.toHexString())
+    /**
+    kotlin.runCatching {
+        println("最外层" + out.toHexString())
+        println("sessionkey:" + userStSig.d2Key.ticket().toHexString())
+        println("tlv_133:" + userStSig.wtSessionTicket.ticket().toHexString())
+        println("tlv_134:" + userStSig.wtSessionTicketKey.ticket().toHexString())
+    }
+    **/
+
 
     return PacketSender(client, out, commandName, seq)
 }

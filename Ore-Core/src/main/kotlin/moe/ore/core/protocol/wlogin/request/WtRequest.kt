@@ -25,7 +25,7 @@ abstract class WtRequest(
     private val ecdh = manager.ecdh
     // private val protocolInfo = ProtocolInternal[manager.protocolType]
 
-    val session = manager.session
+    private val session = manager.session
     val userStSig = manager.userSigInfo
 
     val tlv = Tlv(
