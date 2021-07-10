@@ -78,6 +78,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         // PacketType.ServicePacket,
         PacketType.ServicePacket, PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
+
     val out = newBuilder().apply { writeBlockWithIntLen( { it + 4 } ) {
         writeInt(packetType.flag1)
         writeByte(packetType.flag2)
@@ -151,15 +152,11 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
-    /**
     kotlin.runCatching {
-        println("最外层" + out.toHexString())
-        println("sessionkey:" + userStSig.d2Key.ticket().toHexString())
-        println("tlv_133:" + userStSig.wtSessionTicket.ticket().toHexString())
-        println("tlv_134:" + userStSig.wtSessionTicketKey.ticket().toHexString())
-    }
-    **/
+        println("teaKey : " + teaKey.toHexString())
+        println("commandId : $commandName ==> ${out.toHexString()}")
 
+    }
 
     return PacketSender(client, out, commandName, seq)
 }

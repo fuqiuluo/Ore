@@ -76,6 +76,7 @@ class OreBot(uin: Long) : Ore(uin) {
         // 连接到服务器会自动发送登录包
         client.connect()
     }
+
     override fun shut() {
         // 关闭机器人
         println("shut ore bot")

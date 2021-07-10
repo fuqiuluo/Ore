@@ -8,6 +8,7 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
+import moe.ore.core.protocol.pb.ad.PubArtCenter
 import moe.ore.core.protocol.wlogin.WloginHelper
 import java.util.*
 
@@ -35,7 +36,7 @@ fun main() {
 
             val ore = (ore as OreBot);
 
-            WloginHelper(ore.uin, ore.client).refreshSig()
+            PubArtCenter.getUrlByVid(ore, "m3258hswb80", "8.8.3,3,5470")
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {
