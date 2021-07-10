@@ -6,7 +6,6 @@ import moe.ore.core.OreBot
 import moe.ore.core.helper.sendPacket
 import moe.ore.core.net.packet.PacketType
 import moe.ore.helper.encode
-import moe.ore.helper.toHexString
 
 /**
  * 腾讯广告服务 获取广告封面url
