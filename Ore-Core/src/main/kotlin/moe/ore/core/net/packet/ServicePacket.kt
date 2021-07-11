@@ -155,7 +155,6 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
     kotlin.runCatching {
         println("teaKey : " + teaKey.toHexString())
         println("commandId : $commandName ==> ${out.toHexString()}")
-
     }
 
     return PacketSender(client, out, commandName, seq)

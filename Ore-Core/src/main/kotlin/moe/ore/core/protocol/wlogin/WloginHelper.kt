@@ -24,6 +24,7 @@ import okhttp3.internal.toHexString
 import moe.ore.api.data.Result
 import moe.ore.core.OreManager
 import moe.ore.core.protocol.wlogin.request.*
+import moe.ore.helper.thread.ThreadManager
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -41,6 +42,14 @@ class WloginHelper(val uin : Long,
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
             MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
+            MODE_TOKEN_LOGIN -> {
+                val ret = SvcRegisterHelper(uin).register()
+                if(ret == 0) {
+                    OreManager.changeStatus(uin, OreStatus.Online)
+                } else {
+                    OreManager.changeStatus(uin, OreStatus.ReconnectFail)
+                }
+            }
         }
     }
 
@@ -81,7 +90,7 @@ class WloginHelper(val uin : Long,
      */
     fun loginByToken() {
         this.wtMode = MODE_TOKEN_LOGIN
-        TODO("token登录暂时不支持")
+        threadManager.addTask(this)
     }
 
     /**
@@ -325,6 +334,8 @@ class WloginHelper(val uin : Long,
                     }
                 }
 
+                // 执行flush保存数据
+                manager.flush()
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 

@@ -40,5 +40,14 @@ enum class OreStatus {
     /**
      * 重新连接服务器中
      */
-    Reconnecting
+    Reconnecting,
+
+    /**
+     * 重连失败
+     *
+     * 接下来不会再尝试重连
+     *
+     * 请做好判断
+     */
+    ReconnectFail
 }

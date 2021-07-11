@@ -21,6 +21,7 @@
 
 package moe.ore.core.helper
 
+import moe.ore.api.tars.Tars
 import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.DeviceInfo
@@ -95,6 +96,7 @@ class DataManager private constructor(
      * 销毁
      */
     fun destroy() {
+        // threadManager 只有由dataManager来释放
         threadManager.shutdown()
 
         flush()

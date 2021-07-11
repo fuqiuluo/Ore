@@ -8,8 +8,7 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
-import moe.ore.core.protocol.pb.ad.PubArtCenter
-import moe.ore.core.protocol.wlogin.WloginHelper
+import moe.ore.core.protocol.tars.service.GrayUin
 import java.util.*
 
 fun Ore.getPay(payWord: String) : IQPay {
@@ -18,9 +17,9 @@ fun Ore.getPay(payWord: String) : IQPay {
 }
 
 fun main() {
-    // val ore = OreManager.addBot(203411690, "911586ABc", "C:\\")
+    // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\Users\\13723\\Desktop\\Ore")
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
@@ -34,9 +33,10 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            val ore = (ore as OreBot);
+            val oreBot = (ore as OreBot)
 
-            PubArtCenter.getUrlByVid(ore, "m3258hswb80", "8.8.3,3,5470")
+            GrayUin.test(oreBot)
+
         }
 
         override fun onCaptcha(captchaChan: CaptchaChannel) {

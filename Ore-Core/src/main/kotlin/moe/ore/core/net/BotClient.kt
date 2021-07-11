@@ -61,20 +61,24 @@ class BotClient(val uin: Long) {
         }
 
         override fun onMassage(msg: PacketResponse) {
-            msg.body.readMsfSsoPacket(uin) { uinStr, from ->
-                check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
-                val hash = from.hashCode()
-                println("A = $from")
-                if (commonHandler.containsKey(hash)) {
-                    commonHandler[hash]!!.let {
-                        if (it.check(from)) {
-                            // println("注销")
-                            unRegisterCommonHandler(it.hashCode())
+            try {
+                msg.body.readMsfSsoPacket(uin) { uinStr, from ->
+                    check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
+                    val hash = from.hashCode()
+                    println("A = $from")
+                    if (commonHandler.containsKey(hash)) {
+                        commonHandler[hash]!!.let {
+                            if (it.check(from)) {
+                                // println("注销")
+                                unRegisterCommonHandler(it.hashCode())
+                            }
                         }
+                    } else if (specialHandler.containsKey(from.commandName)) {
+                        specialHandler[from.commandName]!!.check(from)
                     }
-                } else if (specialHandler.containsKey(from.commandName)) {
-                    specialHandler[from.commandName]!!.check(from)
                 }
+            } catch (e : Exception) {
+                e.printStackTrace()
             }
         }
     }, uin)

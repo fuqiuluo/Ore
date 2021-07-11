@@ -1,5 +1,7 @@
 package moe.ore.tars;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
@@ -21,29 +23,33 @@ public class TarsStructBase implements Serializable {
 
     public static final int MAX_STRING_LENGTH = 100 * 1024 * 1024;
 
+    @NotNull
     public String servantName() {
         return "";
     }
 
+    @NotNull
     public String funcName() {
         return "";
     }
 
+    @NotNull
     public String reqName() {
         return "";
     }
 
+    @NotNull
     public String respName() {
         return "";
     }
 
     // 非必要实现
-    public void writeTo(TarsOutputStream output) {
+    public void writeTo(@NotNull TarsOutputStream output) {
 
     }
 
     // 非必要实现
-    public void readFrom(TarsInputStream input) {
+    public void readFrom(@NotNull TarsInputStream input) {
 
     }
 
