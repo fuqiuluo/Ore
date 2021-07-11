@@ -32,9 +32,6 @@ class UserSigInfo : TarsStructBase() {
     // A2
     lateinit var tgt: BytesTicket
 
-    // 1 days
-    lateinit var sKey: StringTicket
-
     var t104: ByteArray? = null
 
     var t174: ByteArray? = null

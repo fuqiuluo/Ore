@@ -50,8 +50,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 //    private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
-    // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
-    private val idleStateHandler: IdleStateHandler = IdleStateHandler(1000 * (60 + 5), 1000 * 60, 1000 * (60 + 10), TimeUnit.MILLISECONDS)
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)
 
     //    max1个线程池 不允许再多
@@ -121,11 +119,14 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
             .handler(object : ChannelInitializer<SocketChannel>() {
             public override fun initChannel(socketChannel: SocketChannel) {
                 // 注意添加顺序决定执行的先后
-                socketChannel.pipeline().addLast("ping", idleStateHandler)
+
+                // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
+                socketChannel.pipeline().addLast("ping", IdleStateHandler(1000 * (60 + 5), 1000 * 60, 1000 * (60 + 10), TimeUnit.MILLISECONDS))
                 socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
                 socketChannel.pipeline().addLast("handler", usefulListener)
                 socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
+
 //                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
             }
         })

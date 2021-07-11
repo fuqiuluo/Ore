@@ -5,4 +5,5 @@ include 'Ore-Core'
 include 'Ore-Api'
 include 'Ore-All'
 include 'Ore-Pay'
+include 'Ore-Group'
 

@@ -78,12 +78,14 @@ class OreBot(uin: Long) : Ore(uin) {
     }
 
     override fun checkTicketAndRefresh() {
-        // 检查是否过期 并刷新
-        if(manager.userSigInfo.sKey.isExpired()) {
-            WloginHelper(uin, client).refreshSig()
-        }
-        if(manager.userSigInfo.d2Key.isExpired()) {
-            WloginHelper(uin, client).refreshSt()
+        kotlin.runCatching {
+            if(manager.userSigInfo.d2Key.isExpired()) {
+                WloginHelper(uin, client).refreshSt()
+            }
+            // 检查是否过期 并刷新
+            if(manager.session.sKey.isExpired()) {
+                WloginHelper(uin, client).refreshSig()
+            }
         }
     }
 

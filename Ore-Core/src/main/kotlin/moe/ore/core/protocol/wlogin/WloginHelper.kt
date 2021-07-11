@@ -166,7 +166,7 @@ class WloginHelper(val uin : Long,
 
                 map[0x120]?.let {
                     // println("input skey")
-                    userStInfo.sKey = strTicket(String(it))
+                    session.sKey = strTicket(String(it))
                 }
 
                 map[0x106]?.let {
@@ -320,7 +320,7 @@ class WloginHelper(val uin : Long,
                                 userStInfo.webSig.shelfLife = time
                             }
                             0x120 -> {
-                                userStInfo.sKey.shelfLife = time
+                                session.sKey.shelfLife = time
                             }
                             0x136 -> {
 

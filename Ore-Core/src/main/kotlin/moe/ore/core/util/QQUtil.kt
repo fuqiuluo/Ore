@@ -154,4 +154,15 @@ object QQUtil {
         result = 31 * result + commandName.hashCode()
         return result
     }
+
+    fun getBkn(skey: String): Long {
+        var hash = 5381
+        var i = 0
+        val len = skey.length
+        while (i < len) {
+            hash += (hash shl 5) + skey[i].code
+            ++i
+        }
+        return (hash and 2147483647).toLong()
+    }
 }

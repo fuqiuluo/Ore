@@ -34,6 +34,9 @@ class SsoSession {
     // expamel 1, 0, 0, 127 是倒过来的哦！
     var clientIp = byteArrayOf(0, 0, 0, 0)
 
+    // 1 days
+    lateinit var sKey: StringTicket
+
     /**
      * T511内的域名的pskey这里都有
      */
@@ -80,14 +83,10 @@ class SsoSession {
     }
 }
 
-// WloginSimpleInfo
 class UinSimpleInfo {
     var age: Byte = 0
     var face: Short = 0
     var gender: Byte = 0
-    lateinit var imgFormat: ByteArray
-    lateinit var imgType: ByteArray
-    lateinit var imgUrl: ByteArray
     lateinit var nick: String
     lateinit var mainDisplayName: ByteArray
 }

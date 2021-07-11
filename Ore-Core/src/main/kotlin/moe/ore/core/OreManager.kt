@@ -77,9 +77,7 @@ object OreManager {
 
     @JvmStatic
     internal fun checkTicketAndRefresh(uin: Long) {
-        getBot(uin)?.let {
-            (it as OreBot).checkTicketAndRefresh()
-        }
+        getBot(uin)?.checkTicketAndRefresh()
     }
 
     @JvmStatic
