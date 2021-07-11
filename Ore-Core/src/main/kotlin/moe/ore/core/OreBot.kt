@@ -77,6 +77,16 @@ class OreBot(uin: Long) : Ore(uin) {
         client.connect()
     }
 
+    override fun checkTicketAndRefresh() {
+        // 检查是否过期 并刷新
+        if(manager.userSigInfo.sKey.isExpired()) {
+            WloginHelper(uin, client).refreshSig()
+        }
+        if(manager.userSigInfo.d2Key.isExpired()) {
+            WloginHelper(uin, client).refreshSt()
+        }
+    }
+
     override fun shut() {
         // 关闭机器人
         println("shut ore bot")

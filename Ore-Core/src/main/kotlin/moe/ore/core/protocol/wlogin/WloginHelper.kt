@@ -14,17 +14,16 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
-import moe.ore.helper.readString
-import moe.ore.helper.reader
-import moe.ore.helper.toByteReadPacket
-import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
 import moe.ore.api.data.Result
 import moe.ore.core.OreManager
 import moe.ore.core.protocol.wlogin.request.*
+import moe.ore.helper.*
 import moe.ore.helper.thread.ThreadManager
+import java.text.SimpleDateFormat
+import java.util.*
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -37,12 +36,12 @@ class WloginHelper(val uin : Long,
     private var wtMode : Int = 0
 
     override fun run() {
-
         when(wtMode) {
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
             MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
             MODE_TOKEN_LOGIN -> {
+                OreManager.checkTicketAndRefresh(uin)
                 val ret = SvcRegisterHelper(uin).register()
                 if(ret == 0) {
                     OreManager.changeStatus(uin, OreStatus.Online)
@@ -296,9 +295,15 @@ class WloginHelper(val uin : Long,
                 // key的刷新时间
                 map[0x138]?.reader {
                     val count = readInt()
+                    // val st = System.currentTimeMillis()
                     repeat(count) {
                         val ver = readShort().toInt()
                         val time = readUInt().toInt() * 1000L
+
+                        // val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        // val timeStr = sdf.format(Date(time + st))
+                        // println("【T${ver.toHexString()}】过期时间：" + timeStr)
+
                         when (ver) {
                             0x106 -> userStInfo.encryptA1.shelfLife = time // 3 days
                             0x10a -> {

@@ -106,8 +106,8 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                         writeInt(16777216)
                         writeInt(0)
 
-                        writeInt(256) // Token Type 如果有Token就是256
                         val token = secondToken ?: EMPTY_BYTE_ARRAY
+                        writeInt(if(secondToken == null) 0 else 256) // Token Type 如果有Token就是256
                         writeInt(token.size + 4)
                         writeBytes(token)
 
@@ -152,10 +152,11 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         }.toByteArray(), teaKey))
     } }.toByteArray()
 
+    /**
     kotlin.runCatching {
         println("teaKey : " + teaKey.toHexString())
         println("commandId : $commandName ==> ${out.toHexString()}")
-    }
+    }**/
 
     return PacketSender(client, out, commandName, seq)
 }
@@ -190,8 +191,13 @@ open class PacketSender (
                 }
             }, timeout)
         }
-        this.client.send(body)
         this.block = block
+        send()
+    }
+
+    private fun send() {
+        println("F = Packet[cmd = $commandName, body = ${body.toHexString()}]")
+        this.client.send(body)
     }
 
     companion object {
@@ -199,7 +205,7 @@ open class PacketSender (
          * 同步
          */
         infix fun PacketSender.sync(timeout : Long) : FromService? {
-            this.client.send(body)
+            send()
             // println("开始等")
             if(this.handler.wait(timeout)) {
                 // println("等完了")

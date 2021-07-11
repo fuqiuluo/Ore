@@ -19,7 +19,7 @@ fun Ore.getPay(payWord: String) : IQPay {
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\Users\\13723\\Desktop\\Ore")
+    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\Users\\13723\\Desktop\\Ore\\")
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {

@@ -22,18 +22,17 @@
 package moe.ore.core.bot
 
 import kotlinx.serialization.Serializable
-import moe.ore.api.tars.Tars
-import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
 
 class UserSigInfo : TarsStructBase() {
+    // 保质期 28 days
     lateinit var tgtKey: BytesTicket
-
     // A2
     lateinit var tgt: BytesTicket
 
+    // 1 days
     lateinit var sKey: StringTicket
 
     var t104: ByteArray? = null
@@ -47,6 +46,7 @@ class UserSigInfo : TarsStructBase() {
 
     var payToken = byteArrayOf()
 
+    // 保质期：下个月 1 日
     lateinit var d2: BytesTicket
     lateinit var d2Key: BytesTicket
 
@@ -58,11 +58,13 @@ class UserSigInfo : TarsStructBase() {
     lateinit var superKey : StringTicket
 
     // 用t106和t10c计算得到 from QQ 8.6.0
+    // 保质期 30 days
     lateinit var encryptA1: BytesTicket
 
     // from 10c
     lateinit var gtKey : BytesTicket
 
+    // 保质期：2 hours
     lateinit var webSig : BytesTicket
 
     lateinit var da2 : BytesTicket
@@ -90,11 +92,11 @@ class UserSigInfo : TarsStructBase() {
 }
 
 open class BytesTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
-    fun ticket() = value
+    fun ticket() : ByteArray = value()
 }
 
 open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
-    fun ticket() = String(value)
+    fun ticket() = String(value())
 
     override fun toString(): String {
         return ticket()
@@ -103,12 +105,16 @@ open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0)
 
 
 open class Ticket(
-    var value : ByteArray,
+    private var value : ByteArray,
     var createTime : Long,
     /**
      * 过期时间可修改 from <h>T138</h>
      */
     var shelfLife : Long) : TarsStructBase() {
+
+    fun value() : ByteArray {
+        return value
+    }
 
     fun isExpired() : Boolean {
         return System.currentTimeMillis() > (createTime + shelfLife)

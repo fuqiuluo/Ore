@@ -57,6 +57,11 @@ abstract class Ore(val uin : Long) {
     abstract fun shut()
 
     /**
+     * 检查并刷新Key
+     */
+    abstract fun checkTicketAndRefresh()
+
+    /**
      * 改变状态
      */
     fun changeStatus(status: OreStatus) {

@@ -21,7 +21,6 @@
 
 package moe.ore.core.helper
 
-import moe.ore.api.tars.Tars
 import moe.ore.core.OreBot
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.DeviceInfo
@@ -59,9 +58,7 @@ class DataManager private constructor(
      */
     @JvmField
     @Transient
-    var dataPath: String = fun(): String {
-        return File(path).absolutePath + File.pathSeparator + MD5.toMD5(uin.toString()) + ".ore"
-    }()
+    var dataPath: String = File(path).absolutePath + "/" + MD5.toMD5(uin.toString()) + ".ore"
 
     /**
      * 管理器

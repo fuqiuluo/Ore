@@ -16,7 +16,7 @@ object GrayUin {
             val manager = DataManager.manager(oreBot.uin)
             val uni = UniPacket()
             uni.put(CheckReq().apply {
-                appId = 537070774
+                appId = 0x200302d5
                 this.uin = oreBot.uin.toString()
                 machineInfo = "771234164054420055"
             })
