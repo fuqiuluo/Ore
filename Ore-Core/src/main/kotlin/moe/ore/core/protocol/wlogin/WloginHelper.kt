@@ -21,9 +21,6 @@ import moe.ore.api.data.Result
 import moe.ore.core.OreManager
 import moe.ore.core.protocol.wlogin.request.*
 import moe.ore.helper.*
-import moe.ore.helper.thread.ThreadManager
-import java.text.SimpleDateFormat
-import java.util.*
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -339,8 +336,8 @@ class WloginHelper(val uin : Long,
                     }
                 }
 
-                // 执行flush保存数据
-                manager.flush()
+//                // 执行flush保存数据
+//                manager.flush()
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 
@@ -360,7 +357,7 @@ class WloginHelper(val uin : Long,
         }
 
         fun onCaptcha(tlvMap: Map<Int, ByteArray>) {
-            tlvMap[0x104]?.let { userStInfo.t104 = it }
+            tlvMap[0x104]?.let { session.t104 = it }
             val url = tlvMap[0x192].let {
                 requireNotNull(it)
                 String(it)
@@ -379,8 +376,9 @@ class WloginHelper(val uin : Long,
                 userStInfo.G = MD5.toMD5Byte(device.guid + session.pwd + it)
                 // 字节组拼接
             }!!
-            tlvMap[0x104]?.let { userStInfo.t104 = it }
-            helper.handle(WtLoginDevicePass(helper.uin, t402, tlvMap[0x403]).sendTo(client))
+            tlvMap[0x104]?.let { session.t104 = it }
+            tlvMap[0x403]?.let { session.randSeed = it }
+            helper.handle(WtLoginDevicePass(helper.uin, t402, session.randSeed).sendTo(client))
         }
 
         fun onRollback(t161 : ByteArray?) {
@@ -409,8 +407,8 @@ class WloginHelper(val uin : Long,
         }
 
         fun onDevicelock(tlvMap: Map<Int, ByteArray>) {
-            tlvMap[0x104]?.let { userStInfo.t104 = it }
-            tlvMap[0x174]?.let { userStInfo.t174 = it }
+            tlvMap[0x104]?.let { session.t104 = it }
+            tlvMap[0x174]?.let { session.t174 = it }
             val smsInformation = tlvMap[0x178]!!.let {
                 val reader = it.toByteReadPacket()
                 SmsInformation(

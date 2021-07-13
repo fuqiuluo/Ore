@@ -1,12 +1,15 @@
 package moe.ore.core.bot
 
 import moe.ore.helper.hex2ByteArray
+import moe.ore.tars.TarsInputStream
+import moe.ore.tars.TarsOutputStream
+import moe.ore.tars.TarsStructBase
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import java.util.*
 import kotlin.random.Random
 
-class DeviceInfo {
+class DeviceInfo : TarsStructBase() {
     enum class NetworkType(val value: Int) {
         /**
          * 移动网络
@@ -25,6 +28,7 @@ class DeviceInfo {
     }
 
     var imei: String = " 867109044454073"
+
     // 53f156a0b5b89966【真的】  53f256a0aaff9966【假的】
     var androidId: String = "53f156a0b5b89966"
     var imsi: String = "460023785098616"
@@ -56,6 +60,48 @@ class DeviceInfo {
 
     // expamel 1, 0, 0, 127 是倒过来的哦！
     var clientIp = byteArrayOf(0, 0, 0, 0)
+
+    override fun writeTo(output: TarsOutputStream) {
+        output.write(imei, 1)
+        output.write(androidId, 2)
+        output.write(imsi, 3)
+        output.write(model, 4)
+        output.write(osType, 5)
+        output.write(brand, 6)
+        output.write(androidVersion, 7)
+        output.write(androidSdkVersion, 8)
+        output.write(wifiSsid, 9)
+        output.write(wifiBSsid, 10)
+        output.write(macAddress, 11)
+        output.write(netType.name, 12)
+        output.write(apn, 13)
+        output.write(apnName, 14)
+        output.write(ksid, 15)
+        output.write(guid, 16)
+        output.write(tgtgt, 17)
+        output.write(clientIp, 18)
+    }
+
+    override fun readFrom(input: TarsInputStream) {
+        imei = input.read(imei, 1, false)
+        androidId = input.read(androidId, 2, false)
+        imsi = input.read(imsi, 3, false)
+        model = input.read(model, 4, false)
+        osType = input.read(osType, 5, false)
+        brand = input.read(brand, 6, false)
+        androidVersion = input.read(androidVersion, 7, false)
+        androidSdkVersion = input.read(androidSdkVersion, 8, false)
+        wifiSsid = input.read(wifiSsid, 9, false)
+        wifiBSsid = input.read(wifiBSsid, 10, false)
+        macAddress = input.read(macAddress, 11, false)
+        netType = NetworkType.valueOf(input.read("netType.name", 12, false))
+        apn = input.read(apn, 13, false)
+        apnName = input.read(apnName, 14, false)
+        ksid = input.read(ksid, 15, false)
+        guid = input.read(guid, 16, false)
+        tgtgt = input.read(tgtgt, 17, false)
+        clientIp = input.read(clientIp, 18, false)
+    }
 
     companion object {
         @JvmStatic

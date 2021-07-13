@@ -11,7 +11,7 @@ class WtLoginSlider(uin : Long, private val ticket : String, private val t546 : 
         writeShort(5)
         writeBytes(tlv.t193(ticket))
         writeBytes(tlv.t8())
-        writeBytes(tlv.t104(userStSig.t104))
+        writeBytes(tlv.t104(session.t104))
         writeBytes(tlv.t116())
         writeBytes(tlv.t547(ClientPow().calc(t546)))
     }.toByteArray()

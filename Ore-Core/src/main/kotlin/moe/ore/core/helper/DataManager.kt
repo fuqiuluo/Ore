@@ -37,16 +37,18 @@ import moe.ore.tars.TarsStructBase
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 import java.io.File
+import java.io.FileOutputStream
+import java.io.ObjectOutputStream
 
 class DataManager private constructor(
-    uin: Long,
-    /**
-     * 数据保存路径
-     */
-    path: String,
-    // 暂时移除
-    // private val safePwd: String
-    ) : TarsStructBase() {
+        uin: Long,
+        /**
+         * 数据保存路径
+         */
+        path: String,
+        // 暂时移除
+        // private val safePwd: String
+) : TarsStructBase() {
 
     /**
      * 线程管理器
@@ -58,23 +60,22 @@ class DataManager private constructor(
      */
     @JvmField
     @Transient
-    var dataPath: String = File(path).absolutePath + "/" + MD5.toMD5(uin.toString()) + ".ore"
+    var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
 
     /**
      * 管理器
      */
     @JvmField
-    @Transient
-    val session = SsoSession()
+    var session = SsoSession()
 
     lateinit var botAccount: BotAccount
 
-    val ecdh : PiratedEcdh by lazy { PiratedEcdh() }
+    val ecdh: PiratedEcdh by lazy { PiratedEcdh() }
 
     /**
      * 保存各种Token
      */
-    val userSigInfo: UserSigInfo = UserSigInfo()
+    var userSigInfo: UserSigInfo = UserSigInfo()
 
     /**
      * 模拟的安卓信息
@@ -100,8 +101,6 @@ class DataManager private constructor(
 
 
         println("destroy")
-        // TODO: 2021/6/6 销毁之前序列化到本地文件
-        // 清空自身类里面的map或存在引用关系的事务
     }
 
     fun flush() {
@@ -110,12 +109,20 @@ class DataManager private constructor(
 
     @Override
     override fun writeTo(output: TarsOutputStream) {
-
+        output.write(session, 1)
+//        output.write(botAccount, 2)
+        output.write(userSigInfo, 3)
+        output.write(deviceInfo, 4)
+        output.write(protocolType.name, 5)
     }
 
     @Override
     override fun readFrom(input: TarsInputStream) {
-
+        session = input.read(session, 1, false)
+//        botAccount = input.read(botAccount, 1, false)
+        userSigInfo = input.read(userSigInfo, 3, false)
+        deviceInfo = input.read(deviceInfo, 4, false)
+        protocolType = ProtocolInternal.ProtocolType.valueOf(input.read("protocolType.name", 5, false))
     }
 
     companion object {

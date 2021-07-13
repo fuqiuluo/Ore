@@ -9,9 +9,9 @@ class WtLoginSubmitSms(uin: Long, private val code: String) : WtRequest(uin, CMD
     override fun makeTlv(seq: Int) = newBuilder().apply {
         writeShort(8)
         writeBytes(tlv.t8())
-        writeBytes(tlv.t104(userStSig.t104))
+        writeBytes(tlv.t104(session.t104))
         writeBytes(tlv.t116())
-        writeBytes(tlv.t174(userStSig.t174))
+        writeBytes(tlv.t174(session.t174))
         writeBytes(tlv.t17c(code))
         writeBytes(tlv.t401(userStSig.G))
         writeBytes(tlv.t198())

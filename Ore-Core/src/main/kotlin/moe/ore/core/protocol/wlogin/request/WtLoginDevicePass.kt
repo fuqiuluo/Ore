@@ -12,7 +12,7 @@ class WtLoginDevicePass(uin: Long, private val t402: ByteArray, private val t403
     override fun makeTlv(seq: Int): ByteArray = newBuilder().apply {
         writeShort(5 + if(t403 == null) 0 else 1)
         writeBytes(tlv.t8())
-        writeBytes(tlv.t104(userStSig.t104))
+        writeBytes(tlv.t104(session.t104))
         writeBytes(tlv.t116())
         writeBytes(tlv.t401(userStSig.G))
         writeBytes(tlv.t402(t402))

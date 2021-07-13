@@ -1,22 +1,25 @@
 package moe.ore.core.bot
 
+import moe.ore.tars.TarsInputStream
+import moe.ore.tars.TarsOutputStream
+import moe.ore.tars.TarsStructBase
 import moe.ore.util.BytesUtil
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
-class SsoSession {
+class SsoSession : TarsStructBase() {
     val uinInfo = UinSimpleInfo()
 
-    val msgCookie : ByteArray = BytesUtil.randomKey(4)
+    var msgCookie: ByteArray = BytesUtil.randomKey(4)
 
     var rollBackCount = 0
 
     // from t172
     var rollbackSig: ByteArray? = null
 
-    lateinit var randSeed: ByteArray
+    var randSeed: ByteArray = ByteArray(0)
 
     var randomKey = BytesUtil.randomKey(16)
 
@@ -47,14 +50,19 @@ class SsoSession {
      */
     var encryptAppid = 0x5f5e10e2L
 
-    var appPri : Long = 4294967295L
+    var appPri: Long = 4294967295L
+
     // 86400 单位：秒 保质期 一天
-    var appPriChangeTime : Long = 0
+    var appPriChangeTime: Long = 0
 
     // from t167
     var imgType = 1
 
     private val seqFactory = AtomicInteger(Random().nextInt(100000))
+
+    var t104: ByteArray? = null
+
+    var t174: ByteArray? = null
 
     @Synchronized
     fun nextSeqId(): Int {
@@ -80,6 +88,22 @@ class SsoSession {
             }
         }
         return id
+    }
+
+    override fun writeTo(output: TarsOutputStream) {
+        output.write(randSeed, 1)
+        output.write(randomKey, 2)
+        output.write(pwd, 3)
+        output.write(msgCookie, 4)
+
+    }
+
+    override fun readFrom(input: TarsInputStream) {
+        randSeed = input.read(randSeed, 1, false)
+        randomKey = input.read(randomKey, 2, false)
+        pwd = input.read(pwd, 3, false)
+        msgCookie = input.read(msgCookie, 4, false)
+
     }
 }
 

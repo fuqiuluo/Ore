@@ -8,12 +8,13 @@ import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
 import moe.ore.core.protocol.tars.service.GrayUin
 import moe.ore.group.TroopManager
+import java.io.File
 import java.util.*
 
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", "C:\\Users\\13723\\Desktop\\Ore\\")
+    val ore = OreManager.addBot(3042628723, "911586abcd", File("").absolutePath)
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
@@ -28,6 +29,10 @@ fun main() {
             println("登录结果：$result")
 
             val oreBot = (ore as OreBot)
+            if (result == LoginResult.Success) {
+//                保存数据
+                DataManager.flush(ore.uin)
+            }
 
             println(TroopManager(ore.uin).getGroupList())
         }
@@ -52,7 +57,8 @@ fun main() {
         }
 
     }
-    ore.login()
+//    ore.login()
+    ore.tokenLogin()
 
 
 }

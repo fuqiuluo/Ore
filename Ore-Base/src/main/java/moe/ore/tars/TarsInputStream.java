@@ -787,6 +787,7 @@ public final class TarsInputStream {
             try {
                 ref = o.getClass().newInstance();
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new TarsDecodeException(e.getMessage());
             }
 

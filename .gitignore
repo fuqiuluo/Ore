@@ -6,3 +6,6 @@
 /Ore-All/build/
 /Ore-Pay/build/
 /build/
+/Ore-Group/build/
+/*/build/
+*.ore

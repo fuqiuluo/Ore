@@ -68,11 +68,21 @@ class OreBot(uin: Long) : Ore(uin) {
         }
     }
 
+
     override fun login() {
         // 登录开始传递登录开始事件
         threadManager.addTask {
             oreListener?.onLoginStart()
         }
+        // 连接到服务器会自动发送登录包
+        client.connect()
+    }
+    override fun tokenLogin() {
+        // 登录开始传递登录开始事件
+        threadManager.addTask {
+            oreListener?.onLoginStart()
+        }
+        this.status = OreStatus.Reconnecting
         // 连接到服务器会自动发送登录包
         client.connect()
     }
