@@ -24,6 +24,8 @@ package moe.ore.core.net.packet
 import moe.ore.core.util.QQUtil
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 abstract class LongHandler(commandName: String) : Handler(0, commandName)
 
@@ -31,8 +33,10 @@ open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandNa
     /**
      * 堵塞器
      */
-    private val queue = ArrayBlockingQueue<Boolean>(1)
-    private var isSuccess = false
+//    private val queue = ArrayBlockingQueue<Boolean>(1)
+    private val countDownLatch = CountDownLatch(1)
+
+    //    private var isSuccess = false
     private var isOver = false
     var fromService: FromService? = null
 
@@ -43,19 +47,20 @@ open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandNa
      * @return Boolean
      */
     fun wait(timeout: Long = 20 * 1000): Boolean {
-        if(isOver || queue.size >= 1) {
+        if (isOver || countDownLatch.count == 0L) {
             // 已经结束了，没必要再继续同步接包
-            return isSuccess
+            return false
         }
-        Timer().apply {
-            schedule(object : TimerTask() {
-                override fun run() {
-                    queue.add(false)
-                    this@apply.cancel()
-                }
-            }, timeout)
-        }
-        val ret = queue.take().also { this.isSuccess = it }
+//        Timer().apply {
+//            schedule(object : TimerTask() {
+//                override fun run() {
+//                    queue.add(false)
+//                    this@apply.cancel()
+//                }
+//            }, timeout)
+//        }
+        val ret = countDownLatch.await(timeout, TimeUnit.MILLISECONDS)//queue.take().also { this.isSuccess = it }
+//        this.isSuccess=true
         this.isOver = true
         return ret
     }
@@ -67,14 +72,15 @@ open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandNa
             if (it) this.fromService = from
         }
         // println("拿到了：$ret")
-        queue.add(ret)
+//        queue.add(ret)
+        countDownLatch.countDown()
         return ret
     }
 }
 
 abstract class Handler(
-    val seq: Int,
-    val commandName: String
+        val seq: Int,
+        val commandName: String
 ) {
 
     abstract fun check(from: FromService): Boolean
