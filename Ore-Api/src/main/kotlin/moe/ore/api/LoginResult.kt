@@ -50,5 +50,9 @@ enum class LoginResult {
     /**
      * 上线失败
      */
-    RegisterFail
+    RegisterFail,
+    /**
+     * 上线失败
+     */
+    TokenLoginError
 }

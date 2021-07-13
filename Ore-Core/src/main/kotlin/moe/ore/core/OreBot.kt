@@ -50,7 +50,7 @@ class OreBot(uin: Long) : Ore(uin) {
                     OreStatus.Reconnecting, OreStatus.Online -> {
                         // 重连
                         println("ore reconnect begin")
-                        WloginHelper(uin, this@apply).loginByToken()
+                        WloginHelper(uin, this@apply, oreListener).loginByToken()
                     }
                     else -> runtimeError("未知的错误操作")
                 }
@@ -77,6 +77,7 @@ class OreBot(uin: Long) : Ore(uin) {
         // 连接到服务器会自动发送登录包
         client.connect()
     }
+
     override fun tokenLogin() {
         // 登录开始传递登录开始事件
         threadManager.addTask {
@@ -89,12 +90,12 @@ class OreBot(uin: Long) : Ore(uin) {
 
     override fun checkTicketAndRefresh() {
         kotlin.runCatching {
-            if(manager.userSigInfo.d2Key.isExpired()) {
-                WloginHelper(uin, client).refreshSt()
+            if (manager.userSigInfo.d2Key.isExpired()) {
+                WloginHelper(uin, client, oreListener).refreshSt()
             }
             // 检查是否过期 并刷新
-            if(manager.session.sKey.isExpired()) {
-                WloginHelper(uin, client).refreshSig()
+            if (manager.session.sKey.isExpired()) {
+                WloginHelper(uin, client, oreListener).refreshSig()
             }
         }
     }

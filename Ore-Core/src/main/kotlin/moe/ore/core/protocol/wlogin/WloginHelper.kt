@@ -24,7 +24,7 @@ import moe.ore.helper.*
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
-                   listener: OreListener? = null) : Thread() {
+                   val listener: OreListener? = null) : Thread() {
     private val eventHandler by lazy { EventHandler(listener, client, this) }
     private val manager = DataManager.manager(uin)
     private val threadManager = manager.threadManager
@@ -61,6 +61,7 @@ class WloginHelper(val uin : Long,
                     1 -> eventHandler.onPasswordWrong()
                     2 -> eventHandler.onCaptcha(tlvMap)
                     6 -> eventHandler.onCaptchaError()
+                    15 -> eventHandler.onTokenLoginError()
                     40 -> eventHandler.onFreeze()
                     180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
@@ -496,6 +497,10 @@ class WloginHelper(val uin : Long,
              * 滑块ticket错误导致的
              */
             callback(LoginResult.NetEnvWrong)
+        }
+
+        fun onTokenLoginError() {
+            callback(LoginResult.TokenLoginError)
         }
     }
 
