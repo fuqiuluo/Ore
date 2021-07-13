@@ -65,7 +65,6 @@ class DataManager private constructor(
     /**
      * 管理器
      */
-    @JvmField
     var session = SsoSession()
 
     lateinit var botAccount: BotAccount
@@ -85,8 +84,10 @@ class DataManager private constructor(
 
     init {
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
-        if (FileUtil.has(dataPath)) {
-            readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
+        kotlin.runCatching {
+            if (FileUtil.has(dataPath)) {
+                readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
+            }
         }
     }
 
@@ -96,11 +97,7 @@ class DataManager private constructor(
     fun destroy() {
         // threadManager 只有由dataManager来释放
         threadManager.shutdown()
-
         flush()
-
-
-        println("destroy")
     }
 
     fun flush() {
@@ -109,8 +106,6 @@ class DataManager private constructor(
 
     @Override
     override fun writeTo(output: TarsOutputStream) {
-        output.write(session, 1)
-//        output.write(botAccount, 2)
         output.write(userSigInfo, 3)
         output.write(deviceInfo, 4)
         output.write(protocolType.name, 5)
@@ -118,11 +113,9 @@ class DataManager private constructor(
 
     @Override
     override fun readFrom(input: TarsInputStream) {
-        session = input.read(session, 1, false)
-//        botAccount = input.read(botAccount, 1, false)
         userSigInfo = input.read(userSigInfo, 3, false)
         deviceInfo = input.read(deviceInfo, 4, false)
-        protocolType = ProtocolInternal.ProtocolType.valueOf(input.read("protocolType.name", 5, false))
+        protocolType = ProtocolInternal.ProtocolType.valueOf(input.read("", 5, false))
     }
 
     companion object {

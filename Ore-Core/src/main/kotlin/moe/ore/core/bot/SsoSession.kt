@@ -1,5 +1,6 @@
 package moe.ore.core.bot
 
+import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -19,7 +20,7 @@ class SsoSession : TarsStructBase() {
     // from t172
     var rollbackSig: ByteArray? = null
 
-    var randSeed: ByteArray = ByteArray(0)
+    var randSeed: ByteArray = EMPTY_BYTE_ARRAY
 
     var randomKey = BytesUtil.randomKey(16)
 
@@ -88,22 +89,6 @@ class SsoSession : TarsStructBase() {
             }
         }
         return id
-    }
-
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(randSeed, 1)
-        output.write(randomKey, 2)
-        output.write(pwd, 3)
-        output.write(msgCookie, 4)
-
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-        randSeed = input.read(randSeed, 1, false)
-        randomKey = input.read(randomKey, 2, false)
-        pwd = input.read(pwd, 3, false)
-        msgCookie = input.read(msgCookie, 4, false)
-
     }
 }
 

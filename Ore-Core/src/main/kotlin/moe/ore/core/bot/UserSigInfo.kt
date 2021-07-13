@@ -21,6 +21,7 @@
 
 package moe.ore.core.bot
 
+import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -33,13 +34,12 @@ class UserSigInfo : TarsStructBase() {
     // A2
     lateinit var tgt: BytesTicket
 
-
     /**
      * 没有名字 QQ逆向里面它叫做G from 8.7.5
      */
-    var G = byteArrayOf()
+    var G = EMPTY_BYTE_ARRAY
 
-    var payToken = byteArrayOf()
+    var payToken = EMPTY_BYTE_ARRAY
 
     // 保质期：下个月 1 日
     lateinit var d2: BytesTicket
@@ -75,13 +75,11 @@ class UserSigInfo : TarsStructBase() {
     lateinit var wtSessionTicket: BytesTicket
     lateinit var wtSessionTicketKey: BytesTicket
 
-     var t528: ByteArray? = null
+     var t528: ByteArray = EMPTY_BYTE_ARRAY
 
     override fun writeTo(output: TarsOutputStream) {
         output.write(tgt, 1)
         output.write(tgtKey, 2)
-//        output.write(t104, 3)
-//        output.write(t174, 4)
         output.write(G, 5)
         output.write(payToken, 6)
         output.write(d2, 7)
@@ -108,8 +106,6 @@ class UserSigInfo : TarsStructBase() {
         val strTicketType = StringTicket()
         tgt = input.read(ticketType, 1, false)
         tgtKey = input.read(ticketType, 2, false)
-//        t104 = input.read(t104, 3, false)
-//        t174 = input.read(t174, 4, false)
         G = input.read(G, 5, false)
         payToken = input.read(payToken, 6, false)
         d2 = input.read(ticketType, 7, false)
@@ -133,13 +129,13 @@ class UserSigInfo : TarsStructBase() {
 }
 
 open class BytesTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
-    constructor() : this(ByteArray(0), 0, 0)
+    constructor() : this(EMPTY_BYTE_ARRAY, 0, 0)
 
     fun ticket(): ByteArray = value()
 }
 
 open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
-    constructor() : this(ByteArray(0), 0, 0)
+    constructor() : this(EMPTY_BYTE_ARRAY, 0, 0)
 
     fun ticket() = String(value())
 
@@ -150,7 +146,7 @@ open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0)
 
 
 open class Ticket() : TarsStructBase() {
-    var value = ByteArray(0)
+    var value = EMPTY_BYTE_ARRAY
     var createTime = 0L
     var shelfLife = 0L
 
