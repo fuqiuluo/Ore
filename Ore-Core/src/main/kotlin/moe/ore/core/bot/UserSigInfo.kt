@@ -181,9 +181,9 @@ open class Ticket() : TarsStructBase() {
     }
 
     override fun readFrom(input: TarsInputStream) {
-        input.read(value, 1, false)
-        input.read(createTime, 2, false)
-        input.read(shelfLife, 3, false)
+        value=  input.read(value, 1, false)
+        createTime= input.read(createTime, 2, false)
+        shelfLife=input.read(shelfLife, 3, false)
     }
 }
 

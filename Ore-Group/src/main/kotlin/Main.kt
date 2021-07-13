@@ -57,8 +57,8 @@ fun main() {
         }
 
     }
-    ore.login()
-//    ore.tokenLogin()
+//    ore.login()
+    ore.tokenLogin()
 
 
 }
