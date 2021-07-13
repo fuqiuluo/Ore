@@ -21,6 +21,7 @@
 
 package moe.ore.core.net
 
+import moe.ore.core.OreManager
 import moe.ore.core.helper.readMsfSsoPacket
 import moe.ore.core.net.decoder.PacketResponse
 import moe.ore.core.net.listener.ClientListener
@@ -62,6 +63,7 @@ class BotClient(val uin: Long) {
 
         override fun onMassage(msg: PacketResponse) {
             try {
+                OreManager.checkTicketAndRefresh(uin)
                 msg.body.readMsfSsoPacket(uin) { uinStr, from ->
                     check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
                     val hash = from.hashCode()
