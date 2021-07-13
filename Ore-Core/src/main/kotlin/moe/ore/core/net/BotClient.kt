@@ -63,6 +63,7 @@ class BotClient(val uin: Long) {
 
         override fun onMassage(msg: PacketResponse) {
             try {
+                // 检查key是否需要刷新
                 OreManager.checkTicketAndRefresh(uin)
                 msg.body.readMsfSsoPacket(uin) { uinStr, from ->
                     check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
