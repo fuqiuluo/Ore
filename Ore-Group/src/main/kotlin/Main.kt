@@ -14,7 +14,7 @@ import java.util.*
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", File("").absolutePath)
+    val ore = OreManager.addBot(3042628723, "911586abcd", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
@@ -57,8 +57,8 @@ fun main() {
         }
 
     }
-//    ore.login()
-    ore.tokenLogin()
+    ore.login()
+    // ore.tokenLogin()
 
 
 }

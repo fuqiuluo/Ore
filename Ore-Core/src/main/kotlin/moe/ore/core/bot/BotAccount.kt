@@ -35,6 +35,7 @@ class BotAccount(val uin: Long, password: String) {
         QQUtil.checkAccount(uin)
     }
 
+    // 使用 lazy 懒加载
     val bytesMd5Password: ByteArray by lazy {
         MD5.toMD5Byte(password)
     }

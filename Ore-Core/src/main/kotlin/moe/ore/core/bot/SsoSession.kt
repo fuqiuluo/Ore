@@ -1,5 +1,6 @@
 package moe.ore.core.bot
 
+import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
@@ -19,7 +20,7 @@ class SsoSession : TarsStructBase() {
     // from t172
     var rollbackSig: ByteArray? = null
 
-    var randSeed: ByteArray = ByteArray(0)
+    var randSeed: ByteArray = EMPTY_BYTE_ARRAY
 
     var randomKey = BytesUtil.randomKey(16)
 

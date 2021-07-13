@@ -77,8 +77,6 @@ class DeviceInfo : TarsStructBase() {
         output.write(apn, 13)
         output.write(apnName, 14)
         output.write(ksid, 15)
-        output.write(guid, 16)
-        output.write(tgtgt, 17)
         output.write(clientIp, 18)
     }
 
@@ -98,8 +96,6 @@ class DeviceInfo : TarsStructBase() {
         apn = input.read(apn, 13, false)
         apnName = input.read(apnName, 14, false)
         ksid = input.read(ksid, 15, false)
-        guid = input.read(guid, 16, false)
-        tgtgt = input.read(tgtgt, 17, false)
         clientIp = input.read(clientIp, 18, false)
     }
 

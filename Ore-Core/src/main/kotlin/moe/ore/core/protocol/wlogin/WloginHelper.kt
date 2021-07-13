@@ -38,7 +38,6 @@ class WloginHelper(val uin : Long,
             MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
             MODE_TOKEN_LOGIN -> {
-                OreManager.checkTicketAndRefresh(uin)
                 val ret = SvcRegisterHelper(uin).register()
                 if(ret == 0) {
                     OreManager.changeStatus(uin, OreStatus.Online)
