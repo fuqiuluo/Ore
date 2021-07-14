@@ -89,6 +89,32 @@ class ProtocolInternal(
                 packageVersion = "8.7.5",
                 tencentSdkMd5 = "a6b745bf24a2c277527716f6f36eb68d".hex2ByteArray(),
             )
+            protocols[ProtocolType.IOS_IPAD] = ProtocolInternal(
+                openAppId = 537065739,
+                appId = 537065739,
+                subAppId = 16,
+                pingVersion = 1,
+                ipVersion = 1,
+                ssoVersion = 1536,
+                msfSsoVersion = 12,
+                tgtgVersion = 4,
+                mainSigMap = 1970400,
+                miscBitmap = 150470524,
+                subSigMap = 66560,
+                dbVersion = 1,
+                buildTime = 1595836208,
+                localId = 2052,
+                protocolVersion = 8001,
+                loginType = 1,
+                isGuidAvailable = true,
+                isGuidFromFileNull = false,
+                isGuidChanged = false,
+                buildVersion = "6.0.0.2475",
+                protocolDetail = "||A8.7.5.18f5bf29",
+                packageName = "com.tencent.minihd.qq",
+                packageVersion = "5.8.9",
+                tencentSdkMd5 = "aa3978f41fd96ff9914a669e186474c7".hex2ByteArray()
+            )
         }
 
     }
@@ -97,6 +123,7 @@ class ProtocolInternal(
         /**
          * Android
          */
-        ANDROID_PHONE
+        ANDROID_PHONE,
+        IOS_IPAD
     }
 }
