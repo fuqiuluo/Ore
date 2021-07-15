@@ -33,7 +33,6 @@ import moe.ore.core.protocol.tars.statsvc.SvcReqMSFLoginNotify
 import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
-import moe.ore.helper.toHexString
 import moe.ore.tars.UniPacket
 
 class OreBot(uin: Long) : Ore(uin) {
@@ -79,8 +78,8 @@ class OreBot(uin: Long) : Ore(uin) {
         client.registerSpecialHandler(object : LongHandler("MessageSvc.PushForceOffline") {
             override fun handle(from: FromService) {
                 val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
-                changeStatus(OreStatus.LoginAnother) // change status
-
+                changeStatus(OreStatus.OffLine) // change status
+                oreListener?.onOffLine(forceOffline.strTitle, forceOffline.strTips)
             }
         })
         // 注入上线监听

@@ -43,6 +43,10 @@ fun main() {
             println("[notice]($platform) $tittle --> $info")
         }
 
+        override fun onOffLine(tittle: String, tips: String) {
+            println("[offline] $tittle --> $tips")
+        }
+
         override fun onCaptcha(captchaChan: CaptchaChannel) {
 
             println(captchaChan.url)
