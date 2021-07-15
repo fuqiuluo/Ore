@@ -99,7 +99,7 @@ object QQUtil {
 
     @JvmStatic
     fun getOicqServer(appId : Long = 0x200302d5) : Pair<String, Int>? {
-        val isUseDebugSo = true
+        val isUseDebugSo = false
         try {
             val uniPacket = UniPacket()
             uniPacket.servantName = "ConfigHttp"

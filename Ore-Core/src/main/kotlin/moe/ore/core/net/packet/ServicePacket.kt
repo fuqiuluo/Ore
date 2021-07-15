@@ -62,7 +62,7 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
     /**
      * 服务包
      */
-    ServicePacket(0xb, 0x2)
+    ServicePacket(0xb, 0x1)
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
