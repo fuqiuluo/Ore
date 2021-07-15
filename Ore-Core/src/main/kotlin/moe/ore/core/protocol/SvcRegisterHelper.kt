@@ -19,6 +19,7 @@ class SvcRegisterHelper(val uin: Long) {
 
     val ore = OreManager.getBot(uin)!!
     val manager = DataManager.manager(uin)
+    val device = manager.deviceInfo
     val userStSig = manager.userSigInfo
     val protocolInfo = ProtocolInternal[manager.protocolType]
     val session = manager.session
@@ -40,6 +41,10 @@ class SvcRegisterHelper(val uin: Long) {
             lBid = 1 or 2 or 4,
             cConnType = 0,
             sOther = "",
+            vecGuid = device.guid,
+            strOSVer = device.androidVersion,
+            strVendorName = "[u]%s".format(device.model),
+            strVendorOSName = "?LMY48G test-keys;ao",
             bOnlinePush = 0,
             bIsOnline = 0,
             bIsShowOnline = 0,
@@ -48,13 +53,13 @@ class SvcRegisterHelper(val uin: Long) {
              */
             bKikPC = 0,
             bKikWeak = 0,
-            timeStamp = Random.nextInt(0, 500).toLong(),
+            timeStamp = Random.nextInt(0, 200).toLong(),
             iOSVersion = 0,
             cNetType = 1, // wifi 1 mobile 0
             bRegType = 1,
             sBuildVer = "",
             bOpenPush = 1,
-            bytes0x769ReqBody = "0A 08 08 2E 10 A7 F7 BF 87 06 0A 05 08 9B 02 10 00".hex2ByteArray()
+            bytes0x769ReqBody = "0A04082E10000A05089B021000".hex2ByteArray()
         )
         val uni = UniPacket()
         uni.put(req)
