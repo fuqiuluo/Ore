@@ -27,6 +27,9 @@ import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
 import moe.ore.core.net.packet.*
 import moe.ore.helper.*
+import moe.ore.tars.TarsStructBase
+import moe.ore.tars.UniPacket
+import moe.ore.util.TarsUtil
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
@@ -91,26 +94,36 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 }
 
 @JvmOverloads
+fun Ore.sendJcePacket(
+        body: TarsStructBase,
+        servName: String,
+        requestId: Int
+): PacketSender {
+    val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
+    return sendPacket(servName, TarsUtil.encodeRequest(requestId, body), PacketType.ServicePacket, ticket, ticket)
+}
+
+@JvmOverloads
 fun Ore.sendPacket(
-    cmd: String,
-    body: ByteArray,
+        cmd: String,
+        body: ByteArray,
 
-    packetType: PacketType = if(this.status() == OreStatus.Online)
-        PacketType.ServicePacket
-    else
-        PacketType.LoginPacket,
+        packetType: PacketType = if (this.status() == OreStatus.Online)
+            PacketType.ServicePacket
+        else
+            PacketType.LoginPacket,
 
-    firstToken : ByteArray? = null,
-    secondToken : ByteArray? = null
-) : PacketSender {
+        firstToken: ByteArray? = null,
+        secondToken: ByteArray? = null
+): PacketSender {
     val bot = this as OreBot
     val client = bot.client
     val manager = DataManager.manager(bot.uin)
     val session = manager.session
     val to = ToService(
-        seq = session.nextSeqId(),
-        commandName = cmd,
-        body = body
+            seq = session.nextSeqId(),
+            commandName = cmd,
+            body = body
     )
     to.packetType = packetType
     to.firstToken = firstToken
