@@ -1,12 +1,10 @@
 package moe.ore.group
 
-import com.google.gson.JsonObject
 import moe.ore.core.helper.DataManager
 import moe.ore.core.util.QQUtil
 import moe.ore.group.data.SimpleGroup
 import moe.ore.util.JsonUtil
 import moe.ore.util.OkhttpUtil
-import java.util.*
 
 class TroopManager(
     /**

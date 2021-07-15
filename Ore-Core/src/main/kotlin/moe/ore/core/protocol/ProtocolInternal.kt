@@ -89,8 +89,9 @@ class ProtocolInternal(
                 packageVersion = "8.7.5",
                 tencentSdkMd5 = "a6b745bf24a2c277527716f6f36eb68d".hex2ByteArray(),
             )
+
             protocols[ProtocolType.IOS_IPAD] = ProtocolInternal(
-                openAppId = 537065739,
+                openAppId = -1,
                 appId = 537065739,
                 subAppId = 16,
                 pingVersion = 1,

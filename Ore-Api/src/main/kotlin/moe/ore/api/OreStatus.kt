@@ -49,5 +49,10 @@ enum class OreStatus {
      *
      * 请做好判断
      */
-    ReconnectFail
+    ReconnectFail,
+
+    /**
+     * 在别的地方登录
+     */
+    LoginAnother
 }

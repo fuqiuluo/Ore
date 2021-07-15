@@ -153,6 +153,9 @@ public class UniPacket {
         TarsInputStream input = new TarsInputStream(bytes, index);
         uniPacket._package.readFrom(input);
         input = new TarsInputStream(uniPacket._package.buffer);
+        uniPacket.funcName = uniPacket._package.getFuncName();
+        uniPacket.servantName = uniPacket._package.getServantName();
+        uniPacket.requestId = uniPacket._package.getRequestId();
         uniPacket.version = uniPacket._package.getVersion();
         if(uniPacket.version == 3) {
             if (newCache__tempdata == null) {
@@ -171,8 +174,6 @@ public class UniPacket {
         }
         return uniPacket;
     }
-
-
 
     public static String java2UniType(String packageName) {
         switch (packageName) {

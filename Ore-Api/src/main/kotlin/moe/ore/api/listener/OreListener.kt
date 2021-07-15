@@ -45,6 +45,11 @@ interface OreListener {
     fun onLoginFinish(result: LoginResult)
 
     /**
+     * 在别的设备登录
+     */
+    fun onLoginAnother(platform : Long, tittle : String, info : String)
+
+    /**
      * 遇到滑块 返回ticket
      */
     fun onCaptcha(captchaChan : CaptchaChannel)

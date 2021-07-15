@@ -22,8 +22,6 @@
 package moe.ore.core.net.packet
 
 import moe.ore.core.util.QQUtil
-import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 

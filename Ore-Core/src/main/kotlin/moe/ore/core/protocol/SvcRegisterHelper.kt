@@ -7,6 +7,7 @@ import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.net.packet.PacketType
 import moe.ore.core.protocol.tars.statsvc.RegisterReq
 import moe.ore.core.protocol.tars.statsvc.RegisterResp
+import moe.ore.helper.hex2ByteArray
 import moe.ore.tars.UniPacket
 import moe.ore.util.TarsUtil
 import kotlin.random.Random
@@ -32,13 +33,6 @@ class SvcRegisterHelper(val uin: Long) {
              * 41 隐身
              * 51 忙碌
              */
-            /**
-             * 11 我在线上
-             * 21 离线
-             * 31 离开
-             * 41 隐身
-             * 51 忙碌
-             */
             iStatus = 11, // 普通在线状态
             iLocaleID = protocolInfo.localId,
             // 花里胡哨在线状态 例如：今日天气等
@@ -52,17 +46,15 @@ class SvcRegisterHelper(val uin: Long) {
             /**
              * 踢PC设备下线 上线时
              */
-            /**
-             * 踢PC设备下线 上线时
-             */
             bKikPC = 0,
             bKikWeak = 0,
-            timeStamp = Random.nextInt(0, 300).toLong(),
+            timeStamp = Random.nextInt(0, 500).toLong(),
             iOSVersion = 0,
-            cNetType = 0,
+            cNetType = 1, // wifi 1 mobile 0
             bRegType = 1,
             sBuildVer = "",
-            bOpenPush = 1
+            bOpenPush = 1,
+            bytes0x769ReqBody = "0A 08 08 2E 10 A7 F7 BF 87 06 0A 05 08 9B 02 10 00".hex2ByteArray()
         )
         val uni = UniPacket()
         uni.put(req)

@@ -126,7 +126,7 @@ object QQUtil {
             }.toByteArray(), ConfigSvrKey)
             val url = if (isUseDebugSo) "https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist" else "https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist"
             val resp = OkhttpUtil().also { it.defaultUserAgent() }.post(url, encrypt.toRequestBody())
-            val code = resp?.code
+            val code = resp.code
             if(code == 200) {
                 val result = resp.body?.bytes()
                 resp.close()

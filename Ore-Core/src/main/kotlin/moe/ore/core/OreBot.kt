@@ -26,9 +26,15 @@ import moe.ore.api.OreStatus
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
+import moe.ore.core.net.packet.FromService
+import moe.ore.core.net.packet.LongHandler
+import moe.ore.core.protocol.tars.service.RequestPushForceOffline
+import moe.ore.core.protocol.tars.statsvc.SvcReqMSFLoginNotify
 import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.helper.toHexString
+import moe.ore.tars.UniPacket
 
 class OreBot(uin: Long) : Ore(uin) {
     private val manager = DataManager.manager(uin)
@@ -68,6 +74,28 @@ class OreBot(uin: Long) : Ore(uin) {
         }
     }
 
+    init {
+        // 注入下线监听
+        client.registerSpecialHandler(object : LongHandler("MessageSvc.PushForceOffline") {
+            override fun check(from: FromService): Boolean {
+                val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
+                changeStatus(OreStatus.LoginAnother) // change status
+
+                return false
+            }
+        })
+        // 注入上线监听
+        client.registerSpecialHandler(object : LongHandler("StatSvc.SvcReqMSFLoginNotify") {
+            private var cnt = 0
+
+            override fun check(from: FromService): Boolean {
+                val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
+
+                oreListener?.onLoginAnother(notify.iPlatform, notify.strTitle, notify.strInfo)
+                return false
+            }
+        })
+    }
 
     override fun login() {
         // 登录开始传递登录开始事件

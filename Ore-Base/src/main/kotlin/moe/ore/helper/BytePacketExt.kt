@@ -25,6 +25,7 @@ import kotlinx.io.core.*
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
+import okhttp3.internal.closeQuietly
 import kotlin.text.toByteArray
 
 fun newBuilder() = BytePacketBuilder()
@@ -92,6 +93,7 @@ inline fun BytePacketBuilder.writeBlockWithIntLen(len : (Int) -> Int = { it }, b
     builder.block()
     this.writeInt(len(builder.size))
     this.writePacket(builder)
+    builder.close()
 }
 
 inline fun BytePacketBuilder.writeBlockWithShortLen(len : (Int) -> Int = { it }, block: BytePacketBuilder.() -> Unit) {
@@ -99,6 +101,7 @@ inline fun BytePacketBuilder.writeBlockWithShortLen(len : (Int) -> Int = { it },
     builder.block()
     this.writeShort(len(builder.size))
     this.writePacket(builder)
+    builder.close()
 }
 
 fun BytePacketBuilder.md5(): ByteArray {
@@ -109,6 +112,7 @@ inline fun BytePacketBuilder.writeTeaEncrypt(key: ByteArray, block: BytePacketBu
     val body = newBuilder()
     body.block()
     this.writeBytes(TeaUtil.encrypt(body.toByteArray(), key))
+    body.close()
 }
 
 fun BytePacketBuilder.writeString(str: String) {
