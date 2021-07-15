@@ -25,7 +25,15 @@ import moe.ore.core.util.QQUtil
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-abstract class LongHandler(commandName: String) : Handler(0, commandName)
+abstract class LongHandler(commandName: String) : Handler(0, commandName) {
+    abstract fun handle(from: FromService)
+
+    override fun check(from: FromService): Boolean {
+        handle(from)
+        return false
+    }
+
+}
 
 open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {
     /**

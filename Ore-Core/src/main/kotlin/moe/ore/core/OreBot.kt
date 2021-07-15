@@ -77,22 +77,18 @@ class OreBot(uin: Long) : Ore(uin) {
     init {
         // 注入下线监听
         client.registerSpecialHandler(object : LongHandler("MessageSvc.PushForceOffline") {
-            override fun check(from: FromService): Boolean {
+            override fun handle(from: FromService) {
                 val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
                 changeStatus(OreStatus.LoginAnother) // change status
 
-                return false
             }
         })
         // 注入上线监听
         client.registerSpecialHandler(object : LongHandler("StatSvc.SvcReqMSFLoginNotify") {
-            private var cnt = 0
-
-            override fun check(from: FromService): Boolean {
+            override fun handle(from: FromService) {
+                // 这里的提示 腾讯一个提示会发3次 请注意！！！
                 val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
-
                 oreListener?.onLoginAnother(notify.iPlatform, notify.strTitle, notify.strInfo)
-                return false
             }
         })
     }
