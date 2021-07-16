@@ -95,6 +95,9 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
     }
 }
 
+/**
+ * 上线之后才能用 因为用d2Key加密 否则sendPacket
+ * */
 @JvmOverloads
 inline fun <reified T> Ore.sendPbPacket(
         servName: String,
