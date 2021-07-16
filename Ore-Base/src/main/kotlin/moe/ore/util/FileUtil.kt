@@ -92,6 +92,7 @@ object FileUtil {
         }
         val fileOutputStream = FileOutputStream(file)
         fileOutputStream.write(content)
+        fileOutputStream.flush()
         fileOutputStream.close()
     }
 

@@ -22,6 +22,8 @@
 package moe.ore.core.helper
 
 import kotlinx.io.core.*
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
@@ -94,9 +96,40 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 }
 
 @JvmOverloads
-fun Ore.sendJcePacket(
-        body: TarsStructBase,
+inline fun <reified T> Ore.sendPbPacket(
         servName: String,
+        oidbSsoPkg: T
+): PacketSender {
+    val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
+    return sendPacket(servName, ProtoBuf.encodeToByteArray(oidbSsoPkg), PacketType.ServicePacket, ticket, ticket)
+}
+
+@JvmOverloads
+inline fun <reified T> Ore.sendPbPacket(
+        servName: String,
+        command: Int,
+        body: T
+): PacketSender {
+    val oIDBSSOPkg = oidb_sso.OIDBSSOPkg()
+    oIDBSSOPkg.uint32_command = command
+    oIDBSSOPkg.bytes_bodybuffer = ProtoBuf.encodeToByteArray(body)
+    val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
+    return sendPacket(servName, ProtoBuf.encodeToByteArray(oIDBSSOPkg), PacketType.ServicePacket, ticket, ticket)
+}
+
+@JvmOverloads
+fun Ore.sendJcePacket(
+        servName: String,
+        body: UniPacket,
+): PacketSender {
+    val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
+    return sendPacket(servName, body.encode(), PacketType.ServicePacket, ticket, ticket)
+}
+
+@JvmOverloads
+fun Ore.sendJcePacket(
+        servName: String,
+        body: TarsStructBase,
         requestId: Int
 ): PacketSender {
     val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
