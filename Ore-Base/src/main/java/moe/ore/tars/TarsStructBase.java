@@ -80,7 +80,11 @@ public class TarsStructBase implements Serializable {
 
     public byte[] toByteArray() {
         TarsOutputStream os = new TarsOutputStream();
-        writeTo(os);
+        try {
+            writeTo(os);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         byte[] out = os.toByteArray();
         os.close();
         return out;
@@ -89,7 +93,11 @@ public class TarsStructBase implements Serializable {
     public byte[] toByteArray(Charset encoding) {
         TarsOutputStream os = new TarsOutputStream();
         os.setServerEncoding(encoding);
-        writeTo(os);
+        try {
+            writeTo(os);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         byte[] out = os.toByteArray();
         os.close();
         return out;

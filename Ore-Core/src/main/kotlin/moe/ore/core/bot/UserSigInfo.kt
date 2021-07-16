@@ -62,12 +62,12 @@ class UserSigInfo : TarsStructBase() {
     // 保质期：2 hours
     lateinit var webSig: BytesTicket
 
-    lateinit var da2: BytesTicket
+    var da2: BytesTicket = BytesTicket()
 
     lateinit var st: BytesTicket
     lateinit var stKey: BytesTicket
 
-    lateinit var deviceToken: BytesTicket
+    var deviceToken: BytesTicket = BytesTicket()
 
     lateinit var downloadStKey: BytesTicket
     lateinit var downloadSt: BytesTicket
@@ -75,7 +75,7 @@ class UserSigInfo : TarsStructBase() {
     lateinit var wtSessionTicket: BytesTicket
     lateinit var wtSessionTicketKey: BytesTicket
 
-     var t528: ByteArray = EMPTY_BYTE_ARRAY
+    var t528: ByteArray = EMPTY_BYTE_ARRAY
 
     override fun writeTo(output: TarsOutputStream) {
         output.write(tgt, 1)
@@ -177,9 +177,9 @@ open class Ticket() : TarsStructBase() {
     }
 
     override fun readFrom(input: TarsInputStream) {
-        value=  input.read(value, 1, false)
-        createTime= input.read(createTime, 2, false)
-        shelfLife=input.read(shelfLife, 3, false)
+        value = input.read(value, 1, false)
+        createTime = input.read(createTime, 2, false)
+        shelfLife = input.read(shelfLife, 3, false)
     }
 }
 
