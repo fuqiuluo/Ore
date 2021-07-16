@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
 class SsoSession : TarsStructBase() {
+    lateinit var t318: ByteArray
+
     val uinInfo = UinSimpleInfo()
 
     var msgCookie: ByteArray = BytesUtil.randomKey(4)

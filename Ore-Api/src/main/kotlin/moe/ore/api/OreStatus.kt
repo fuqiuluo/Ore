@@ -38,6 +38,11 @@ enum class OreStatus {
     Online,
 
     /**
+     * 二维码登录
+     */
+    QRLogin,
+
+    /**
      * 重新连接服务器中
      */
     Reconnecting,

@@ -49,6 +49,7 @@ abstract class Ore(val uin : Long) {
      */
     abstract fun login()
     abstract fun tokenLogin()
+    abstract fun qrLogin()
 
     /**
      * 获取机器人状态

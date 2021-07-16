@@ -21,6 +21,7 @@ import moe.ore.api.data.Result
 import moe.ore.core.OreManager
 import moe.ore.core.protocol.wlogin.request.*
 import moe.ore.helper.*
+import java.lang.RuntimeException
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
@@ -34,6 +35,7 @@ class WloginHelper(val uin : Long,
 
     override fun run() {
         when(wtMode) {
+            MODE_QR_LOGIN -> handle(WtLoginQRToken(uin).sendTo(client), ecdh.shareKey)
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
             MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
@@ -53,7 +55,7 @@ class WloginHelper(val uin : Long,
         if (from == null) {
             eventHandler.callback(LoginResult.ServerTimeout)
         } else {
-            from.body.readLoginPacket(key) { result, tlvMap ->
+            from.body.readWtLoginPacket(key) { result, tlvMap ->
                 println("tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
                 when(result) {
                     0 -> eventHandler.onSuccess(tlvMap[0x119])
@@ -64,6 +66,8 @@ class WloginHelper(val uin : Long,
                     40 -> eventHandler.onFreeze()
                     180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
+                    9 -> throw Error("协议不合法")
+                    235 -> throw Error("协议版本过低")
                     237 -> eventHandler.onNetEnvWrong()
                     239 -> eventHandler.onDevicelock(tlvMap)
                     else -> {
@@ -79,6 +83,14 @@ class WloginHelper(val uin : Long,
                 }
             }
         }
+    }
+
+    /**
+     * 通过二维码验证返回的token登录
+     */
+    fun loginByQrToken() {
+        this.wtMode = MODE_QR_LOGIN
+        threadManager.addTask(this)
     }
 
     /**
@@ -131,7 +143,7 @@ class WloginHelper(val uin : Long,
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
-                    MODE_EXCHANGE_EMP_SIG -> userStInfo.gtKey.ticket()
+                    MODE_QR_LOGIN, MODE_EXCHANGE_EMP_SIG -> userStInfo.gtKey.ticket()
                     MODE_EXCHANGE_EMP_ST -> MD5.toMD5Byte(userStInfo.d2Key.ticket())
                     else -> error("unknown wtlogin mode")
                 }).toByteReadPacket())
@@ -445,7 +457,7 @@ class WloginHelper(val uin : Long,
                     if(lastGetTime + timeLimited <= System.currentTimeMillis()) {
                         lastGetTime = System.currentTimeMillis()
                         val sender = WtLoginGetSmsCode(helper.uin).sendTo(client)
-                        (sender sync 20 * 1000)?.body?.readLoginPacket(helper.ecdh.shareKey) { result, tlvMap ->
+                        (sender sync 20 * 1000)?.body?.readWtLoginPacket(helper.ecdh.shareKey) { result, tlvMap ->
                             println("SmsTlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
 
                             tlvMap[0x146]?.let {
@@ -508,10 +520,11 @@ class WloginHelper(val uin : Long,
         const val MODE_EXCHANGE_EMP_SIG = 1
         const val MODE_EXCHANGE_EMP_ST = 2
         const val MODE_TOKEN_LOGIN = 3
+        const val MODE_QR_LOGIN = 4
     }
 }
 
-internal inline fun ByteArray.readLoginPacket(key: ByteArray, block: (Int, Map<Int, ByteArray>) -> Unit) {
+internal inline fun ByteArray.readWtLoginPacket(key: ByteArray, block: (Int, Map<Int, ByteArray>) -> Unit) {
     val reader = this.toByteReadPacket()
     reader.discardExact(1 + 2 + 2 + 2 + 2)
     // 02 (dis) xx xx (dis) 1f 41 (dis) 08 01 (dis) 00 01 (dis)

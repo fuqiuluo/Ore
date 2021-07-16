@@ -308,6 +308,10 @@ class Tlv(
         }
     }
 
+    fun t318(t318 : ByteArray) = buildTlv(0x318) {
+        writeBytes(t318)
+    }
+
     fun t401(g: ByteArray) = buildTlv(0x401) {
         /**
         builder.writeBytes(deviceInfo.guid)

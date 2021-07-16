@@ -40,7 +40,7 @@ class OreBot(uin: Long) : Ore(uin) {
 
     private val threadManager: ThreadManager = manager.threadManager
 
-    val client: BotClient = BotClient(uin).apply {
+    var client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
             override fun onConnect() {
                 when (this@OreBot.status()) {
@@ -56,6 +56,9 @@ class OreBot(uin: Long) : Ore(uin) {
                         // 重连
                         println("ore reconnect begin")
                         WloginHelper(uin, this@apply, oreListener).loginByToken()
+                    }
+                    OreStatus.QRLogin -> {
+                        WloginHelper(uin, this@apply, oreListener).loginByQrToken()
                     }
                     else -> runtimeError("未知的错误操作")
                 }
@@ -107,6 +110,16 @@ class OreBot(uin: Long) : Ore(uin) {
             oreListener?.onLoginStart()
         }
         this.status = OreStatus.Reconnecting
+        // 连接到服务器会自动发送登录包
+        client.connect()
+    }
+
+    override fun qrLogin() {
+        // 登录开始传递登录开始事件
+        threadManager.addTask {
+            oreListener?.onLoginStart()
+        }
+        this.status = OreStatus.QRLogin
         // 连接到服务器会自动发送登录包
         client.connect()
     }

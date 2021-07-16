@@ -20,7 +20,7 @@ abstract class WtRequest(
     private val encryptMethod: EncryptMethod = EncryptMethod.EM_ECDH
 ) {
     val manager = DataManager.manager(uin)
-    private val account = manager.botAccount
+    private val account by lazy { manager.botAccount }
     private val device = manager.deviceInfo
     private val ecdh = manager.ecdh
     // private val protocolInfo = ProtocolInternal[manager.protocolType]
@@ -61,7 +61,7 @@ abstract class WtRequest(
     private fun makeBody(seq: Int) : ByteArray = newBuilder().apply {
         val encryptBody = when(encryptMethod) {
             EncryptMethod.EM_ST -> EMPTY_BYTE_ARRAY
-            EncryptMethod.EM_ECDH -> newBuilder().apply {
+            EncryptMethod.SPECIAL_QR, EncryptMethod.EM_ECDH -> newBuilder().apply {
                 writeByte(2)
                 writeByte(1)
                 writeBytes(session.randomKey)
@@ -72,13 +72,13 @@ abstract class WtRequest(
         val publicKey = when(encryptMethod) {
             EncryptMethod.EM_ST -> userStSig.wtSessionTicket.ticket()
 
-            EncryptMethod.EM_ECDH -> ecdh.publicKey
+            EncryptMethod.SPECIAL_QR, EncryptMethod.EM_ECDH -> ecdh.publicKey
         }
         val tlvBody = newBuilder().apply {
             writeTeaEncrypt(when(encryptMethod) {
                 EncryptMethod.EM_ST -> userStSig.wtSessionTicketKey.ticket()
 
-                EncryptMethod.EM_ECDH -> ecdh.shareKey
+                EncryptMethod.SPECIAL_QR, EncryptMethod.EM_ECDH -> ecdh.shareKey
             }) {
                 writeShort(subCmd)
                 val tlv = makeTlv(seq)
@@ -92,7 +92,7 @@ abstract class WtRequest(
         writeShort(8001)
         writeShort(commandId)
         writeShort(1)
-        writeLongToBuf32(account.uin)
+        writeLongToBuf32(uin)
 
         writeByte(3)
         writeByte(ecdhType.toByte())
@@ -113,6 +113,5 @@ abstract class WtRequest(
     companion object {
         const val CMD_LOGIN = "wtlogin.login"
         const val CMD_EXCHANGE_EMP = "wtlogin.exchange_emp"
-        const val CMD_TRANS_EMP = "wtlogin.trans_emp"
     }
 }

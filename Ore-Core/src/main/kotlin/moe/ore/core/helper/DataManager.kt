@@ -41,7 +41,7 @@ import java.io.FileOutputStream
 import java.io.ObjectOutputStream
 
 class DataManager private constructor(
-        uin: Long,
+        val uin: Long,
         /**
          * 数据保存路径
          */
@@ -97,7 +97,8 @@ class DataManager private constructor(
     fun destroy() {
         // threadManager 只有由dataManager来释放
         threadManager.shutdown()
-        flush()
+        // this.flush() 出现bug 关闭销毁保存
+        managerMap.remove(uin, this)
     }
 
     fun flush() {
@@ -154,16 +155,15 @@ class DataManager private constructor(
         }
 
         /**
-         * 转移
+         * 转移 而不会销毁原来的
          */
         @JvmStatic
         fun copyTo(oldUin: Long, newUin : Long) : DataManager {
             val oldManager = manager(oldUin)
             val newManager = init(newUin, oldManager.dataPath)
-            newManager.protocolType = oldManager.protocolType
             newManager.deviceInfo = oldManager.deviceInfo
             newManager.userSigInfo = oldManager.userSigInfo
-            oldManager.destroy()
+            newManager.session = oldManager.session
             return newManager
         }
     }
