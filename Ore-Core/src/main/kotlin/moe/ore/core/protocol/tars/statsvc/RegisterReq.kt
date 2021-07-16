@@ -1,9 +1,7 @@
 package moe.ore.core.protocol.tars.statsvc
 
-import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
-
 
 class RegisterReq(
     var bIsOnline: Byte = 0,
@@ -47,45 +45,38 @@ class RegisterReq(
     var vecGuid: ByteArray? = null,
     var vecServerBuf: ByteArray? = null
 ) : TarsStructBase() {
-    companion object {
-        var cache_bytes_0x769_reqbody = ByteArray(1)
-        var cache_vecDevParam = ByteArray(1)
-        var cache_vecGuid = ByteArray(1)
-        var cache_vecServerBuf = ByteArray(1)
-    }
-
     override fun funcName(): String = "SvcReqRegister"
 
     override fun servantName(): String = "PushService"
 
     override fun reqName(): String = "SvcReqRegister"
 
-    override fun writeTo(stream: TarsOutputStream) {
-        stream.write(lUin, 0)
-        stream.write(lBid, 1)
-        stream.write(cConnType, 2)
-        stream.write(sOther, 3)
-        stream.write(iStatus, 4)
-        stream.write(bOnlinePush, 5)
-        stream.write(bIsOnline, 6)
-        stream.write(bIsShowOnline, 7)
-        stream.write(bKikPC, 8)
-        stream.write(bKikWeak, 9)
-        stream.write(timeStamp, 10)
-        stream.write(iOSVersion, 11)
-        stream.write(cNetType, 12)
-        stream.write(sBuildVer, 13)
-        stream.write(bRegType, 14)
-        vecDevParam?.let { stream.write(it, 15) }
-        vecGuid?.let { stream.write(it, 16) }
-        stream.write(iLocaleID, 17)
-        stream.write(bSilentPush, 18)
-        stream.write(strDevName, 19)
-        stream.write(strDevType, 20)
-        stream.write(strOSVer, 21)
-        stream.write(bOpenPush, 22)
-        stream.write(iLargeSeq, 23)
-        stream.write(iLastWatchStartTime, 24)
+    override fun writeTo(output: TarsOutputStream) {
+        output.write(lUin, 0)
+        output.write(lBid, 1)
+        output.write(cConnType, 2)
+        output.write(sOther, 3)
+        output.write(iStatus, 4)
+        output.write(bOnlinePush, 5)
+        output.write(bIsOnline, 6)
+        output.write(bIsShowOnline, 7)
+        output.write(bKikPC, 8)
+        output.write(bKikWeak, 9)
+        output.write(timeStamp, 10)
+        output.write(iOSVersion, 11)
+        output.write(cNetType, 12)
+        output.write(sBuildVer, 13)
+        output.write(bRegType, 14)
+        vecDevParam?.let { output.write(it, 15) }
+        vecGuid?.let { output.write(it, 16) }
+        output.write(iLocaleID, 17)
+        output.write(bSilentPush, 18)
+        output.write(strDevName, 19)
+        output.write(strDevType, 20)
+        output.write(strOSVer, 21)
+        output.write(bOpenPush, 22)
+        output.write(iLargeSeq, 23)
+        output.write(iLastWatchStartTime, 24)
         /*
         val arrayList = vecBindUin
         if (arrayList != null) {
@@ -93,63 +84,20 @@ class RegisterReq(
         }
         没什么鸟用的东西，咕咕咕吧
          */
-        stream.write(uOldSSOIp, 26)
-        stream.write(uNewSSOIp, 27)
-        stream.write(sChannelNo, 28)
-        stream.write(lCpId, 29)
-        stream.write(strVendorName, 30)
-        stream.write(strVendorOSName, 31)
-        stream.write(strIOSIdfa, 32)
-        bytes0x769ReqBody?.let { stream.write(it, 33) }
-        stream.write(bIsSetStatus, 34)
-        vecServerBuf?.let { stream.write(it, 35) }
-        stream.write(bSetMute, 36)
-        stream.write(cNotifySwitch, 37)
-        stream.write(uExtOnlineStatus, 38)
-        stream.write(iBatteryStatus, 39)
-        stVendorPushInfo?.let { stream.write(it, 42) }
-    }
-
-    override fun readFrom(stream: TarsInputStream) {
-        lUin = stream.read(lUin, 0, true)
-        lBid = stream.read(lBid, 1, true)
-        cConnType = stream.read(cConnType, 2, true)
-        sOther = stream.readString(3, true)
-        iStatus = stream.read(iStatus, 4, false)
-        bOnlinePush = stream.read(bOnlinePush, 5, false)
-        bIsOnline = stream.read(bIsOnline, 6, false)
-        bIsShowOnline = stream.read(bIsShowOnline, 7, false)
-        bKikPC = stream.read(bKikPC, 8, false)
-        bKikWeak = stream.read(bKikWeak, 9, false)
-        timeStamp = stream.read(timeStamp, 10, false)
-        iOSVersion = stream.read(iOSVersion, 11, false)
-        cNetType = stream.read(cNetType, 12, false)
-        sBuildVer = stream.readString(13, false)
-        bRegType = stream.read(bRegType, 14, false)
-        vecDevParam = stream.read(cache_vecDevParam, 15, false)
-        vecGuid = stream.read(cache_vecGuid, 16, false)
-        iLocaleID = stream.read(iLocaleID, 17, false)
-        bSilentPush = stream.read(bSilentPush, 18, false)
-        strDevName = stream.readString(19, false)
-        strDevType = stream.readString(20, false)
-        strOSVer = stream.readString(21, false)
-        bOpenPush = stream.read(bOpenPush, 22, false)
-        iLargeSeq = stream.read(iLargeSeq, 23, false)
-        iLastWatchStartTime = stream.read(iLastWatchStartTime, 24, false)
-        uOldSSOIp = stream.read(uOldSSOIp, 26, false)
-        uNewSSOIp = stream.read(uNewSSOIp, 27, false)
-        sChannelNo = stream.readString(28, false)
-        lCpId = stream.read(lCpId, 29, false)
-        strVendorName = stream.readString(30, false)
-        strVendorOSName = stream.readString(31, false)
-        strIOSIdfa = stream.readString(32, false)
-        bytes0x769ReqBody = stream.read(cache_bytes_0x769_reqbody, 33, false)
-        bIsSetStatus = stream.read(bIsSetStatus, 34, false)
-        vecServerBuf = stream.read(cache_vecServerBuf, 35, false)
-        bSetMute = stream.read(bSetMute, 36, false)
-        cNotifySwitch = stream.read(cNetType, 37, false)
-        uExtOnlineStatus = stream.read(uExtOnlineStatus, 38, false)
-        iBatteryStatus = stream.read(iBatteryStatus, 39, false)
-        stVendorPushInfo = stream.read(stVendorPushInfo, 42, false)
+        output.write(uOldSSOIp, 26)
+        output.write(uNewSSOIp, 27)
+        output.write(sChannelNo, 28)
+        output.write(lCpId, 29)
+        output.write(strVendorName, 30)
+        output.write(strVendorOSName, 31)
+        output.write(strIOSIdfa, 32)
+        bytes0x769ReqBody?.let { output.write(it, 33) }
+        output.write(bIsSetStatus, 34)
+        vecServerBuf?.let { output.write(it, 35) }
+        output.write(bSetMute, 36)
+        output.write(cNotifySwitch, 37)
+        output.write(uExtOnlineStatus, 38)
+        output.write(iBatteryStatus, 39)
+        stVendorPushInfo?.let { output.write(it, 42) }
     }
 }

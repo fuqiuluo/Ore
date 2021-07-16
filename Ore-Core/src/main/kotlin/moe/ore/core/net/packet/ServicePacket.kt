@@ -223,19 +223,6 @@ data class FromService(
 ) {
     var msgCookie : ByteArray = 0x02B05B8B.toByteArray()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as FromService
-
-        if (seq != other.seq) return false
-        if (commandName != other.commandName) return false
-        if (!body.contentEquals(other.body)) return false
-
-        return true
-    }
-
     override fun hashCode(): Int {
         return QQUtil.hash(seq, commandName)
     }

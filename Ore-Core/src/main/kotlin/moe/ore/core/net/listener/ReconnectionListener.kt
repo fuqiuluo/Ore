@@ -47,9 +47,11 @@ class ReconnectionListener(private val connection: BotConnection) : ChannelHandl
                 /**
                  * 更换网络将导致 远程主机强制关闭连接
                  */
+                println("net wrong, will reconnect")
                 reconnect()
             }
             is HeartbeatTimeoutException -> {
+                println("heartbeat wrong, will reconnect")
                 reconnect()
             }
             is UnknownError -> {
@@ -64,10 +66,13 @@ class ReconnectionListener(private val connection: BotConnection) : ChannelHandl
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
+        println("inactive, will reconnect")
         /**
          * 奇怪的断线 开始重连
          */
-        reconnect()
+        if(OreManager.getOreStatus(connection.uin) == OreStatus.Online) {
+            reconnect()
+        }
     }
 
     private fun reconnect() {

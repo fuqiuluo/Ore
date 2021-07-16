@@ -28,6 +28,7 @@ import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.net.packet.Handler
 import moe.ore.core.net.packet.SingleHandler
+import moe.ore.helper.thread.ThreadManager
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -61,7 +62,7 @@ class BotClient(val uin: Long) {
             listener?.onFailConnect()
         }
 
-        override fun onMassage(msg: PacketResponse) {
+        override fun onMassage(msg: PacketResponse) { ThreadManager[uin].addTask {
             try {
                 // 检查key是否需要刷新
                 OreManager.checkTicketAndRefresh(uin)
@@ -83,7 +84,7 @@ class BotClient(val uin: Long) {
             } catch (e : Exception) {
                 e.printStackTrace()
             }
-        }
+        } }
     }, uin)
 
     fun registerCommonHandler(handler: Handler): SingleHandler {

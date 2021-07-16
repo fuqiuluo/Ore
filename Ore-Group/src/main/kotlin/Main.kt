@@ -6,30 +6,18 @@ import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
-import moe.ore.core.helper.sendPacket
-import moe.ore.core.net.packet.Handler
-import moe.ore.core.net.packet.PacketType
-import moe.ore.core.net.packet.SingleHandler
 import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.core.protocol.tars.service.GrayUin
 import moe.ore.group.TroopManager
-import moe.ore.tars.UniPacket
 import java.io.File
 import java.util.*
 
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", File("").absolutePath)
+    val ore = OreManager.addBot(3042628723, "911586abcd", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
+    val manager = DataManager.manager(ore.uin)
+    manager.protocolType = ProtocolInternal.ProtocolType.IOS_IPAD
 
-    DataManager.manager(3042628723).protocolType = ProtocolInternal.ProtocolType.IOS_IPAD
-//    ore.sendPacket("cmd", ByteArray(0), PacketType.ServicePacket, firstToken = ByteArray(0), secondToken = ByteArray(0))
-//    val oreBot1 = ore as OreBot
-//    val singleHandler = SingleHandler(1, "")
-//    oreBot1.client.registerCommonHandler(singleHandler)
-//    if (singleHandler.wait(1000 * 3)) {
-//        val decode = UniPacket.decode(singleHandler.fromService?.body)
-//    }
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
             println("机器人状态改变为：$status")
@@ -51,6 +39,14 @@ fun main() {
             println(TroopManager(ore.uin).getGroupList())
         }
 
+        override fun onLoginAnother(platform: Long, tittle: String, info: String) {
+            println("[notice]($platform) $tittle --> $info")
+        }
+
+        override fun onOffLine(tittle: String, tips: String) {
+            println("[offline] $tittle --> $tips")
+        }
+
         override fun onCaptcha(captchaChan: CaptchaChannel) {
 
             println(captchaChan.url)
@@ -70,7 +66,10 @@ fun main() {
             sms.submitSms(code)
         }
 
+
     }
+
+
     ore.login()
     // ore.tokenLogin()
 
