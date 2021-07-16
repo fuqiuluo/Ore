@@ -2,6 +2,7 @@ package moe.ore.core.protocol.wlogin.request.qr
 
 import kotlinx.io.core.*
 import moe.ore.api.LoginResult
+import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
@@ -100,6 +101,9 @@ class QRLoginHelper(
                                 val ore = OreManager.addBot(uin, "", manager.dataPath) as OreBot
                                 ore.oreListener = oreListener
                                 DataManager.copyTo(0, uin)
+
+                                listener?.onQRSuccess(ore)
+
                                 ore.qrLogin()
 
                                 this.manager.destroy(false) // uin 为 0的玩意解除占用直接销毁
@@ -149,6 +153,13 @@ class QRLoginHelper(
 }
 
 interface QRLoginListener {
+    /**
+     * 二维码确认成功
+     * 但是没有登录
+     * 过一会就自动登录了哦
+     */
+    fun onQRSuccess(ore : Ore)
+
     /**
      * 二维码过期
      */
