@@ -116,6 +116,33 @@ class ProtocolInternal(
                 packageVersion = "5.8.9",
                 tencentSdkMd5 = "aa3978f41fd96ff9914a669e186474c7".hex2ByteArray()
             )
+
+            protocols[ProtocolType.ANDROID_WATCH] = ProtocolInternal (
+                openAppId = 0,
+                appId = 0x200300b9,
+                subAppId = 16,
+                pingVersion = 0,
+                ipVersion = 0,
+                ssoVersion = 1536,
+                msfSsoVersion = 0,
+                tgtgVersion = 0,
+                mainSigMap = 1970400,
+                miscBitmap = 16252796,
+                subSigMap = 66560,
+                dbVersion = 1,
+                buildTime = 1595836208,
+                localId = 2052,
+                protocolVersion = 8001,
+                loginType = 1,
+                isGuidAvailable = true,
+                isGuidFromFileNull = false,
+                isGuidChanged = false,
+                buildVersion = "6.0.0.2475",
+                protocolDetail = "||Atestreversion",
+                packageName = "com.tencent.qqwatch",
+                packageVersion = "2.0.8",
+                tencentSdkMd5 = "a6b745bf24a2c277527716f6f36eb68d".hex2ByteArray()
+            )
         }
 
     }
@@ -125,6 +152,7 @@ class ProtocolInternal(
          * Android
          */
         ANDROID_PHONE,
-        IOS_IPAD
+        ANDROID_WATCH,
+        IOS_IPAD,
     }
 }

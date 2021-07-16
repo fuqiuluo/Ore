@@ -65,17 +65,19 @@ abstract class WtRequest(
                 writeByte(2)
                 writeByte(1)
                 writeBytes(session.randomKey)
-                writeShort(0x131)
+                writeShort(0x131) // 01 02
                 writeShort(ECDH_VERSION.toShort())
             }.toByteArray()
         }
         val publicKey = when(encryptMethod) {
             EncryptMethod.EM_ST -> userStSig.wtSessionTicket.ticket()
+
             EncryptMethod.EM_ECDH -> ecdh.publicKey
         }
         val tlvBody = newBuilder().apply {
             writeTeaEncrypt(when(encryptMethod) {
                 EncryptMethod.EM_ST -> userStSig.wtSessionTicketKey.ticket()
+
                 EncryptMethod.EM_ECDH -> ecdh.shareKey
             }) {
                 writeShort(subCmd)
@@ -111,5 +113,6 @@ abstract class WtRequest(
     companion object {
         const val CMD_LOGIN = "wtlogin.login"
         const val CMD_EXCHANGE_EMP = "wtlogin.exchange_emp"
+        const val CMD_TRANS_EMP = "wtlogin.trans_emp"
     }
 }

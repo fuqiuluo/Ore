@@ -6,17 +6,36 @@ import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
-import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.group.TroopManager
+import moe.ore.core.net.BotClient
+import moe.ore.core.net.listener.ClientListener
+import moe.ore.core.net.packet.PacketSender.Companion.sync
+import moe.ore.core.protocol.wlogin.request.qr.WtLoginGetQR
+import moe.ore.group.TroopManagerWeb
 import java.io.File
 import java.util.*
+
+fun main(args: Array<String>) {
+    val wlogin = WtLoginGetQR("C:\\Users\\13723\\Desktop\\Ore")
+    val client = BotClient(0)
+    client.connect()
+    client.listener = object : ClientListener {
+        override fun onConnect() {
+            val from = wlogin.sendTo(client) sync 30 * 1000
+            println(from)
+
+        }
+
+        override fun onFailConnect() {
+            TODO("服务器链接失败")
+        }
+    }
+}
 
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
     val ore = OreManager.addBot(3042628723, "911586abcd", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
     val manager = DataManager.manager(ore.uin)
-    manager.protocolType = ProtocolInternal.ProtocolType.IOS_IPAD
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
@@ -36,7 +55,7 @@ fun main() {
                 DataManager.flush(ore.uin)
             }
 
-            println(TroopManager(ore.uin).getGroupList())
+            println(TroopManagerWeb(ore.uin).getGroupList())
         }
 
         override fun onLoginAnother(platform: Long, tittle: String, info: String) {
@@ -70,7 +89,7 @@ fun main() {
     }
 
 
-    ore.login()
+    // ore.login()
     // ore.tokenLogin()
 
 

@@ -126,7 +126,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 socketChannel.pipeline().addLast("decoder", BotDecoder())
                 socketChannel.pipeline().addLast("handler", usefulListener)
                 socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
-
 //                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
             }
         })

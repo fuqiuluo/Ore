@@ -62,21 +62,35 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
     /**
      * 服务包
      */
-    ServicePacket(0xb, 0x1)
+    ServicePacket(0xb, 0x1),
+
+    /**
+     * 二维码登录
+     */
+    WloginGetQRCode(0x8, 0x2)
 }
 
 fun ToService.sendTo(client: BotClient) : PacketSender {
     val uin = client.uin
     val manager = DataManager.manager(uin)
     val userStSig = manager.userSigInfo
-    val protocolInfo = ProtocolInternal[manager.protocolType]
+    val protocolInfo = if(uin == 0L) {
+        ProtocolInternal[manager.protocolType]
+    } else ProtocolInternal[manager.protocolType]
     val session = manager.session
     val deviceInfo = manager.deviceInfo
 
     val teaKey = when (packetType) {
-        PacketType.ExChangeEmpSt, PacketType.ExChangeEmpA1, PacketType.LoginPacket -> DEFAULT_TEA_KEY
-        // PacketType.ServicePacket,
-        PacketType.ServicePacket, PacketType.SvcRegister -> userStSig.d2Key.ticket()
+        PacketType.WloginGetQRCode,
+        PacketType.ExChangeEmpSt,
+        PacketType.ExChangeEmpA1,
+        PacketType.LoginPacket ->
+            DEFAULT_TEA_KEY
+
+        // =============================================
+        PacketType.ServicePacket,
+        PacketType.SvcRegister ->
+            userStSig.d2Key.ticket()
     }
 
     val out = newBuilder().apply { writeBlockWithIntLen( { it + 4 } ) {
@@ -84,12 +98,20 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         writeByte(packetType.flag2)
         when(packetType) {
             // write token
-            PacketType.ExChangeEmpSt, PacketType.LoginPacket, PacketType.SvcRegister -> {
+            PacketType.WloginGetQRCode,
+            PacketType.ExChangeEmpSt,
+            PacketType.LoginPacket,
+            PacketType.SvcRegister
+
+            -> {
                 val token = firstToken ?: EMPTY_BYTE_ARRAY
                 writeInt(token.size + 4)
                 writeBytes(token)
             }
-            PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> writeInt(seq)
+            // =============================================
+            PacketType.ServicePacket,
+            PacketType.ExChangeEmpA1 ->
+                writeInt(seq)
         }
         writeByte(0)
         uin.toString().let {
@@ -99,7 +121,10 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
         writeBytes(TeaUtil.encrypt(newBuilder().apply {
             writeBlockWithIntLen({ it + 4 }) {
                 when(packetType) {
-                    PacketType.ExChangeEmpSt, PacketType.SvcRegister, PacketType.LoginPacket -> {
+                    PacketType.WloginGetQRCode,
+                    PacketType.ExChangeEmpSt,
+                    PacketType.SvcRegister,
+                    PacketType.LoginPacket -> {
                         writeInt(seq)
                         writeInt(protocolInfo.appId)
                         writeInt(protocolInfo.appId)
@@ -131,7 +156,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                             writeShort(it.length + 2)
                             writeString(it)
                         }
-                        writeInt(4) // qimei 的位置
+                        // writeInt(4) // qimei 的位置
                     }
                     PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> {
                         commandName.let {
@@ -146,6 +171,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                     }
                 }
             }
+            // =============================================
             writeBlockWithIntLen({ it + 4 }) {
                 writeBytes(body)
             }

@@ -152,6 +152,20 @@ class DataManager private constructor(
         fun destroy(uin: Long) {
             managerMap.remove(uin)?.destroy()
         }
+
+        /**
+         * 转移
+         */
+        @JvmStatic
+        fun copyTo(oldUin: Long, newUin : Long) : DataManager {
+            val oldManager = manager(oldUin)
+            val newManager = init(newUin, oldManager.dataPath)
+            newManager.protocolType = oldManager.protocolType
+            newManager.deviceInfo = oldManager.deviceInfo
+            newManager.userSigInfo = oldManager.userSigInfo
+            oldManager.destroy()
+            return newManager
+        }
     }
 }
 
