@@ -101,6 +101,8 @@ class QRLoginHelper(
                                 ore.oreListener = oreListener
                                 DataManager.copyTo(0, uin)
                                 ore.qrLogin()
+
+                                this.manager.destroy(false) // uin 为 0的玩意解除占用直接销毁
                             }
                             17 -> listener?.onQRExpired()
                             48 -> {

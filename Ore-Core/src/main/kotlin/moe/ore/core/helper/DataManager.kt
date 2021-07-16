@@ -94,10 +94,13 @@ class DataManager private constructor(
     /**
      * 销毁
      */
-    fun destroy() {
+    @JvmOverloads
+    fun destroy(save : Boolean = true) {
         // threadManager 只有由dataManager来释放
         threadManager.shutdown()
-        // this.flush() 出现bug 关闭销毁保存
+        if(save) {
+            this.flush()
+        }
         managerMap.remove(uin, this)
     }
 
