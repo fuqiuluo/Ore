@@ -25,7 +25,6 @@ import kotlinx.io.core.*
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
-import okhttp3.internal.closeQuietly
 import kotlin.text.toByteArray
 
 fun newBuilder() = BytePacketBuilder()

@@ -1,7 +1,7 @@
 package moe.ore.core.protocol.tars.service
 
-import moe.ore.tars.TarsStructBase
 import moe.ore.tars.TarsInputStream
+import moe.ore.tars.TarsStructBase
 
 class RequestPushForceOffline : TarsStructBase() {
     var bSameDevice: Byte = 0

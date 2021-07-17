@@ -1,6 +1,8 @@
 package moe.ore.core.protocol.wlogin.request.qr
 
-import moe.ore.helper.*
+import moe.ore.helper.newBuilder
+import moe.ore.helper.toByteArray
+import moe.ore.helper.writeBytesWithShortLen
 
 class WtLoginCheckQR(
     val verifySig : ByteArray

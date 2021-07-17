@@ -21,15 +21,12 @@
 
 package moe.ore.util
 
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getHostnameVerifier
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getSSLSocketFactory
 import moe.ore.util.OkhttpUtil.Companion.SSLSocketClient.getX509TrustManager
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
-import java.lang.Exception
 import java.net.Proxy
 import java.security.KeyStore
 import java.security.SecureRandom

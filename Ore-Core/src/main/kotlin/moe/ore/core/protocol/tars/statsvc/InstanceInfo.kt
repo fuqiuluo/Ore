@@ -1,7 +1,7 @@
 package moe.ore.core.protocol.tars.statsvc
 
-import moe.ore.tars.TarsStructBase
 import moe.ore.tars.TarsInputStream
+import moe.ore.tars.TarsStructBase
 
 class InstanceInfo : TarsStructBase() {
     var cTablet: Byte = 0

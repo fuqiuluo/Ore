@@ -22,11 +22,8 @@
 package moe.ore.core.protocol
 
 import com.google.crypto.tink.config.TinkConfig
-import com.google.crypto.tink.proto.Tink
 import moe.ore.helper.hex2ByteArray
-import moe.ore.helper.toHexString
 import moe.ore.util.MD5
-import java.lang.Exception
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.PrivateKey

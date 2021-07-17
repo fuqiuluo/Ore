@@ -2,11 +2,7 @@ package moe.ore.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.MessageDigest;
 
 public class MD5 {

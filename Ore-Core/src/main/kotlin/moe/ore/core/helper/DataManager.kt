@@ -36,9 +36,6 @@ import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
-import java.io.File
-import java.io.FileOutputStream
-import java.io.ObjectOutputStream
 
 class DataManager private constructor(
         val uin: Long,

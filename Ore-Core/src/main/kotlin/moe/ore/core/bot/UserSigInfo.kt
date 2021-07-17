@@ -25,7 +25,6 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsStructBase
-import kotlin.properties.Delegates
 
 class UserSigInfo : TarsStructBase() {
     // 保质期 28 days

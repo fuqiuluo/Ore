@@ -21,7 +21,6 @@
 
 package moe.ore.util
 
-import kotlin.Throws
 import java.io.*
 
 object FileUtil {

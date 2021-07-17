@@ -1,12 +1,11 @@
 package moe.ore.core.protocol.wlogin.request.qr
 
-import kotlinx.io.core.*
-import moe.ore.api.LoginResult
+import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.discardExact
+import kotlinx.io.core.readBytes
+import kotlinx.io.core.readUShort
 import moe.ore.api.Ore
-import moe.ore.api.OreStatus
-import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
-import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.bot.BytesTicket
@@ -16,15 +15,10 @@ import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.currentTimeSeconds
-import moe.ore.helper.hex2ByteArray
 import moe.ore.helper.thread.sleepQuietly
 import moe.ore.helper.toByteReadPacket
-import moe.ore.helper.toHexString
 import moe.ore.util.TeaUtil
-import okhttp3.internal.toHexString
-import java.util.*
 
 class QRLoginHelper(
     dataPath : String,

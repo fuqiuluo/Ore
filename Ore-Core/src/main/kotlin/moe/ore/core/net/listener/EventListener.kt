@@ -21,14 +21,12 @@
 
 package moe.ore.core.net.listener
 
-import kotlin.Throws
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.ChannelHandlerAdapter
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelPromise
 import moe.ore.core.net.BotConnection
 import java.net.SocketAddress
-import io.netty.channel.ChannelPromise
-import java.lang.Exception
 
 /**
  * @author 飞翔的企鹅

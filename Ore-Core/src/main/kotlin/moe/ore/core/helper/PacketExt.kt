@@ -21,21 +21,24 @@
 
 package moe.ore.core.helper
 
-import kotlinx.io.core.*
+import kotlinx.io.core.discardExact
+import kotlinx.io.core.readBytes
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
 import moe.ore.core.net.packet.*
-import moe.ore.helper.*
+import moe.ore.helper.readByteReadPacket
+import moe.ore.helper.readString
+import moe.ore.helper.reader
+import moe.ore.helper.runtimeError
 import moe.ore.tars.TarsStructBase
 import moe.ore.tars.UniPacket
 import moe.ore.util.TarsUtil
 import moe.ore.util.TeaUtil
 import moe.ore.util.ZipUtil
 import okhttp3.internal.closeQuietly
-import java.net.Inet4Address
 
 val DEFAULT_TEA_KEY = ByteArray(16)
 

@@ -21,8 +21,6 @@
 
 package moe.ore.util
 
-import java.net.InetSocketAddress
-
 @SuppressWarnings("unchecked")
 object DebugUtil {
     @JvmStatic

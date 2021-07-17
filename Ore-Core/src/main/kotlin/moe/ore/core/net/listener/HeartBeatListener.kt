@@ -21,20 +21,18 @@
 
 package moe.ore.core.net.listener
 
-import kotlin.Throws
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandler.Sharable
-import moe.ore.core.net.BotConnection
-import io.netty.handler.timeout.IdleStateEvent
+import io.netty.channel.ChannelHandlerAdapter
+import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.timeout.IdleState
+import io.netty.handler.timeout.IdleStateEvent
 import moe.ore.api.OreStatus
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
+import moe.ore.core.net.BotConnection
 import moe.ore.core.net.exc.HeartbeatTimeoutException
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
-import java.lang.Exception
 
 /**
  * @author 飞翔的企鹅

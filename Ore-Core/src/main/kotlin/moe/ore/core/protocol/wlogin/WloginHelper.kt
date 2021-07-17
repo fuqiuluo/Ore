@@ -3,9 +3,11 @@ package moe.ore.core.protocol.wlogin
 import kotlinx.io.core.*
 import moe.ore.api.LoginResult
 import moe.ore.api.OreStatus
+import moe.ore.api.data.Result
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
+import moe.ore.core.OreManager
 import moe.ore.core.bot.BytesTicket
 import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.bot.StringTicket
@@ -14,14 +16,14 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
+import moe.ore.core.protocol.wlogin.request.*
+import moe.ore.helper.readString
+import moe.ore.helper.reader
+import moe.ore.helper.toByteReadPacket
+import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 import okhttp3.internal.toHexString
-import moe.ore.api.data.Result
-import moe.ore.core.OreManager
-import moe.ore.core.protocol.wlogin.request.*
-import moe.ore.helper.*
-import java.lang.RuntimeException
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,
