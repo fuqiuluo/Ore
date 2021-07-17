@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
+    id 'maven-publish'
 }
 
 group 'moe.ore.base'
@@ -32,4 +33,16 @@ tasks.withType(JavaCompile) {
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
 }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'moe.ore.base'
+            artifactId = 'Ore-Base'
+            version = '1.0.1'
+            from components.java
+        }
+    }
+}
+
 

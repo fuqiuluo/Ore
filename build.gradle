@@ -7,12 +7,12 @@ buildscript {
         google()
         maven { url 'https://repo.spring.io/milestone' }
         maven{ url "https://kotlin.bintray.com/kotlinx"}
-
         mavenLocal()
     }
 
     dependencies {
-        classpath 'io.github.zhangshikj:tars:1.0.0'
+        classpath("moe.ore:tars:1.0.1")
+        classpath("com.android.tools.build:gradle:3.5.0")
     }
 }
 
@@ -43,6 +43,8 @@ allprojects {
 }
 
 subprojects {
+    // apply plugin: 'com.android.tools.build.gradle'
+    apply plugin: 'moe.ore.tars'
     apply plugin: 'java'
 
     configurations {

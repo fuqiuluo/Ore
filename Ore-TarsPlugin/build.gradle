@@ -1,0 +1,68 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://maven.aliyun.com/repository/central/" }
+        maven { url "https://maven.aliyun.com/repository/public/" }
+        google()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven{ url "https://kotlin.bintray.com/kotlinx"}
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
+        classpath("com.android.tools.build:gradle:3.5.0")
+    }
+}
+
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'maven-publish'
+}
+
+group 'moe.ore'
+version '1.0.7'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'moe.ore'
+            artifactId = 'tars'
+            version = '1.0.7'
+            from components.java
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "https://maven.aliyun.com/repository/central/" }
+    maven { url "https://maven.aliyun.com/repository/public/" }
+    google()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven{ url "https://kotlin.bintray.com/kotlinx"}
+    mavenLocal()
+}
+
+dependencies {
+    implementation project(":Ore-Base")
+
+    implementation gradleApi()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'org.codehaus.groovy:groovy-all:3.0.5'
+    implementation "com.android.tools.build:gradle:3.5.0"
+    implementation "com.android.tools.build:transform-api:1.5.0"
+
+    def asmVer = "9.2"
+    implementation "org.ow2.asm:asm-commons:$asmVer"
+    implementation "org.ow2.asm:asm-tree:$asmVer"
+    implementation "org.ow2.asm:asm-util:$asmVer"
+}
+
+test {
+    useJUnitPlatform()
+}
