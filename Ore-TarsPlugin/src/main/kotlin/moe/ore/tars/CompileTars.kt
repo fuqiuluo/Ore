@@ -11,6 +11,7 @@ object CompileTars {
 
         val cv = object : ClassVisitor(ASM9, cw) {
             private lateinit var className : String
+            private var hasCInitMethod = false
             private var isTarsClass = false
 
             private var requireRead : Boolean = false
@@ -26,6 +27,25 @@ object CompileTars {
                 this.className = name
                 super.visit(version, access, name, signature, superName, interfaces)
             }
+
+            /**
+            override fun visitMethod(
+                access: Int,
+                name: String?,
+                descriptor: String?,
+                signature: String?,
+                exceptions: Array<out String>?
+            ): MethodVisitor {
+                return object : MethodVisitor(ASM9, super.visitMethod(access, name, descriptor, signature, exceptions)) {
+                    override fun visitInsn(opcode: Int) {
+                        if(opcode == RETURN && isTarsClass && name == "<clinit>") {
+                            mv.visitMethodInsn(INVOKESTATIC, className, "initCache", "()V", false)
+                            hasCInitMethod = true
+                        }
+                        super.visitInsn(opcode)
+                    }
+                }
+            }**/
 
             override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
                 if(descriptor == "Lmoe/ore/tars/TarsClass;") {
@@ -101,8 +121,16 @@ object CompileTars {
                     reqName(reqName)
                     respName(respName)
 
-                    if(requireRead) readFrom(className, fieldMap)
                     if(requireWrite) writeTo(className, fieldMap)
+                    if(requireRead) readFrom(className, fieldMap)
+                    /**if(!hasCInitMethod) {
+                        visitMethod(ACC_STATIC, "<clinit>", "()V", null, null).also { mv ->
+                            mv.visitCode()
+                            mv.visitInsn(RETURN)
+                            mv.visitMaxs(2, 0)
+                            mv.visitEnd()
+                        }
+                    }**/
                 }
                 super.visitEnd()
             }
@@ -151,35 +179,89 @@ object CompileTars {
     }
 
     private fun ClassVisitor.readFrom(className : String, fieldMap : Map<Int, FieldInfo>) {
+        val cacheMap = hashMapOf<String, FieldInfo>()
         visitMethod(ACC_PUBLIC, "readFrom", "(Lmoe/ore/tars/TarsInputStream;)V", null, null).also { mv ->
             mv.visitCode()
             fieldMap.forEach { (tag, field) ->
                 println("compile field --> $field")
 
-                mv.visitVarInsn(ALOAD, 0)
-                mv.visitVarInsn(ALOAD, 1)
-                mv.visitVarInsn(ALOAD, 0)
-                mv.visitFieldInsn(GETFIELD, className, field.name, field.type)
+                if(field.isTarsObject()) {
+                    val type = field.type
+                    val cacheName = "cache_" + field.name
+                    cacheMap[cacheName] = field
+
+                    val gtLabel = Label()
+                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                    mv.visitJumpInsn(IFNONNULL, gtLabel)
+
+                    when {
+                        type.startsWith("[") -> {
+                            // 如果是array [Lxxx;
+                            val newClassName = type.substring(2).let { it.substring(0, it.length - 1) }
+                            println("new classes name : $newClassName")
+                            mv.visitInsn(ICONST_1)
+                            mv.visitTypeInsn(ANEWARRAY, newClassName)
+                            mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                            when(newClassName) {
+                                else -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitInsn(AASTORE)
+                                }
+                            }
+                        }
+                        else -> {
+                            val newClassName = type.substring(1).let { it.substring(0, it.length - 1) }
+                            mv.visitTypeInsn(NEW, newClassName)
+                            mv.visitInsn(DUP)
+                            mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                            mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                        }
+                    }
+
+                    mv.visitLabel(gtLabel)
+                    mv.visitFrame(F_SAME, 0, null, 0, null)
+                    mv.visitVarInsn(ALOAD, 0)
+                    mv.visitVarInsn(ALOAD, 1)
+                    mv.visitFieldInsn(GETSTATIC, className, cacheName, field.type)
+
+                } else {
+                    mv.visitVarInsn(ALOAD, 0)
+                    mv.visitVarInsn(ALOAD, 1)
+                    mv.visitVarInsn(ALOAD, 0)
+
+                    mv.visitFieldInsn(GETFIELD, className, field.name, field.type)
+                }
+
                 mv.visitIntInsn(SIPUSH, tag)
+
                 mv.visitInsn(if(field.require) ICONST_1 else ICONST_0)
 
                 if(field.isBaseType()) {
                     mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsInputStream", "read", "(${field.type}IZ)${field.type}", false)
                 } else {
                     mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsInputStream", "read", "(Ljava/lang/Object;IZ)Ljava/lang/Object;", false)
-                    mv.visitTypeInsn(CHECKCAST, field.type.substring(1).let {
-                        it.substring(0, it.length - 1)
-                    })
+                    if(field.type.startsWith("[")) {
+                        // 如果是 array就不能去掉L
+                        mv.visitTypeInsn(CHECKCAST, field.type)
+                    } else {
+                        mv.visitTypeInsn(CHECKCAST, field.type.substring(1).let {
+                            it.substring(0, it.length - 1)
+                        })
+                    }
                 }
 
                 // mv.visitInsn(POP)
                 mv.visitFieldInsn(PUTFIELD, className, field.name, field.type)
-
             }
             mv.visitInsn(RETURN)
             mv.visitMaxs(5, 2)
             mv.visitEnd()
         }
+        cacheMap.forEach { (name, field) -> visitField(ACC_PRIVATE + ACC_STATIC, name, field.type, null, null).apply { visitEnd() } }
     }
 
     private fun ClassVisitor.servantName(servantName : String) {

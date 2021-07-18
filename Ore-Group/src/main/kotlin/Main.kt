@@ -32,7 +32,7 @@ class TarsTest : TarsStructBase() {
     var f3 : Byte = 0
 
     @TarsField(id = 45, require = false)
-    lateinit var hhh : Objsua
+    lateinit var hhh : Array<Objsua>
 
     class Objsua : TarsStructBase() {
 
