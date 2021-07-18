@@ -37,7 +37,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
 
     override fun getWalletBalance() : Double {
         try {
-            val skey = userStInfo.sKey.ticket()
+            val skey = session.sKey.ticket()
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbWallet, mapOf(
@@ -130,7 +130,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
         totalNum: Int,
         textMap: Map<String, Any> = mapOf()
     ): QPayBalance? {
-        val skey = userStInfo.sKey.ticket()
+        val skey = session.sKey.ticket()
         val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
         val hbPack = getHBPack(skey, pskey, groupId, 0, hbType.busType, hbType.channel, wishing, totalAmount, totalNum, 3, textMap)!!
         if(hbPack.retcode != 0) {

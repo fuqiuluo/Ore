@@ -10,6 +10,10 @@ import moe.ore.group.TroopManagerWeb
 import java.io.File
 import java.util.*
 
+fun main(args: Array<String>) {
+    println("你好，伏秋洛a,伏秋洛啊啊啊啊啊，这是伏秋洛！！！")
+}
+
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 

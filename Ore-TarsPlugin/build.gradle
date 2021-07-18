@@ -24,14 +24,14 @@ plugins {
 }
 
 group 'moe.ore'
-version '1.0.7'
+version '1.0.10'
 
 publishing {
     publications {
         maven(MavenPublication) {
             groupId = 'moe.ore'
             artifactId = 'tars'
-            version = '1.0.7'
+            version = '1.0.10'
             from components.java
         }
     }
@@ -49,13 +49,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(":Ore-Base")
-
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation 'org.codehaus.groovy:groovy-all:3.0.5'
-    implementation "com.android.tools.build:gradle:3.5.0"
-    implementation "com.android.tools.build:transform-api:1.5.0"
 
     def asmVer = "9.2"
     implementation "org.ow2.asm:asm-commons:$asmVer"

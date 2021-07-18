@@ -11,8 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("moe.ore:tars:1.0.1")
-        classpath("com.android.tools.build:gradle:3.5.0")
+        classpath("moe.ore:tars:1.0.10")
     }
 }
 
