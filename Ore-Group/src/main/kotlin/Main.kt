@@ -7,11 +7,36 @@ import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
 import moe.ore.group.TroopManagerWeb
+import moe.ore.tars.*
 import java.io.File
 import java.util.*
 
 fun main(args: Array<String>) {
     println("你好，伏秋洛a,伏秋洛啊啊啊啊啊，这是伏秋洛！！！")
+    println(TarsTest().servantName())
+}
+
+@TarsClass(
+    requireRead = true,
+    servantName = "你好世界",
+    requireWrite = true
+)
+class TarsTest : TarsStructBase() {
+    @TarsField(id = 1)
+    var field1 : Int = 0
+
+    @TarsField(id = 2)
+    lateinit var f2 : String
+
+    @TarsField(id = 666, require = true)
+    var f3 : Byte = 0
+
+    @TarsField(id = 45, require = false)
+    lateinit var hhh : Objsua
+
+    class Objsua : TarsStructBase() {
+
+    }
 }
 
 fun main() {
