@@ -10,11 +10,11 @@ data class FieldInfo(
 
 private val BaseTypeArray = arrayOf(
     "Ljava/lang/String;",
-    "B", "S", "I", "J", "F", "D", "C"
+    "B", "S", "I", "J", "F", "D", "C", "Z"
 )
 
 private val NotNeedCheck = arrayOf(
-    "B", "S", "I", "J", "F", "D", "C"
+    "B", "S", "I", "J", "F", "D", "C", "Z"
 )
 
 private val systemClass = arrayOf(
@@ -24,7 +24,8 @@ private val systemClass = arrayOf(
     "Ljava/lang/Character;",
     "Ljava/lang/Long;",
     "Ljava/lang/Float;",
-    "Ljava/lang/Double;"
+    "Ljava/lang/Double;",
+    "Ljava/lang/Boolean;",
 )
 
 fun FieldInfo.isTarsObject(): Boolean {

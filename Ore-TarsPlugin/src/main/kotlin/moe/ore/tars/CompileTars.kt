@@ -302,7 +302,109 @@ object CompileTars {
                             }
                         }
                         type == "Ljava/util/Map;" -> {
+                            // Ljava/util/Map<Ljava/lang/Byte;LTarsTest$Objsua;>;
+                            val allType = field.sign!!.substring(15).let { it.substring(0, it.length - 2) }.split(";")
+                            // 0 key 1 value 2 empty
+                            val keyType = allType[0].substring(1)
+                            val newClassName = allType[1].substring(1)
+                            mv.visitTypeInsn(NEW, "java/util/HashMap")
+                            mv.visitInsn(DUP)
+                            mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashMap", "<init>", "()V", false)
+                            mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                            when(keyType) {
+                                "java/lang/Byte" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Short" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Integer" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Long" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Float" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Double" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Character" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitIntInsn(BIPUSH, 48)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/String" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitLdcInsn("")
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                else -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
 
+                                    mv.visitTypeInsn(NEW, keyType)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, keyType, "<init>", "()V", false)
+
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                            }
                         }
                         type == "Ljava/util/ArrayList;" -> {
                             try {
@@ -349,20 +451,83 @@ object CompileTars {
                         }
                         type.startsWith("[") -> {
                             // 如果是array [Lxxx;
-                            val newClassName = type.substring(2).let { it.substring(0, it.length - 1) }
+                            var newClassName = type.substring(1)
                             println("new classes name : $newClassName")
-                            mv.visitInsn(ICONST_1)
-                            mv.visitTypeInsn(ANEWARRAY, newClassName)
-                            mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
-                            when(newClassName) {
-                                else -> {
-                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
-                                    mv.visitInsn(ICONST_0)
-                                    mv.visitTypeInsn(NEW, newClassName)
-                                    mv.visitInsn(DUP)
-                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
-                                    mv.visitInsn(AASTORE)
+                            if(newClassName.startsWith("L")) {
+                                newClassName = newClassName.substring(1).let { it.substring(0, it.length - 1) }
+                                mv.visitInsn(ICONST_1)
+                                mv.visitTypeInsn(ANEWARRAY, newClassName)
+                                mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                                when(newClassName) {
+                                    "java/lang/Byte" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Short" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Integer" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Long" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Float" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Double" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/Character" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitIntInsn(BIPUSH, 48)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    "java/lang/String" -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitLdcInsn("")
+                                        mv.visitInsn(AASTORE)
+                                    }
+                                    else -> {
+                                        mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                        mv.visitInsn(ICONST_0)
+                                        mv.visitTypeInsn(NEW, newClassName)
+                                        mv.visitInsn(DUP)
+                                        mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                        mv.visitInsn(AASTORE)
+                                    }
                                 }
+                            } else {
+                                mv.visitInsn(ICONST_1)
+                                mv.visitIntInsn(NEWARRAY, when(newClassName) {
+                                    "Z" -> T_BOOLEAN
+                                    "B" -> T_BYTE
+                                    "S" -> T_SHORT
+                                    "I" -> T_INT
+                                    "J" -> T_LONG
+                                    "F" -> T_FLOAT
+                                    "D" -> T_DOUBLE
+                                    "C" -> T_CHAR
+                                    else -> T_BYTE
+                                })
+                                mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
                             }
                         }
                         else -> {

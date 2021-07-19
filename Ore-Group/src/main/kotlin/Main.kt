@@ -34,7 +34,7 @@ class TarsTest : TarsStructBase() {
     var f3 : Byte = 0
 
     @TarsField(id = 45, require = false)
-    lateinit var hhh : HashMap<Objsua, Objsua>
+    lateinit var hhh : ByteArray
 
     class Objsua : TarsStructBase() {
 
