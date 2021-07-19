@@ -62,7 +62,7 @@ object CompileTars {
                                 "reqName" -> reqName = value as String
                                 "respName" -> respName = value as String
                             }
-                            // 如果结束方法可以消去注解
+                            // todo 如果结束方法可以消去注解
                             return
                         }
                         super.visit(name, value)
@@ -492,6 +492,7 @@ object CompileTars {
                                     "java/lang/Double" -> {
                                         mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
                                         mv.visitInsn(ICONST_0)
+                                        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false)
                                         mv.visitInsn(AASTORE)
                                     }
                                     "java/lang/Character" -> {

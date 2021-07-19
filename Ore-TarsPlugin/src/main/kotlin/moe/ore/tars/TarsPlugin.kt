@@ -37,7 +37,7 @@ class TarsPlugin : Plugin<Project> {
                     println("buildDir : $buildDir")
                     if(FileUtil.has(buildDir + File.separator + "classes")) {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
-                            if(classFile.absolutePath.endsWith(".class")) {
+                            if(classFile.name.endsWith(".class")) {
                                 val bytes = FileUtil.readFile(classFile)
                                 // 不包含基础类 不处理
                                 if(String(bytes).contains("TarsStructBase")) {
