@@ -13,5 +13,11 @@ annotation class TarsClass(
 @Target(AnnotationTarget.FIELD)
 annotation class TarsField (
     val id : Int,
-    val require : Boolean = false
+    val require : Boolean = false,
+    val prepMethod : String = ""
+)
+
+@Target(AnnotationTarget.FUNCTION)
+annotation class TarsMethod(
+    val fieldTag : Int
 )

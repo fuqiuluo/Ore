@@ -7,21 +7,6 @@ import org.jetbrains.kotlin.konan.file.File
 
 class TarsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        project.task("testTarsPlugin").apply {
-            doFirst {
-                println("plugin can run on this machine.")
-            }
-        }
-
-        /**
-         * 监听所有build任务结束
-         */
-        // project.getTasksByName("build", true).forEach {
-        //     it.doLast {
-        //         println("start build tars")
-        //     }
-        // }
-
         project.afterEvaluate { thisProject ->
             // 配置项目文件 （构建前执行发生）
             // 构建前给任务注入监听
@@ -38,12 +23,7 @@ class TarsPlugin : Plugin<Project> {
                     if(FileUtil.has(buildDir + File.separator + "classes")) {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
                             if(classFile.name.endsWith(".class")) {
-                                val bytes = FileUtil.readFile(classFile)
-                                // 不包含基础类 不处理
-                                if(String(bytes).contains("TarsStructBase")) {
-                                    val out = CompileTars.compileDir(bytes)
-                                    FileUtil.saveFile(classFile.absolutePath, out)
-                                }
+                                TarsTransform(classFile).transform()
                             }
                         }
                         println("finish build tars file")

@@ -36,7 +36,11 @@ class TarsTest : TarsStructBase() {
     @TarsField(id = 45, require = false)
     lateinit var hhh : ByteArray
 
-    class Objsua : TarsStructBase() {
+    @TarsField(id = 445, require = false)
+    lateinit var tt : ByteArray
+
+    @TarsMethod(fieldTag = 45)
+    fun test() {
 
     }
 }

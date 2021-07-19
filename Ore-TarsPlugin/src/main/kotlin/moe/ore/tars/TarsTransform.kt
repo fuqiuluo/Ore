@@ -1,173 +1,72 @@
 package moe.ore.tars
 
-import org.objectweb.asm.*
+import moe.ore.tars.util.AsmUtil
+import moe.ore.tars.util.AsmUtil.getAnnotation
+import moe.ore.tars.util.AsmUtil.hasAnnotation
+import moe.ore.tars.util.AsmUtil.hasMethod
+import moe.ore.tars.util.FileUtil
+import moe.ore.tars.util.TarsUtil
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.tree.AnnotationNode
+import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldNode
+import org.objectweb.asm.tree.MethodNode
+import java.io.File
+import java.util.*
 
-object CompileTars {
+class TarsTransform(
+    private val clzFile: File
+) {
+    private val bytes : ByteArray by lazy { FileUtil.readFile(clzFile) }
+    private val fields : TreeMap<Int, FieldInfo> by lazy { TreeMap() }
+    private val tarsClassInfo = TarsClass()
+    private lateinit var className : String
 
-    fun compileDir(input : ByteArray) : ByteArray {
-        val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
-        val cr = ClassReader(input)
-
-        val cv = object : ClassVisitor(ASM9, cw) {
-            private lateinit var className : String
-            private var isTarsClass = false
-
-            private var requireRead : Boolean = false
-            private var requireWrite : Boolean = false
-            private var servantName : String = ""
-            private var funcName : String = ""
-            private var reqName : String = ""
-            private var respName : String = ""
-
-            private lateinit var fieldMap : HashMap<Int, FieldInfo>
-
-            override fun visit(version: Int, access: Int, name: String, signature: String?, superName: String?, interfaces: Array<out String>?) {
-                this.className = name
-                super.visit(version, access, name, signature, superName, interfaces)
-            }
-
-            /**
-            override fun visitMethod(
-                access: Int,
-                name: String?,
-                descriptor: String?,
-                signature: String?,
-                exceptions: Array<out String>?
-            ): MethodVisitor {
-                return object : MethodVisitor(ASM9, super.visitMethod(access, name, descriptor, signature, exceptions)) {
-                    override fun visitInsn(opcode: Int) {
-                        if(opcode == RETURN && isTarsClass && name == "<clinit>") {
-                            mv.visitMethodInsn(INVOKESTATIC, className, "initCache", "()V", false)
-                            hasCInitMethod = true
-                        }
-                        super.visitInsn(opcode)
-                    }
-                }
-            }**/
-
-            override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
-                if(descriptor == "Lmoe/ore/tars/TarsClass;") {
-                    this.isTarsClass = true
-                    this.fieldMap = hashMapOf()
-                }
-                return object : AnnotationVisitor(ASM9, super.visitAnnotation(descriptor, visible)) {
-                    override fun visit(name: String?, value: Any?) {
-                        if(isTarsClass && name != null) {
-                            when(name) {
-                                "requireRead" -> requireRead = value as Boolean
-                                "requireWrite" -> requireWrite = value as Boolean
-                                "servantName" -> servantName = value as String
-                                "funcName" -> funcName = value as String
-                                "reqName" -> reqName = value as String
-                                "respName" -> respName = value as String
-                            }
-                            // todo 如果结束方法可以消去注解
-                            return
-                        }
-                        super.visit(name, value)
-                    }
-                }
-            }
-
-            override fun visitField(
-                access: Int,
-                name: String,
-                fieldType: String,
-                signature: String?,
-                value: Any?
-            ): FieldVisitor {
-                println("super.visitField($access, $name, $fieldType, $signature, $value)")
-                return object : FieldVisitor(ASM9, super.visitField(access, name, fieldType, signature, value)) {
-                    // 读取注解获取tag
-                    override fun visitAnnotation(annotationType: String?, visible: Boolean): AnnotationVisitor {
-                        val isTarsField = annotationType == "Lmoe/ore/tars/TarsField;"
-                        return object : AnnotationVisitor(ASM9, super.visitAnnotation(annotationType, visible)) {
-                            private var tag : Int = 0
-                            private var require : Boolean = false
-
-                            override fun visit(name: String?, value: Any?) {
-                                if (isTarsClass && isTarsField) {
-                                    when(name) {
-                                        "id" -> tag = value as Int
-                                        "require" -> require = value as Boolean
-                                    }
-                                    return
-                                }
-                                super.visit(name, value)
-                            }
-
-                            override fun visitEnd() {
-                                if(isTarsField) {
-                                    fieldMap[tag] = FieldInfo(
-                                        name = name,
-                                        id = tag,
-                                        type = fieldType,
-                                        sign = signature,
-                                        require = require
-                                    )
-                                }
-                                super.visitEnd()
-                            }
-                        }
-                    }
-                }
-            }
-
-            override fun visitEnd() {
-                if(isTarsClass) {
-                    // 合成参数方法
-                    servantName(servantName)
-                    funcName(funcName)
-                    reqName(reqName)
-                    respName(respName)
-
-                    if(requireWrite) writeTo(className, fieldMap)
-                    if(requireRead) readFrom(className, fieldMap)
-                    /**if(!hasCInitMethod) {
-                        visitMethod(ACC_STATIC, "<clinit>", "()V", null, null).also { mv ->
-                            mv.visitCode()
-                            mv.visitInsn(RETURN)
-                            mv.visitMaxs(2, 0)
-                            mv.visitEnd()
-                        }
-                    }**/
-                }
-                super.visitEnd()
-            }
-        }
-
-        cr.accept(cv, 0) // 将cr代理给cv
-
-        return cw.toByteArray()
+    fun transform() {
+        println("start transform by qiuluo...")
+        // 做好解析工作
+        println("tars task result : " + doLast(doFirst()))
     }
 
-    private fun ClassVisitor.writeTo(className: String, fieldMap: Map<Int, FieldInfo>) {
-        visitMethod(ACC_PUBLIC, "writeTo", "(Lmoe/ore/tars/TarsOutputStream;)V", null, null).also { mv ->
+    private fun doLast(clz : ClassNode?) = clz?.runCatching {
+
+        if (tarsClassInfo.requireWrite && !hasMethod("writeTo")) this.methods.add(MethodNode(ACC_PUBLIC, "writeTo", "(L$CLASS_TARS_OUTPUT;)V", null, null).also { mv ->
             mv.visitCode()
             var nowLabel = Label()
             var nextLabel = Label()
             mv.visitLabel(nowLabel)
-            fieldMap.forEach { (tag, field) ->
+
+            this@TarsTransform.fields.forEach { (tag, field) ->
+                val name = field.name
                 mv.visitFrame(F_SAME, 0, null, 0, null)
+
+                field.bindMethod.forEach {
+                    if(it.access and ACC_STATIC != 0) {
+                        mv.visitMethodInsn(INVOKESTATIC, className, it.name, it.desc, false)
+                    } else {
+                        mv.visitVarInsn(ALOAD, 0)
+                        mv.visitMethodInsn(INVOKEVIRTUAL, className, it.name, it.desc, false)
+                    }
+                }
+
                 if(field.needCheckNull()) {
                     mv.visitVarInsn(ALOAD, 0)
-                    mv.visitFieldInsn(GETFIELD, className, field.name, field.type)
+                    mv.visitFieldInsn(GETFIELD, className, name, field.type)
                     mv.visitJumpInsn(IFNULL, nextLabel)
                 }
-
                 mv.visitVarInsn(ALOAD, 1)
                 mv.visitVarInsn(ALOAD, 0)
-                mv.visitFieldInsn(GETFIELD, className, field.name, field.type)
-
+                mv.visitFieldInsn(GETFIELD, className, name, field.type)
                 mv.visitIntInsn(SIPUSH, tag)
-
                 if(field.isBaseType()) {
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsOutputStream", "write", "(${field.type}I)V", false)
+                    mv.visitMethodInsn(INVOKEVIRTUAL, CLASS_TARS_OUTPUT, "write", "(${field.type}I)V", false)
                 } else {
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsOutputStream", "write", "(Ljava/lang/Object;I)V", false)
+                    mv.visitMethodInsn(INVOKEVIRTUAL, CLASS_TARS_OUTPUT, "write", "(Ljava/lang/Object;I)V", false)
                 }
-
                 nowLabel = nextLabel
                 mv.visitLabel(nowLabel)
                 nextLabel = Label()
@@ -176,25 +75,20 @@ object CompileTars {
             mv.visitInsn(RETURN)
             mv.visitMaxs(3, 2)
             mv.visitEnd()
-        }
-    }
+        })
 
-    private fun ClassVisitor.readFrom(className : String, fieldMap : Map<Int, FieldInfo>) {
-        val cacheMap = hashMapOf<String, FieldInfo>()
-        visitMethod(ACC_PUBLIC, "readFrom", "(Lmoe/ore/tars/TarsInputStream;)V", null, null).also { mv ->
+        if (tarsClassInfo.requireRead && !hasMethod("readFrom")) this.methods.add(MethodNode(ACC_PUBLIC, "readFrom", "(L$CLASS_TARS_INPUT;)V", null, null).also { mv ->
             mv.visitCode()
-            fieldMap.forEach { (tag, field) ->
-                println("compile field --> $field")
-
+            mv.visitCode()
+            this@TarsTransform.fields.forEach { (id, field) ->
+                val name = field.name
+                val type = field.type
                 if(field.isTarsObject()) {
-                    val type = field.type
-                    val cacheName = "cache_" + field.name
-                    cacheMap[cacheName] = field
-
+                    val cacheName = "cache_" + name
+                    clz.fields.add(FieldNode(ACC_PUBLIC + ACC_STATIC, cacheName, type, null, null))
                     val gtLabel = Label()
                     mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
                     mv.visitJumpInsn(IFNONNULL, gtLabel)
-
                     when {
                         type == "Ljava/util/HashMap;" -> {
                             // Ljava/util/HashMap<Ljava/lang/Byte;LTarsTest$Objsua;>;
@@ -539,94 +433,188 @@ object CompileTars {
                             mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
                         }
                     }
-
                     mv.visitLabel(gtLabel)
                     mv.visitFrame(F_SAME, 0, null, 0, null)
                     mv.visitVarInsn(ALOAD, 0)
                     mv.visitVarInsn(ALOAD, 1)
-                    mv.visitFieldInsn(GETSTATIC, className, cacheName, field.type)
-
+                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
                 } else {
                     mv.visitVarInsn(ALOAD, 0)
                     mv.visitVarInsn(ALOAD, 1)
                     mv.visitVarInsn(ALOAD, 0)
-
-                    mv.visitFieldInsn(GETFIELD, className, field.name, field.type)
+                    mv.visitFieldInsn(GETFIELD, className, name, type)
                 }
-
-                mv.visitIntInsn(SIPUSH, tag)
-
+                mv.visitIntInsn(SIPUSH, id)
                 mv.visitInsn(if(field.require) ICONST_1 else ICONST_0)
-
-                if(field.isBaseType()) {
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsInputStream", "read", "(${field.type}IZ)${field.type}", false)
-                } else {
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "moe/ore/tars/TarsInputStream", "read", "(Ljava/lang/Object;IZ)Ljava/lang/Object;", false)
-                    if(field.type.startsWith("[")) {
+                mv.visitMethodInsn(INVOKEVIRTUAL, CLASS_TARS_INPUT, "read", if(field.isBaseType()) "(${type}IZ)${type}" else "(Ljava/lang/Object;IZ)Ljava/lang/Object;", false)
+                if(!field.isBaseType()) {
+                    if(type.startsWith("[")) {
                         // 如果是 array就不能去掉L
-                        mv.visitTypeInsn(CHECKCAST, field.type)
+                        mv.visitTypeInsn(CHECKCAST, type)
                     } else {
-                        mv.visitTypeInsn(CHECKCAST, field.type.substring(1).let {
-                            it.substring(0, it.length - 1)
-                        })
+                        mv.visitTypeInsn(CHECKCAST, type.substring(1).let { it.substring(0, it.length - 1) })
                     }
                 }
-
-                // mv.visitInsn(POP)
-                mv.visitFieldInsn(PUTFIELD, className, field.name, field.type)
+                mv.visitFieldInsn(PUTFIELD, className, name, type) // put
             }
             mv.visitInsn(RETURN)
             mv.visitMaxs(5, 2)
             mv.visitEnd()
-        }
-        cacheMap.forEach { (name, field) -> visitField(ACC_PRIVATE + ACC_STATIC, name, field.type, field.sign, null).apply { visitEnd() } }
+        })
+
+        if(tarsClassInfo.servantName.isNotEmpty() && !hasMethod("servantName")) this.methods.add(MethodNode(ACC_PUBLIC, "servantName", "()Ljava/lang/String;", null, null).also { mv ->
+            mv.visitCode()
+            mv.visitLdcInsn(tarsClassInfo.servantName)
+            mv.visitInsn(ARETURN)
+            mv.visitMaxs(1, 1)
+            mv.visitEnd()
+        })
+
+        if(tarsClassInfo.funcName.isNotEmpty() && !hasMethod("funcName")) this.methods.add(MethodNode(ACC_PUBLIC, "funcName", "()Ljava/lang/String;", null, null).also { mv ->
+            mv.visitCode()
+            mv.visitLdcInsn(tarsClassInfo.funcName)
+            mv.visitInsn(ARETURN)
+            mv.visitMaxs(1, 1)
+            mv.visitEnd()
+        })
+
+        if(tarsClassInfo.reqName.isNotEmpty() && !hasMethod("reqName")) this.methods.add(MethodNode(ACC_PUBLIC, "reqName", "()Ljava/lang/String;", null, null).also { mv ->
+            mv.visitCode()
+            mv.visitLdcInsn(tarsClassInfo.reqName)
+            mv.visitInsn(ARETURN)
+            mv.visitMaxs(1, 1)
+            mv.visitEnd()
+        })
+
+        if(tarsClassInfo.respName.isNotEmpty() && !hasMethod("respName")) this.methods.add(MethodNode(ACC_PUBLIC, "respName", "()Ljava/lang/String;", null, null).also { mv ->
+            mv.visitCode()
+            mv.visitLdcInsn(tarsClassInfo.respName)
+            mv.visitInsn(ARETURN)
+            mv.visitMaxs(1, 1)
+            mv.visitEnd()
+        })
+
+        val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
+        this.accept(cw)
+
+        FileUtil.saveFile(clzFile.absolutePath, cw.toByteArray())
     }
 
-    private fun ClassVisitor.servantName(servantName : String) {
-        if (servantName.isNotEmpty()) {
-            visitMethod(ACC_PUBLIC, "servantName", "()Ljava/lang/String;", null, null).also { mv ->
-                mv.visitCode()
-                mv.visitLdcInsn(servantName)
-                mv.visitInsn(ARETURN)
-                mv.visitMaxs(1, 1)
-                mv.visitEnd()
+    private fun doFirst() : ClassNode? {
+        val clz = AsmUtil.bufToClassNode(bytes)
+        println("do_first for ${clz.name}")
+        if(clz.hasAnnotation(ANNOTATION_TARS_CLASS, true)) {
+            println("Class[${clz.name}] is tars class.")
+            this.className = clz.name
+            clz.getAnnotation(ANNOTATION_TARS_CLASS, true)?.let {
+                doClass(it)
+                clz.visibleAnnotations.remove(it)
+            }
+            doFields(clz.fields)
+            doMethod(clz.methods)
+            return clz
+        }
+        return null
+    }
+
+    /**
+     * 解析class
+     */
+    private fun doClass(classAnnotation : AnnotationNode) {
+        tarsClassInfo.runCatching {
+            val iterator = classAnnotation.values.iterator()
+            while (iterator.hasNext()) {
+                val k = iterator.next() as String
+                val v = iterator.next()
+                when(k) {
+                    "requireRead" -> requireRead = v as Boolean
+                    "requireWrite" -> requireWrite = v as Boolean
+                    "servantName" -> servantName = v as String
+                    "funcName" -> funcName = v as String
+                    "reqName" -> reqName = v as String
+                    "respName" -> respName = v as String
+                    else -> error("unknown tars class annotation type : $k")
+                }
             }
         }
     }
 
-    private fun ClassVisitor.funcName(funcName : String) {
-        if (funcName.isNotEmpty()) {
-            visitMethod(ACC_PUBLIC, "funcName", "()Ljava/lang/String;", null, null).also { mv ->
-                mv.visitCode()
-                mv.visitLdcInsn(funcName)
-                mv.visitInsn(ARETURN)
-                mv.visitMaxs(1, 1)
-                mv.visitEnd()
+    /**
+     * 解析field
+     */
+    private fun doFields(fields: List<FieldNode>?) {
+        val fieldList = arrayListOf<FieldInfo>()
+        fields?.forEach { field ->
+            field.getAnnotation(ANNOTATION_TARS_FIELD, true)?.let { fieldAnnotation ->
+                val iterator = fieldAnnotation.values.iterator()
+                var id = 0
+                var require = false
+                while (iterator.hasNext()) {
+                    val k = iterator.next() as String
+                    val v = iterator.next()
+                    when(k) {
+                        "id" -> id = v as Int
+                        "require" -> require = v as Boolean
+                        // "prepMethod" -> prepMethod = v as String
+                        // code change
+                        else -> error("unknown tars field annotation type : $k")
+                    }
+                }
+
+                field.visibleAnnotations.remove(fieldAnnotation)
+
+                fieldList.add(FieldInfo(
+                    name = field.name,
+                    id = id,
+                    require = require,
+                    type = field.desc,
+                    sign = field.signature
+                ))
+            }
+        }
+
+        TarsUtil.quickSort(fieldList).forEach {
+            println(it)
+            this.fields[it.id] = it
+        }
+    }
+
+    /**
+     * 解析方法
+     */
+    private fun doMethod(methods : List<MethodNode>?) {
+        methods?.forEach { m ->
+            m.getAnnotation(ANNOTATION_TARS_METHOD, true)?.let {
+                val iterator = it.values.iterator()
+                while (iterator.hasNext()) {
+                    val k = iterator.next() as String
+                    val v = iterator.next()
+                    when(k) {
+                        "fieldTag" -> fields[v]?.bind(MethodInfo(access = m.access, name = m.name, desc = m.desc))
+                        else -> error("unknown tars field annotation type : $k")
+                    }
+                }
+
+                m.visibleAnnotations.remove(it)
             }
         }
     }
 
-    private fun ClassVisitor.reqName(reqName : String) {
-        if (reqName.isNotEmpty()) {
-            visitMethod(ACC_PUBLIC, "reqName", "()Ljava/lang/String;", null, null).also { mv ->
-                mv.visitCode()
-                mv.visitLdcInsn(reqName)
-                mv.visitInsn(ARETURN)
-                mv.visitMaxs(1, 1)
-                mv.visitEnd()
-            }
-        }
-    }
+    companion object {
+        const val ANNOTATION_TARS_CLASS = "Lmoe/ore/tars/TarsClass;"
+        const val ANNOTATION_TARS_FIELD = "Lmoe/ore/tars/TarsField;"
+        const val ANNOTATION_TARS_METHOD = "Lmoe/ore/tars/TarsMethod;"
 
-    private fun ClassVisitor.respName(respName : String) {
-        if (respName.isNotEmpty()) {
-            visitMethod(ACC_PUBLIC, "respName", "()Ljava/lang/String;", null, null).also { mv ->
-                mv.visitCode()
-                mv.visitLdcInsn(respName)
-                mv.visitInsn(ARETURN)
-                mv.visitMaxs(1, 1)
-                mv.visitEnd()
-            }
-        }
+        const val CLASS_TARS_OUTPUT = "moe/ore/tars/TarsOutputStream"
+        const val CLASS_TARS_INPUT = "moe/ore/tars/TarsInputStream"
+
+        data class TarsClass(
+            var requireRead: Boolean = false,
+            var requireWrite : Boolean = false,
+            var servantName : String = "",
+            var funcName : String = "",
+            var reqName : String = "",
+            var respName : String = ""
+        )
     }
 }

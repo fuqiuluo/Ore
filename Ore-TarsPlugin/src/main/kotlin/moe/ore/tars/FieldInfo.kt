@@ -6,7 +6,13 @@ data class FieldInfo(
     val type : String,
     val sign : String? = null,
     val require : Boolean = false
-)
+) {
+    val bindMethod : ArrayList<MethodInfo> = arrayListOf()
+
+    fun bind(method : MethodInfo) {
+        bindMethod.add(method)
+    }
+}
 
 private val BaseTypeArray = arrayOf(
     "Ljava/lang/String;",
