@@ -22,109 +22,79 @@
 package moe.ore.core.bot
 
 import moe.ore.helper.EMPTY_BYTE_ARRAY
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.*
 
+@TarsClass(requireRead = true, requireWrite = true)
 class UserSigInfo : TarsStructBase() {
     // 保质期 28 days
+    @TarsField(id = 2)
     lateinit var tgtKey: BytesTicket
 
     // A2
+    @TarsField(id = 1)
     lateinit var tgt: BytesTicket
 
     /**
      * 没有名字 QQ逆向里面它叫做G from 8.7.5
      */
+    @TarsField(id = 5)
     var G = EMPTY_BYTE_ARRAY
 
+    @TarsField(id = 6)
     var payToken = EMPTY_BYTE_ARRAY
 
     // 保质期：下个月 1 日
+    @TarsField(id = 7)
     lateinit var d2: BytesTicket
+    @TarsField(id = 8)
     lateinit var d2Key: BytesTicket
 
+    @TarsField(id = 9)
     var extraDataList = arrayListOf<LoginExtraData>()
 
     // from t16a
+    @TarsField(id = 10)
     lateinit var noPicSig: BytesTicket
 
+    @TarsField(id = 11)
     lateinit var superKey: StringTicket
 
     // 用t106和t10c计算得到 from QQ 8.6.0
     // 保质期 30 days
+    @TarsField(id = 12)
     lateinit var encryptA1: BytesTicket
 
     // from 10c
+    @TarsField(id = 13)
     lateinit var gtKey: BytesTicket
 
     // 保质期：2 hours
+    @TarsField(id = 14)
     lateinit var webSig: BytesTicket
 
+    @TarsField(id = 15)
     var da2: BytesTicket = BytesTicket()
 
+    @TarsField(id = 16)
     lateinit var st: BytesTicket
+    @TarsField(id = 17)
     lateinit var stKey: BytesTicket
 
+    @TarsField(id = 18)
     var deviceToken: BytesTicket = BytesTicket()
 
+    @TarsField(id = 20)
     lateinit var downloadStKey: BytesTicket
+    @TarsField(id = 19)
     lateinit var downloadSt: BytesTicket
 
+    @TarsField(id = 21)
     lateinit var wtSessionTicket: BytesTicket
+    @TarsField(id = 22)
     lateinit var wtSessionTicketKey: BytesTicket
 
+    @TarsField(id = 23)
     var t528: ByteArray = EMPTY_BYTE_ARRAY
-
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(tgt, 1)
-        output.write(tgtKey, 2)
-        output.write(G, 5)
-        output.write(payToken, 6)
-        output.write(d2, 7)
-        output.write(d2Key, 8)
-        output.write(extraDataList, 9)
-        output.write(noPicSig, 10)
-        output.write(superKey, 11)
-        output.write(encryptA1, 12)
-        output.write(gtKey, 13)
-        output.write(webSig, 14)
-        output.write(da2, 15)
-        output.write(st, 16)
-        output.write(stKey, 17)
-        output.write(deviceToken, 18)
-        output.write(downloadSt, 19)
-        output.write(downloadStKey, 20)
-        output.write(wtSessionTicket, 21)
-        output.write(wtSessionTicketKey, 22)
-        output.write(t528, 23)
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-        val ticketType = BytesTicket()
-        val strTicketType = StringTicket()
-        tgt = input.read(ticketType, 1, false)
-        tgtKey = input.read(ticketType, 2, false)
-        G = input.read(G, 5, false)
-        payToken = input.read(payToken, 6, false)
-        d2 = input.read(ticketType, 7, false)
-        d2Key = input.read(ticketType, 8, false)
-        extraDataList = input.read(extraDataList, 9, false) as ArrayList<LoginExtraData>
-        noPicSig = input.read(ticketType, 10, false)
-        superKey = input.read(strTicketType, 11, false)
-        encryptA1 = input.read(ticketType, 12, false)
-        gtKey = input.read(ticketType, 13, false)
-        webSig = input.read(ticketType, 14, false)
-        da2 = input.read(ticketType, 15, false)
-        st = input.read(ticketType, 16, false)
-        stKey = input.read(ticketType, 17, false)
-        deviceToken = input.read(ticketType, 18, false)
-        downloadSt = input.read(ticketType, 19, false)
-        downloadStKey = input.read(ticketType, 20, false)
-        wtSessionTicket = input.read(ticketType, 21, false)
-        wtSessionTicketKey = input.read(ticketType, 22, false)
-        t528 = input.read(t528, 23, false)
-    }
 }
 
 open class BytesTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {
@@ -143,10 +113,13 @@ open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0)
     }
 }
 
-
+@TarsClass(requireRead = true, requireWrite = true)
 open class Ticket() : TarsStructBase() {
+    @TarsField(id = 1)
     var value = EMPTY_BYTE_ARRAY
+    @TarsField(id = 2)
     var createTime = 0L
+    @TarsField(id = 3)
     var shelfLife = 0L
 
     constructor(
@@ -168,37 +141,16 @@ open class Ticket() : TarsStructBase() {
     fun isExpired(): Boolean {
         return System.currentTimeMillis() > (createTime + shelfLife)
     }
-
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(value, 1)
-        output.write(createTime, 2)
-        output.write(shelfLife, 3)
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-        value = input.read(value, 1, false)
-        createTime = input.read(createTime, 2, false)
-        shelfLife = input.read(shelfLife, 3, false)
-    }
 }
 
+@TarsClass(requireWrite = true, requireRead = true)
 data class LoginExtraData(
-        val uin: Long,
-        val ip: ByteArray,
-        val time: Int,
-        val appId: Int
-) : TarsStructBase() {
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(uin, 1)
-        output.write(ip, 2)
-        output.write(time, 3)
-        output.write(appId, 4)
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-        input.read(uin, 1, false)
-        input.read(ip, 1, false)
-        input.read(time, 1, false)
-        input.read(appId, 1, false)
-    }
-}
+    @TarsField(id = 1)
+    val uin: Long,
+    @TarsField(id = 2)
+    val ip: ByteArray,
+    @TarsField(id = 3)
+    val time: Int,
+    @TarsField(id = 4)
+    val appId: Int
+) : TarsStructBase()

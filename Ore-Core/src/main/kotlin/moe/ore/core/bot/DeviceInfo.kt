@@ -1,14 +1,13 @@
 package moe.ore.core.bot
 
 import moe.ore.helper.hex2ByteArray
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.*
 import moe.ore.util.BytesUtil
 import moe.ore.util.MD5
 import java.util.*
 import kotlin.random.Random
 
+@TarsClass(requireWrite = true, requireRead = true)
 class DeviceInfo : TarsStructBase() {
     enum class NetworkType(val value: Int) {
         /**
@@ -27,28 +26,49 @@ class DeviceInfo : TarsStructBase() {
         OTHER(0),
     }
 
+    @TarsField(id = 1)
     var imei: String = " 867109044454073"
 
     // 53f156a0b5b89966【真的】  53f256a0aaff9966【假的】
+    @TarsField(id = 2)
     var androidId: String = "53f156a0b5b89966"
+    @TarsField(id = 3)
     var imsi: String = "460023785098616"
+    @TarsField(id = 4)
     var model: String = "M2002J9E"
+    @TarsField(id = 5)
     var osType: String = "android"
+    @TarsField(id = 6)
     var brand: String = "Xiaomi"
+    @TarsField(id = 7)
     var androidVersion: String = "11"
+    @TarsField(id = 8)
     var androidSdkVersion: Int = 30
+    @TarsField(id = 9)
     var wifiSsid: String = "<unknown ssid>"
+    @TarsField(id = 10)
     var wifiBSsid = "02:00:00:00:00:00"
+    @TarsField(id = 11)
     var macAddress = "02:00:00:00:00:00"
-    var netType: NetworkType = NetworkType.WIFI
 
+    var netType: NetworkType = NetworkType.WIFI
+    set(value) {
+        netTypeStr = value.name
+        field = value
+    }
+    @TarsField(id = 12)
+    internal var netTypeStr = netType.name
+
+    @TarsField(id = 13)
     var apn = if (netType == NetworkType.WIFI) {
         "wifi"
     } else {
         "cmnet"
     }
 
+    @TarsField(id = 14)
     var apnName = "中国移动"
+    @TarsField(id = 15)
     var ksid: ByteArray = "31008c9064e89b48f20765fd739edd1f".hex2ByteArray()
 
     // %4;7t>;28<fc.5*6
@@ -59,45 +79,8 @@ class DeviceInfo : TarsStructBase() {
     var tgtgt: ByteArray = MD5.toMD5Byte(Random.nextBytes(16) + guid)
 
     // expamel 1, 0, 0, 127 是倒过来的哦！
+    @TarsField(id = 18)
     var clientIp = byteArrayOf(0, 0, 0, 0)
-
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(imei, 1)
-        output.write(androidId, 2)
-        output.write(imsi, 3)
-        output.write(model, 4)
-        output.write(osType, 5)
-        output.write(brand, 6)
-        output.write(androidVersion, 7)
-        output.write(androidSdkVersion, 8)
-        output.write(wifiSsid, 9)
-        output.write(wifiBSsid, 10)
-        output.write(macAddress, 11)
-        output.write(netType.name, 12)
-        output.write(apn, 13)
-        output.write(apnName, 14)
-        output.write(ksid, 15)
-        output.write(clientIp, 18)
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-        imei = input.read(imei, 1, false)
-        androidId = input.read(androidId, 2, false)
-        imsi = input.read(imsi, 3, false)
-        model = input.read(model, 4, false)
-        osType = input.read(osType, 5, false)
-        brand = input.read(brand, 6, false)
-        androidVersion = input.read(androidVersion, 7, false)
-        androidSdkVersion = input.read(androidSdkVersion, 8, false)
-        wifiSsid = input.read(wifiSsid, 9, false)
-        wifiBSsid = input.read(wifiBSsid, 10, false)
-        macAddress = input.read(macAddress, 11, false)
-        netType = NetworkType.valueOf(input.read("netType.name", 12, false))
-        apn = input.read(apn, 13, false)
-        apnName = input.read(apnName, 14, false)
-        ksid = input.read(ksid, 15, false)
-        clientIp = input.read(clientIp, 18, false)
-    }
 
     companion object {
         @JvmStatic

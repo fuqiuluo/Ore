@@ -13,38 +13,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-fun main(args: Array<String>) {
-    println("你好，伏秋洛a,伏秋洛啊啊啊啊啊，这是伏秋洛！！！")
-    println(TarsTest().servantName())
-}
-
-@TarsClass(
-    requireRead = true,
-    servantName = "你好世界",
-    requireWrite = true
-)
-class TarsTest : TarsStructBase() {
-    @TarsField(id = 1)
-    var field1 : Int = 0
-
-    @TarsField(id = 2)
-    lateinit var f2 : String
-
-    @TarsField(id = 666, require = true)
-    var f3 : Byte = 0
-
-    @TarsField(id = 45, require = false)
-    lateinit var hhh : ByteArray
-
-    @TarsField(id = 445, require = false)
-    lateinit var tt : ByteArray
-
-    @TarsMethod(fieldTag = 45)
-    fun test() {
-
-    }
-}
-
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
@@ -103,7 +71,7 @@ fun main() {
     }
 
 
-    // ore.login()
+    ore.login()
     // ore.tokenLogin()
 
 

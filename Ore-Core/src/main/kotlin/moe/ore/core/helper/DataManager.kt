@@ -31,12 +31,11 @@ import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil.checkAccount
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.*
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 
+@TarsClass(requireWrite = true, requireRead = true)
 class DataManager private constructor(
         val uin: Long,
         /**
@@ -71,19 +70,33 @@ class DataManager private constructor(
     /**
      * 保存各种Token
      */
+    @TarsField(id = 3)
     var userSigInfo: UserSigInfo = UserSigInfo()
 
     /**
      * 模拟的安卓信息
      */
+    @TarsField(id = 4)
     var deviceInfo = DeviceInfo()
+
     var protocolType: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+    set(value) {
+        // 被更改时 连 str 一起更改
+        protocolTypeStr = value.name
+        field = value
+    }
+    @TarsField(id = 5)
+    private var protocolTypeStr = protocolType.name
 
     init {
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
                 readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
+                // 读完成以后 尝试转类型
+                // 因为是runCatching 有错误捕捉 不用担心错误
+                deviceInfo.netType = DeviceInfo.NetworkType.valueOf(deviceInfo.netTypeStr)
+                protocolType = ProtocolInternal.ProtocolType.valueOf(protocolTypeStr)
             }
         }
     }
@@ -103,20 +116,6 @@ class DataManager private constructor(
 
     fun flush() {
         FileUtil.saveFile(dataPath, toByteArray())
-    }
-
-    @Override
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(userSigInfo, 3)
-        output.write(deviceInfo, 4)
-        output.write(protocolType.name, 5)
-    }
-
-    @Override
-    override fun readFrom(input: TarsInputStream) {
-        userSigInfo = input.read(userSigInfo, 3, false)
-        deviceInfo = input.read(deviceInfo, 4, false)
-        protocolType = ProtocolInternal.ProtocolType.valueOf(input.read("", 5, false))
     }
 
     companion object {
