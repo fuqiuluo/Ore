@@ -28,10 +28,6 @@ import kotlin.properties.Delegates
  * Ore实体对象接口文件
  */
 abstract class Ore(val uin : Long) {
-    init {
-
-    }
-
     /**
      * 机器人状态
      */

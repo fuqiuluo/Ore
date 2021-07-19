@@ -4,8 +4,8 @@ import kotlinx.io.core.ByteReadPacket
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
 import kotlinx.io.core.readUShort
-import moe.ore.api.Ore
 import moe.ore.api.listener.OreListener
+import moe.ore.api.listener.QRLoginListener
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.bot.BytesTicket
@@ -101,6 +101,7 @@ class QRLoginHelper(
                                 ore.qrLogin()
 
                                 this.manager.destroy(false) // uin 为 0的玩意解除占用直接销毁
+                                this.client.close()
                             }
                             17 -> listener?.onQRExpired()
                             48 -> {
@@ -144,40 +145,6 @@ class QRLoginHelper(
     private fun getQRCode() = WtLoginGetQR().apply {
         this@QRLoginHelper.shareKey = this.shareKey()
     }.sendTo(client)
-}
-
-interface QRLoginListener {
-    /**
-     * 二维码确认成功
-     * 但是没有登录
-     * 过一会就自动登录了哦
-     */
-    fun onQRSuccess(ore : Ore)
-
-    /**
-     * 二维码过期
-     */
-    fun onQRExpired()
-
-    /**
-     * 成功获取到二维码
-     */
-    fun onGetQRSuccess(imgBuf : ByteArray)
-
-    /**
-     * 获取二维码失败
-     */
-    fun onGetQRFailure()
-
-    /**
-     * 连接服务器失败
-     */
-    fun onFailConnect()
-
-    /**
-     * 有设备扫描了二维码，但没有确认登录
-     */
-    fun onScanCode()
 }
 
 internal inline fun ByteArray.readWloginPacket(key: ByteArray, block: (result: Int, subCmd : Int, ByteArray) -> Unit) {
