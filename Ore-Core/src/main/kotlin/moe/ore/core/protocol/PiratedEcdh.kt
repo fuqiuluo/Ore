@@ -21,7 +21,7 @@
 
 package moe.ore.core.protocol
 
-import com.google.crypto.tink.config.TinkConfig
+//import com.google.crypto.tink.config.TinkConfig
 import moe.ore.helper.hex2ByteArray
 import moe.ore.util.MD5
 import java.security.KeyFactory
@@ -61,7 +61,7 @@ class PiratedEcdh(
     lateinit var pkcs8PrivateKey : PrivateKey
 
     init {
-        TinkConfig.register()
+//        TinkConfig.register()
         if(initShareKeyByBouncycastle() == 0) {
             hasBcLib = true
             println("can use ecdh lib")

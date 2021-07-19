@@ -8,3 +8,4 @@ fun Int.toByteArray(): ByteArray = BytesUtil.int32ToBuf(this)
 
 fun Long.toByteArray(): ByteArray = BytesUtil.int64ToBuf(this)
 
+fun Int.toHexString(): String = Integer.toHexString(this)

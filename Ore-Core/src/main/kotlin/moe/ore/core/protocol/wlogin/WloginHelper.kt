@@ -23,7 +23,6 @@ import moe.ore.helper.toByteReadPacket
 import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
-import okhttp3.internal.toHexString
 
 class WloginHelper(val uin : Long,
                    private val client: BotClient,

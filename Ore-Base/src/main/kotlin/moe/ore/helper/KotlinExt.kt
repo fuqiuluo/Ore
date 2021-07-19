@@ -57,3 +57,11 @@ fun timeoutEvent(time : Long, block : TimerTask.() -> Unit) : Timer {
     }, time)
     return timer
 }
+fun Closeable.closeQuietly() {
+    try {
+        close()
+    } catch (rethrown: RuntimeException) {
+        throw rethrown
+    } catch (_: Exception) {
+    }
+}
