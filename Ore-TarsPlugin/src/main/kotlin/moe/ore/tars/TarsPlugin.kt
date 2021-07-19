@@ -39,8 +39,11 @@ class TarsPlugin : Plugin<Project> {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
                             if(classFile.absolutePath.endsWith(".class")) {
                                 val bytes = FileUtil.readFile(classFile)
-                                val out = CompileTars.compileDir(bytes)
-                                FileUtil.saveFile(classFile.absolutePath, out)
+                                // 不包含基础类 不处理
+                                if(String(bytes).contains("TarsStructBase")) {
+                                    val out = CompileTars.compileDir(bytes)
+                                    FileUtil.saveFile(classFile.absolutePath, out)
+                                }
                             }
                         }
                         println("finish build tars file")

@@ -2,28 +2,27 @@ import moe.ore.tars.TarsInputStream;
 import moe.ore.tars.TarsStructBase;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class test extends TarsStructBase {
-    public char aa;
-    private static Byte a;
-    private static Short b;
-    private static Integer c;
-    private static Character d;
-    private static Long l;
-    private static Float aFloat;
-    private static Double aDouble;
-    private static Duix[] cache_dx;
-    private Duix[] dx;
+    private static Map<Character, Duix> cache_dx;
+    private Map<Character, Duix> dx;
 
     static class Duix {
-        int a = 0;
+
     }
 
     @Override
     public void readFrom(@NotNull TarsInputStream input) {
         if(cache_dx == null) {
-            cache_dx = new Duix[1];
-            cache_dx[0] = new Duix();
+            cache_dx = new HashMap<>();
+            cache_dx.put(Character.valueOf('0'), new Duix());
         }
-        this.dx = (Duix[]) input.read(cache_dx, 1, false);
+        this.dx = (Map<Character, Duix>) input.read(cache_dx, 1, false);
+
+
     }
 }

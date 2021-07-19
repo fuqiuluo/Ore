@@ -4,6 +4,7 @@ data class FieldInfo(
     val name : String,
     val id : Int,
     val type : String,
+    val sign : String? = null,
     val require : Boolean = false
 )
 
@@ -33,6 +34,10 @@ fun FieldInfo.isTarsObject(): Boolean {
     return false
 }
 
-fun FieldInfo.isBaseType() = BaseTypeArray.contains(this.type)
+fun FieldInfo.isBaseType() = isBaseType(this.type)
 
-fun FieldInfo.needCheckNull() = !NotNeedCheck.contains(this.type)
+fun FieldInfo.needCheckNull() = needCheckNull(this.type)
+
+fun isBaseType(string: String) = BaseTypeArray.contains(string)
+
+fun needCheckNull(string: String) = !NotNeedCheck.contains(string)

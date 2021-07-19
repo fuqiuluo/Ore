@@ -10,6 +10,8 @@ import moe.ore.group.TroopManagerWeb
 import moe.ore.tars.*
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 fun main(args: Array<String>) {
     println("你好，伏秋洛a,伏秋洛啊啊啊啊啊，这是伏秋洛！！！")
@@ -32,7 +34,7 @@ class TarsTest : TarsStructBase() {
     var f3 : Byte = 0
 
     @TarsField(id = 45, require = false)
-    lateinit var hhh : Array<Objsua>
+    lateinit var hhh : HashMap<Objsua, Objsua>
 
     class Objsua : TarsStructBase() {
 

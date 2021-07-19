@@ -11,7 +11,6 @@ object CompileTars {
 
         val cv = object : ClassVisitor(ASM9, cw) {
             private lateinit var className : String
-            private var hasCInitMethod = false
             private var isTarsClass = false
 
             private var requireRead : Boolean = false
@@ -78,6 +77,7 @@ object CompileTars {
                 signature: String?,
                 value: Any?
             ): FieldVisitor {
+                println("super.visitField($access, $name, $fieldType, $signature, $value)")
                 return object : FieldVisitor(ASM9, super.visitField(access, name, fieldType, signature, value)) {
                     // 读取注解获取tag
                     override fun visitAnnotation(annotationType: String?, visible: Boolean): AnnotationVisitor {
@@ -103,6 +103,7 @@ object CompileTars {
                                         name = name,
                                         id = tag,
                                         type = fieldType,
+                                        sign = signature,
                                         require = require
                                     )
                                 }
@@ -195,6 +196,157 @@ object CompileTars {
                     mv.visitJumpInsn(IFNONNULL, gtLabel)
 
                     when {
+                        type == "Ljava/util/HashMap;" -> {
+                            // Ljava/util/HashMap<Ljava/lang/Byte;LTarsTest$Objsua;>;
+                            val allType = field.sign!!.substring(19).let { it.substring(0, it.length - 2) }.split(";")
+                            // 0 key 1 value 2 empty
+                            val keyType = allType[0].substring(1)
+                            val newClassName = allType[1].substring(1)
+                            mv.visitTypeInsn(NEW, "java/util/HashMap")
+                            mv.visitInsn(DUP)
+                            mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashMap", "<init>", "()V", false)
+                            mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                            when(keyType) {
+                                "java/lang/Byte" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Short" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Integer" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Long" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Float" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Double" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitInsn(ICONST_0)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/Character" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitIntInsn(BIPUSH, 48)
+                                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false)
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                "java/lang/String" -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                    mv.visitLdcInsn("")
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                                else -> {
+                                    mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+
+                                    mv.visitTypeInsn(NEW, keyType)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, keyType, "<init>", "()V", false)
+
+                                    mv.visitTypeInsn(NEW, newClassName)
+                                    mv.visitInsn(DUP)
+                                    mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                                    mv.visitInsn(POP)
+                                }
+                            }
+                        }
+                        type == "Ljava/util/Map;" -> {
+
+                        }
+                        type == "Ljava/util/ArrayList;" -> {
+                            try {
+                                // Ljava/util/ArrayList<Lxxx;>;
+                                val valueType = field.sign!!.substring(21).let { it.substring(0, it.length - 2) }
+                                // Lxxx;
+                                val newClassName = valueType.substring(1).let { it.substring(0, it.length - 1) }
+                                // list装的一定是对象 则不可能是 baseValue
+                                mv.visitTypeInsn(NEW, "java/util/ArrayList")
+                                mv.visitInsn(DUP)
+                                mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false)
+                                mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                                mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                mv.visitTypeInsn(NEW, newClassName)
+                                mv.visitInsn(DUP)
+                                mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/ArrayList", "add", "(Ljava/lang/Object;)Z", true)
+                                mv.visitInsn(POP)
+                            } catch (e : Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        type == "Ljava/util/List;" -> {
+                            // list value 签名丢失将导致无法合成 list的cache 故请使用jdk6以上
+                            try {
+                                // Ljava/util/List<Lxxx;>;
+                                val valueType = field.sign!!.substring(16).let { it.substring(0, it.length - 2) }
+                                // Lxxx;
+                                val newClassName = valueType.substring(1).let { it.substring(0, it.length - 1) }
+                                // list装的一定是对象 则不可能是 baseValue
+                                mv.visitTypeInsn(NEW, "java/util/ArrayList")
+                                mv.visitInsn(DUP)
+                                mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false)
+                                mv.visitFieldInsn(PUTSTATIC, className, cacheName, type)
+                                mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
+                                mv.visitTypeInsn(NEW, newClassName)
+                                mv.visitInsn(DUP)
+                                mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
+                                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true)
+                                mv.visitInsn(POP)
+                            } catch (e : Exception) {
+                                e.printStackTrace()
+                            }
+                        }
                         type.startsWith("[") -> {
                             // 如果是array [Lxxx;
                             val newClassName = type.substring(2).let { it.substring(0, it.length - 1) }
@@ -261,7 +413,7 @@ object CompileTars {
             mv.visitMaxs(5, 2)
             mv.visitEnd()
         }
-        cacheMap.forEach { (name, field) -> visitField(ACC_PRIVATE + ACC_STATIC, name, field.type, null, null).apply { visitEnd() } }
+        cacheMap.forEach { (name, field) -> visitField(ACC_PRIVATE + ACC_STATIC, name, field.type, field.sign, null).apply { visitEnd() } }
     }
 
     private fun ClassVisitor.servantName(servantName : String) {
