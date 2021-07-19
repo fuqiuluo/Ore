@@ -82,14 +82,14 @@ subprojects {
         implementation 'org.jetbrains.kotlinx:kotlinx-io-jvm:0.1.16'
 
         // kotlin 协程
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-io-jvm:0.1.16'
+//        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+//        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.0'
+//        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-io-jvm:0.1.16'
 
-        implementation 'org.jetbrains.kotlinx:atomicfu:0.16.2'
-        implementation 'org.jetbrains.kotlin:kotlin-util-io:1.5.0'
-        implementation 'com.google.crypto.tink:tink:1.6.0'
-        implementation "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.4"
+//        implementation 'org.jetbrains.kotlinx:atomicfu:0.16.2'
+//        implementation 'org.jetbrains.kotlin:kotlin-util-io:1.5.0'
+//        implementation 'com.google.crypto.tink:tink:1.6.0'
+//        implementation "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.4"
     }
 }
 

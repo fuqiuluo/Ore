@@ -3,7 +3,9 @@ package moe.ore.tars
 import moe.ore.tars.util.FileUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.konan.file.File
+import java.io.File
+
+//import org.jetbrains.kotlin.konan.file.File
 
 class TarsPlugin : Plugin<Project> {
     override fun apply(project: Project) {

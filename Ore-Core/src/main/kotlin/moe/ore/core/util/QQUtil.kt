@@ -25,9 +25,8 @@ import moe.ore.core.net.SsoServerInfoReq
 import moe.ore.core.net.SsoServerInfoResp
 import moe.ore.helper.*
 import moe.ore.tars.UniPacket
-import moe.ore.util.OkhttpUtil
+import moe.ore.util.HttpUtils
 import moe.ore.util.TeaUtil
-import okhttp3.RequestBody.Companion.toRequestBody
 
 object QQUtil {
     @JvmStatic
@@ -98,7 +97,7 @@ object QQUtil {
     }
 
     @JvmStatic
-    fun getOicqServer(appId : Long = 0x200300b9) : Pair<String, Int>? {
+    fun getOicqServer(appId: Long = 0x200300b9): Pair<String, Int>? {
         val isUseDebugSo = false
         try {
             val uniPacket = UniPacket()
@@ -125,12 +124,9 @@ object QQUtil {
                 }
             }.toByteArray(), ConfigSvrKey)
             val url = if (isUseDebugSo) "https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist" else "https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist"
-            val resp = OkhttpUtil().also { it.defaultUserAgent() }.post(url, encrypt.toRequestBody())
-            val code = resp.code
-            if(code == 200) {
-                val result = resp.body?.bytes()
-                resp.close()
-                val decrypt = TeaUtil.decrypt(result!!, ConfigSvrKey)
+            val result = HttpUtils().post(url, encrypt)
+            result?.let {
+                val decrypt = TeaUtil.decrypt(result, ConfigSvrKey)
                 val decode = UniPacket.decode(decrypt, 4)
                 val findByClass = decode.findByClass("HttpServerListRes", SsoServerInfoResp())
                 val info = findByClass.b!![0]
@@ -138,7 +134,8 @@ object QQUtil {
                 println("get sso server by configsvr : $ret")
                 return ret
             }
-        } catch (e : Exception) { }
+        } catch (e: Exception) {
+        }
         return null
     }
 
