@@ -57,6 +57,10 @@ enum class OreStatus {
     ReconnectFail,
 
     /**
+     * 重连成功
+     */
+    ReconnectSuccess,
+    /**
      * 在别的地方登录
      *
      * 掉线了，已下线，需要手动重新连接
