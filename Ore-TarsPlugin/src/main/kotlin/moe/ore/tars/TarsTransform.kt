@@ -26,8 +26,6 @@ class TarsTransform(
     private lateinit var className : String
 
     fun transform() {
-        println("start transform by qiuluo...")
-        // 做好解析工作
         println("tars task result : " + doLast(doFirst()))
     }
 
@@ -334,7 +332,8 @@ class TarsTransform(
                                     mv.visitTypeInsn(NEW, newClassName)
                                     mv.visitInsn(DUP)
                                     mv.visitMethodInsn(INVOKESPECIAL, newClassName, "<init>", "()V", false)
-                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/ArrayList", "add", "(Ljava/lang/Object;)Z", true)
+                                    //
+                                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true)
                                     mv.visitInsn(POP)
                                 } catch (e : Exception) {
                                     e.printStackTrace()
@@ -365,7 +364,6 @@ class TarsTransform(
                             type.startsWith("[") -> {
                                 // 如果是array [Lxxx;
                                 var newClassName = type.substring(1)
-                                println("new classes name : $newClassName")
                                 if(newClassName.startsWith("L")) {
                                     newClassName = newClassName.substring(1).let { it.substring(0, it.length - 1) }
                                     mv.visitInsn(ICONST_1)
@@ -522,7 +520,6 @@ class TarsTransform(
 
     private fun doFirst() : ClassNode? {
         val clz = AsmUtil.bufToClassNode(bytes)
-        println("do_first for ${clz.name}")
         if(clz.hasAnnotation(ANNOTATION_TARS_CLASS, true)) {
             println("Class[${clz.name}] is tars class.")
             this.className = clz.name
@@ -597,7 +594,6 @@ class TarsTransform(
         }
 
         TarsUtil.quickSort(fieldList).forEach {
-            println(it)
             this.fields[it.id] = it
         }
     }

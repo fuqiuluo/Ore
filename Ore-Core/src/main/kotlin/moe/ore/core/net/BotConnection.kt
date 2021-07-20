@@ -57,8 +57,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     //    max1个线程池 不允许再多
     private val scheduler = Executors.newScheduledThreadPool(1)
 
-    private lateinit var socketChannel: SocketChannel
-
     // 单位：秒
     private var baseIdleTime: Long = 5 * 60
 
@@ -126,8 +124,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 .handler(object : ChannelInitializer<SocketChannel>() {
                     public override fun initChannel(socketChannel: SocketChannel) {
                         // 注意添加顺序决定执行的先后
-                        this@BotConnection.socketChannel = socketChannel
-                        // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
                         socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 5, baseIdleTime, baseIdleTime + 10, TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
@@ -144,6 +140,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
      */
     fun setNewIdleStateHandlerTime(newBaseIdleTime: Int) {
         this.baseIdleTime = newBaseIdleTime.toLong()
+        val socketChannel = channelFuture.channel()
         runCatching {
             socketChannel.pipeline().remove("ping")
         }
