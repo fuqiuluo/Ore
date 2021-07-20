@@ -87,6 +87,13 @@ class BotClient(val uin: Long) {
         } }
     }, uin)
 
+    /**
+     * 设置心跳间隔
+     */
+    fun setHeartbeatInterval(time : Int) {
+
+    }
+
     fun registerCommonHandler(handler: Handler): SingleHandler {
         commonHandler[handler.hashCode()] = handler
         return handler as SingleHandler

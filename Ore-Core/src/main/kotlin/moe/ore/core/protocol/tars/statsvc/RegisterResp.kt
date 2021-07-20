@@ -10,7 +10,7 @@ import moe.ore.tars.TarsStructBase
 )
 class RegisterResp : TarsStructBase() {
     @TarsField(id = 9)
-    var bCrashFlag: Byte = 0
+    var bCrashFlag: Byte = 0 // 失败类型 失败的原因
 
     @TarsField(id = 14)
     var bLargeSeqUpdate: Byte = 0
@@ -28,19 +28,16 @@ class RegisterResp : TarsStructBase() {
     var bytes_0x769_rspbody: ByteArray? = null
 
     @TarsField(id = 2)
-    var cReplyCode: Byte = 0
+    var cReplyCode: Byte = -1 // 返回的状态标志 -1 是彻头彻尾的失败
 
     @TarsField(id = 11)
     var iClientPort = 0
-
-    @TarsField(id = 12)
-    var iHelloInterval = 300
 
     @TarsField(id = 13)
     var iLargeSeq: Long = 0
 
     @TarsField(id = 16)
-    var iStatus = 0
+    var iStatus = 0 // 当前在线状态
 
     @TarsField(id = 1)
     var lBid: Long = 0
@@ -60,12 +57,15 @@ class RegisterResp : TarsStructBase() {
     @TarsField(id = 8)
     var timeStamp: Long = 0
 
+    @TarsField(id = 12)
+    var iHelloInterval = 300 // 心跳间隔 单位(秒)
+
     @TarsField(id = 19)
-    var uClientAutoStatusInterval: Long = 600
+    var uClientAutoStatusInterval: Long = 600 // 间隔刷新
 
     @TarsField(id = 18)
-    var uClientBatteryGetInterval: Long = 86400
+    var uClientBatteryGetInterval: Long = 86400 //
 
     @TarsField(id = 17)
-    var uExtOnlineStatus: Long = 0
+    var uExtOnlineStatus: Long = 0 // 扩展在线状态
 }
