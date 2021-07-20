@@ -49,7 +49,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
 
     //    private val eventListener: EventListener = EventListener(this)
-    private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
+    val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)
 

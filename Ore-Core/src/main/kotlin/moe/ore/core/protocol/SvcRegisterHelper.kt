@@ -24,7 +24,7 @@ class SvcRegisterHelper(val uin: Long) {
     val protocolInfo = ProtocolInternal[manager.protocolType]
     val session = manager.session
 
-    fun register() : Int {
+    fun register() : RegisterResp {
         val req = RegisterReq (
             lUin = uin,
             /**
@@ -70,9 +70,9 @@ class SvcRegisterHelper(val uin: Long) {
             secondToken = userStSig.tgt.ticket()
         ) sync 5 * 1000
         return if(from != null) {
-            TarsUtil.decodeRequest(RegisterResp(), from.body).cReplyCode.toInt()
+            TarsUtil.decodeRequest(RegisterResp(), from.body)
         } else {
-            RESULT_REGISTER_FAIL
+            RegisterResp()
         }
     }
 
