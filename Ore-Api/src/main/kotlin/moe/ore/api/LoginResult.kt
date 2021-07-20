@@ -52,7 +52,7 @@ enum class LoginResult {
      */
     RegisterFail,
     /**
-     * 上线失败
+     * token 登录失败
      */
     TokenLoginError
 }

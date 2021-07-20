@@ -76,6 +76,14 @@ object OreManager {
     }
 
     @JvmStatic
+    internal fun getStatus(uin: Long) : OreStatus? {
+        getBot(uin)?.let {
+           return (it as OreBot).status()
+        }
+        return null
+    }
+
+    @JvmStatic
     internal fun checkTicketAndRefresh(uin: Long) {
         getBot(uin)?.checkTicketAndRefresh()
     }

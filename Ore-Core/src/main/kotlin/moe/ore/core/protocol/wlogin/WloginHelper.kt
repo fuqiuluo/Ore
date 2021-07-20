@@ -24,7 +24,7 @@ import moe.ore.helper.toHexString
 import moe.ore.util.MD5
 import moe.ore.util.TeaUtil
 
-class WloginHelper(val uin : Long,
+class WloginHelper(val uin: Long,
                    private val client: BotClient,
                    val listener: OreListener? = null) : Thread() {
     private val eventHandler by lazy { EventHandler(listener, client, this) }
@@ -32,17 +32,21 @@ class WloginHelper(val uin : Long,
     private val threadManager = manager.threadManager
     private val ecdh = manager.ecdh
 
-    private var wtMode : Int = 0
+    private var wtMode: Int = 0
 
     override fun run() {
-        when(wtMode) {
+        when (wtMode) {
             MODE_QR_LOGIN -> handle(WtLoginQRToken(uin).sendTo(client), ecdh.shareKey)
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
             MODE_EXCHANGE_EMP_SIG -> handle(WtLoginGetSig(uin).sendTo(client), manager.userSigInfo.wtSessionTicketKey.ticket())
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
             MODE_TOKEN_LOGIN -> {
                 val ret = SvcRegisterHelper(uin).register()
-                if(ret.cReplyCode.toInt() == 0) {
+                if (ret == 0) {
+                    val status = OreManager.getStatus(uin)
+                    if (status != null && status == OreStatus.Reconnecting) {
+                        OreManager.changeStatus(uin, OreStatus.ReconnectSuccess)
+                    }
                     OreManager.changeStatus(uin, OreStatus.Online)
                 } else {
                     OreManager.changeStatus(uin, OreStatus.ReconnectFail)
@@ -58,7 +62,7 @@ class WloginHelper(val uin : Long,
         } else {
             from.body.readWtLoginPacket(key) { result, tlvMap ->
                 println("tlvMap: " + tlvMap.keys.map { "0x" + it.toHexString() })
-                when(result) {
+                when (result) {
                     0 -> eventHandler.onSuccess(tlvMap[0x119])
                     1 -> eventHandler.onPasswordWrong()
                     2 -> eventHandler.onCaptcha(tlvMap)
@@ -127,9 +131,9 @@ class WloginHelper(val uin : Long,
     }
 
     class EventHandler(
-        private val listener: OreListener?,
-        private val client: BotClient,
-        private val helper: WloginHelper
+            private val listener: OreListener?,
+            private val client: BotClient,
+            private val helper: WloginHelper
     ) {
         private val manager = DataManager.manager(helper.uin)
         private val userStInfo = manager.userSigInfo
@@ -140,7 +144,7 @@ class WloginHelper(val uin : Long,
             listener?.runCatching { listener.onLoginFinish(result) }
         }
 
-        fun onSuccess(t119 : ByteArray?) {
+        fun onSuccess(t119: ByteArray?) {
             t119?.let { source ->
                 val map = decodeTlv(TeaUtil.decrypt(source, when (helper.wtMode) {
                     MODE_PASSWORD_LOGIN -> device.tgtgt
@@ -199,8 +203,8 @@ class WloginHelper(val uin : Long,
                         val pskey = readString(readUShort().toInt())
                         val p4token = readString(readUShort().toInt())
                         session.pSKeyMap[domain] = hashMapOf(
-                            "pskey" to strTicket(pskey),
-                            "p4token" to strTicket(p4token)
+                                "pskey" to strTicket(pskey),
+                                "p4token" to strTicket(p4token)
                         )
                         // println(domain + " ==> " + session.pSKeyMap[domain])
                     }
@@ -292,12 +296,12 @@ class WloginHelper(val uin : Long,
                     val version = readByte()
                     repeat(readUByte().toInt()) {
                         userStInfo.extraDataList.add(
-                            LoginExtraData(
-                                uin = readLong(),
-                                ip = readBytes(4),
-                                time = readInt(),
-                                appId = readInt()
-                            )
+                                LoginExtraData(
+                                        uin = readLong(),
+                                        ip = readBytes(4),
+                                        time = readInt(),
+                                        appId = readInt()
+                                )
                         )
                     }
                 }
@@ -354,14 +358,11 @@ class WloginHelper(val uin : Long,
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 
-                if(ret.cReplyCode.toInt() == 0) {
+                if (ret == 0) {
                     // 清空回滚
                     session.rollBackCount = 0
                     OreManager.changeStatus(helper.uin, OreStatus.Online)
                     callback(LoginResult.Success)
-
-
-
                 } else callback(LoginResult.RegisterFail)
 
 
@@ -397,7 +398,7 @@ class WloginHelper(val uin : Long,
             helper.handle(WtLoginDevicePass(helper.uin, t402, session.randSeed).sendTo(client))
         }
 
-        fun onRollback(t161 : ByteArray?) {
+        fun onRollback(t161: ByteArray?) {
             t161?.reader {
                 val tlv = decodeTlv(this)
 
@@ -428,11 +429,11 @@ class WloginHelper(val uin : Long,
             val smsInformation = tlvMap[0x178]!!.let {
                 val reader = it.toByteReadPacket()
                 SmsInformation(
-                    countryCode = reader.readBytes(reader.readUShort().toInt()),
-                    phoneNum = reader.readString(reader.readUShort().toInt()),
-                    smsStatus = reader.readInt(),
-                    availableMsgCnt = reader.readShort(),
-                    timeLimited = reader.readShort()
+                        countryCode = reader.readBytes(reader.readUShort().toInt()),
+                        phoneNum = reader.readString(reader.readUShort().toInt()),
+                        smsStatus = reader.readInt(),
+                        availableMsgCnt = reader.readShort(),
+                        timeLimited = reader.readShort()
                 )
             } // 手机号什么的
             val noticeStr = String(tlvMap[0x17e]!!) // 提示信息
@@ -458,7 +459,7 @@ class WloginHelper(val uin : Long,
 
                 override fun sendSms(): Result<Boolean> {
                     // 设置一分钟只能获取一次验证码
-                    if(lastGetTime + timeLimited <= System.currentTimeMillis()) {
+                    if (lastGetTime + timeLimited <= System.currentTimeMillis()) {
                         lastGetTime = System.currentTimeMillis()
                         val sender = WtLoginGetSmsCode(helper.uin).sendTo(client)
                         (sender sync 20 * 1000)?.body?.readWtLoginPacket(helper.ecdh.shareKey) { result, tlvMap ->
@@ -472,7 +473,7 @@ class WloginHelper(val uin : Long,
                                 println(String(it))
                             }
 
-                            return when(result) {
+                            return when (result) {
                                 161 -> Result(161, "今日操作次数过多，请等待一天后再试。", false)
                                 162 -> Result(162, "频繁发送验证码，请稍后再试。", false)
                                 160 -> {
@@ -561,9 +562,9 @@ internal fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
 }
 
 data class SmsInformation(
-    val countryCode : ByteArray,
-    val phoneNum : String,
-    val smsStatus : Int,
-    val availableMsgCnt : Short,
-    val timeLimited : Short
+        val countryCode: ByteArray,
+        val phoneNum: String,
+        val smsStatus: Int,
+        val availableMsgCnt: Short,
+        val timeLimited: Short
 )

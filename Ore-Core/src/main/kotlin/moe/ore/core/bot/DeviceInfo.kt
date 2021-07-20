@@ -1,5 +1,7 @@
 package moe.ore.core.bot
 
+import kotlinx.io.core.toByteArray
+import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.hex2ByteArray
 import moe.ore.tars.*
 import moe.ore.util.BytesUtil
@@ -76,6 +78,10 @@ class DeviceInfo : TarsStructBase() {
     // expamel 1, 0, 0, 127 是倒过来的哦！
     @TarsField(id = 18)
     var clientIp = byteArrayOf(0, 0, 0, 0)
+
+
+    @TarsField(id = 19)
+    var deviceReport = DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())
 
     companion object {
         @JvmStatic
