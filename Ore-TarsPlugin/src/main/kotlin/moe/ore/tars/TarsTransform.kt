@@ -104,7 +104,7 @@ class TarsTransform(
                 } else {
                     if(field.isTarsObject()) {
                         val cacheName = "cache_$name"
-                        clz.fields.add(FieldNode(ACC_PUBLIC + ACC_STATIC, cacheName, type, null, null))
+                        clz.fields.add(FieldNode(ACC_PRIVATE + ACC_STATIC, cacheName, type, field.sign, null))
                         val gtLabel = Label()
                         mv.visitFieldInsn(GETSTATIC, className, cacheName, type)
                         mv.visitJumpInsn(IFNONNULL, gtLabel)
