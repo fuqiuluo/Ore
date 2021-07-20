@@ -5,6 +5,7 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
+import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.helper.DataManager
 import moe.ore.group.TroopManagerWeb
 import moe.ore.tars.*

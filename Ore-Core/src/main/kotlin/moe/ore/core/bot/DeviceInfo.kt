@@ -51,13 +51,8 @@ class DeviceInfo : TarsStructBase() {
     @TarsField(id = 11)
     var macAddress = "02:00:00:00:00:00"
 
+    @TarsField(id = 12, isEnum = true)
     var netType: NetworkType = NetworkType.WIFI
-    set(value) {
-        netTypeStr = value.name
-        field = value
-    }
-    @TarsField(id = 12)
-    internal var netTypeStr = netType.name
 
     @TarsField(id = 13)
     var apn = if (netType == NetworkType.WIFI) {

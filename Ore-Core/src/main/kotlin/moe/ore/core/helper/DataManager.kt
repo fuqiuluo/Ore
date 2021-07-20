@@ -78,25 +78,14 @@ class DataManager private constructor(
      */
     @TarsField(id = 4)
     var deviceInfo = DeviceInfo()
-
+    @TarsField(id = 5, isEnum = true)
     var protocolType: ProtocolInternal.ProtocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
-    set(value) {
-        // 被更改时 连 str 一起更改
-        protocolTypeStr = value.name
-        field = value
-    }
-    @TarsField(id = 5)
-    private var protocolTypeStr = protocolType.name
 
     init {
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
                 readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
-                // 读完成以后 尝试转类型
-                // 因为是runCatching 有错误捕捉 不用担心错误
-                deviceInfo.netType = DeviceInfo.NetworkType.valueOf(deviceInfo.netTypeStr)
-                protocolType = ProtocolInternal.ProtocolType.valueOf(protocolTypeStr)
             }
         }
     }

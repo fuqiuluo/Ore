@@ -14,7 +14,7 @@ annotation class TarsClass(
 annotation class TarsField (
     val id : Int,
     val require : Boolean = false,
-    val prepMethod : String = ""
+    val isEnum : Boolean = false
 )
 
 @Target(AnnotationTarget.FUNCTION)

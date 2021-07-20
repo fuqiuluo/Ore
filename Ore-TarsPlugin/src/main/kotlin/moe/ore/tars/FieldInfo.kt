@@ -5,7 +5,8 @@ data class FieldInfo(
     val id : Int,
     val type : String,
     val sign : String? = null,
-    val require : Boolean = false
+    val require : Boolean = false,
+    val isEnum : Boolean = false
 ) {
     val bindMethod : ArrayList<MethodInfo> = arrayListOf()
 
