@@ -47,7 +47,8 @@ import kotlin.random.Random
 class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
-//    private val eventListener: EventListener = EventListener(this)
+
+    //    private val eventListener: EventListener = EventListener(this)
     private val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)
@@ -55,6 +56,8 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     //    max1个线程池 不允许再多
     private val scheduler = Executors.newScheduledThreadPool(1)
 
+    private lateinit var socketChannel: SocketChannel
+    private var baseIdleTime: Long = 1000 * 60
     fun close() {
         if (this::channelFuture.isInitialized) {
             println("exec close the client")
@@ -73,7 +76,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
             try {
                 channelFuture = init(Bootstrap()).connect(host, port)
                 channelFuture.addListener(usefulListener).sync()
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -95,14 +98,14 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     companion object {
         private val oicqServer = arrayOf(
-            "msfwifi.3g.qq.com" to 8080,
-            // "14.215.138.110" to 8080,
-            // 这个服务器，连不上
+                "msfwifi.3g.qq.com" to 8080,
+                // "14.215.138.110" to 8080,
+                // 这个服务器，连不上
 //            "113.96.12.224" to 8080, "157.255.13.77" to 14000, "120.232.18.27" to 443, "183.3.235.162" to 14000, "163.177.89.195" to 443,
-            // "183.232.94.44" to 80,
-            // 不可接通的服务器
+                // "183.232.94.44" to 80,
+                // 不可接通的服务器
 //            "203.205.255.224" to 8080, "203.205.255.221" to 8080 ,
-            "msfwifiv6.3g.qq.com" to 8080
+                "msfwifiv6.3g.qq.com" to 8080
         )
     }
 
@@ -111,24 +114,29 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
             nioEventLoopGroup = NioEventLoopGroup()
         }
         bootstrap.group(nioEventLoopGroup)
-            .option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE)
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-            .channel(NioSocketChannel::class.java as Class<out Channel>)
-            .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
-            .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
-            .handler(object : ChannelInitializer<SocketChannel>() {
-            public override fun initChannel(socketChannel: SocketChannel) {
-                // 注意添加顺序决定执行的先后
-
-                // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
-                socketChannel.pipeline().addLast("ping", IdleStateHandler(1000 * (60 + 5), 1000 * 60, 1000 * (60 + 10), TimeUnit.MILLISECONDS))
-                socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
-                socketChannel.pipeline().addLast("decoder", BotDecoder())
-                socketChannel.pipeline().addLast("handler", usefulListener)
-                socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
+                .option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                .channel(NioSocketChannel::class.java as Class<out Channel>)
+                .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
+                .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
+                .handler(object : ChannelInitializer<SocketChannel>() {
+                    public override fun initChannel(socketChannel: SocketChannel) {
+                        // 注意添加顺序决定执行的先后
+                        this@BotConnection.socketChannel = socketChannel
+                        // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
+                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
+                        socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
+                        socketChannel.pipeline().addLast("decoder", BotDecoder())
+                        socketChannel.pipeline().addLast("handler", usefulListener)
+                        socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
 //                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
-            }
-        })
+                    }
+                })
         return bootstrap
+    }
+
+    fun setNewIdleStateHandlerTime(baseIdleTime: Long) {
+        this.baseIdleTime = baseIdleTime
+        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
     }
 }
