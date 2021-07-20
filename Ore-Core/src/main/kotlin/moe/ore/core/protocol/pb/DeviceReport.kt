@@ -34,4 +34,4 @@ data class DeviceReport(
     var androidId: ByteArray,
     var baseband: ByteArray,
     var innerVer: ByteArray
-)
+) 
