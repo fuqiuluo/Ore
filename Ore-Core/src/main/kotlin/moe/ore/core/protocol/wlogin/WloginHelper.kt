@@ -42,7 +42,7 @@ class WloginHelper(val uin: Long,
             MODE_EXCHANGE_EMP_ST -> handle(WtLoginGetSt(uin).sendTo(client), ecdh.shareKey)
             MODE_TOKEN_LOGIN -> {
                 val ret = SvcRegisterHelper(uin).register()
-                if (ret == 0) {
+                if (ret.cReplyCode.toInt() == 0) {
                     val status = OreManager.getStatus(uin)
                     if (status != null && status == OreStatus.Reconnecting) {
                         OreManager.changeStatus(uin, OreStatus.ReconnectSuccess)
@@ -358,7 +358,7 @@ class WloginHelper(val uin: Long,
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 
-                if (ret == 0) {
+                if (ret.cReplyCode.toInt() == 0) {
                     // 清空回滚
                     session.rollBackCount = 0
                     OreManager.changeStatus(helper.uin, OreStatus.Online)
