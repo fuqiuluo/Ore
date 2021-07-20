@@ -16,6 +16,7 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.SvcRegisterHelper
+import moe.ore.core.protocol.tars.statsvc.RegisterResp
 import moe.ore.core.protocol.wlogin.request.*
 import moe.ore.helper.readString
 import moe.ore.helper.reader
@@ -43,6 +44,7 @@ class WloginHelper(val uin: Long,
             MODE_TOKEN_LOGIN -> {
                 val ret = SvcRegisterHelper(uin).register()
                 if (ret.cReplyCode.toInt() == 0) {
+                    eventHandler.onRegisterSuccess(ret)
                     val status = OreManager.getStatus(uin)
                     if (status != null && status == OreStatus.Reconnecting) {
                         OreManager.changeStatus(uin, OreStatus.ReconnectSuccess)
@@ -142,6 +144,12 @@ class WloginHelper(val uin: Long,
 
         fun callback(result: LoginResult) {
             listener?.runCatching { listener.onLoginFinish(result) }
+        }
+
+        fun onRegisterSuccess(ret : RegisterResp) {
+            session.clientAutoStatusInterval = ret.uClientAutoStatusInterval
+            session.clientBatteryGetInterval = ret.uClientBatteryGetInterval
+            client.setHeartbeatInterval(ret.iHelloInterval)
         }
 
         fun onSuccess(t119: ByteArray?) {
@@ -362,6 +370,7 @@ class WloginHelper(val uin: Long,
                     // 清空回滚
                     session.rollBackCount = 0
                     OreManager.changeStatus(helper.uin, OreStatus.Online)
+                    onRegisterSuccess(ret)
                     callback(LoginResult.Success)
                 } else callback(LoginResult.RegisterFail)
 

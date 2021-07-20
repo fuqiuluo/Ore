@@ -58,7 +58,10 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     private val scheduler = Executors.newScheduledThreadPool(1)
 
     private lateinit var socketChannel: SocketChannel
-    private var baseIdleTime: Long = 1000 * 60
+
+    // 单位：秒
+    private var baseIdleTime: Long = 5 * 60
+
     fun close() {
         if (this::channelFuture.isInitialized) {
             println("exec close the client")
@@ -125,7 +128,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                         // 注意添加顺序决定执行的先后
                         this@BotConnection.socketChannel = socketChannel
                         // 1分钟内没有发送心跳 1分钟+10秒没有收到数据返回 1分钟+20秒没有如何操作
-                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
+                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 5, baseIdleTime, baseIdleTime + 10, TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
                         socketChannel.pipeline().addLast("handler", usefulListener)
@@ -136,12 +139,14 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         return bootstrap
     }
 
-    fun setNewIdleStateHandlerTime(baseIdleTime: Long) {
-        this.baseIdleTime = baseIdleTime
-        try {
+    /**
+     * 设置新的心跳
+     */
+    fun setNewIdleStateHandlerTime(newBaseIdleTime: Int) {
+        this.baseIdleTime = newBaseIdleTime.toLong()
+        runCatching {
             socketChannel.pipeline().remove("ping")
-        } catch (_: Exception) {
         }
-        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
+        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 5, baseIdleTime, baseIdleTime + 10, TimeUnit.SECONDS))
     }
 }

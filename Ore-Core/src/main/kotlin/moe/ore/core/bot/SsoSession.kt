@@ -11,6 +11,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
 class SsoSession : TarsStructBase() {
+    /**
+     * 状态默认刷新间隔
+     */
+    var clientAutoStatusInterval : Long = 600
+
+    /**
+     * 电池默认主动上报间隔
+     */
+    var clientBatteryGetInterval: Long = 86400
+
     lateinit var t318: ByteArray
 
     val uinInfo = UinSimpleInfo()

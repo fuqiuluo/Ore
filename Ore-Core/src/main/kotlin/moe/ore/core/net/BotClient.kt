@@ -91,7 +91,7 @@ class BotClient(val uin: Long) {
      * 设置心跳间隔
      */
     fun setHeartbeatInterval(time : Int) {
-
+        connection.setNewIdleStateHandlerTime(time)
     }
 
     fun registerCommonHandler(handler: Handler): SingleHandler {
