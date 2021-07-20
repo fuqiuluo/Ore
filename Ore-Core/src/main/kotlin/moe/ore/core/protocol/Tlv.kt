@@ -402,7 +402,7 @@ class Tlv(
     }
 
     private fun t52d() = buildTlv(0x52d) {
-        writeBytes(DeviceReport.serializer().encode(DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = deviceInfo.androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())))
+        writeBytes(DeviceReport.serializer().encode(deviceInfo.deviceReport))
     }
 
     fun t542() = buildTlv(0x542) {
