@@ -30,9 +30,10 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.handler.timeout.IdleStateHandler
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.HeartBeatListener
-import moe.ore.core.net.listener.IdleStateHandler
+//import moe.ore.core.net.listener.IdleStateHandler
 import moe.ore.core.net.listener.ReconnectionListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.util.QQUtil
@@ -137,7 +138,10 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     fun setNewIdleStateHandlerTime(baseIdleTime: Long) {
         this.baseIdleTime = baseIdleTime
-        socketChannel.pipeline().remove("ping")
+        try {
+            socketChannel.pipeline().remove("ping")
+        } catch (_: Exception) {
+        }
         socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
     }
 }
