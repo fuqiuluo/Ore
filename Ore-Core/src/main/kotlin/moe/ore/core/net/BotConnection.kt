@@ -137,6 +137,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     fun setNewIdleStateHandlerTime(baseIdleTime: Long) {
         this.baseIdleTime = baseIdleTime
+        socketChannel.pipeline().remove("ping")
         socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 1000 * 5, baseIdleTime, baseIdleTime + 1000 * 10, TimeUnit.MILLISECONDS))
     }
 }
