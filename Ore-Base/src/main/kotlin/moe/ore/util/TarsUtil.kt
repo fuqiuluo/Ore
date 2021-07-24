@@ -22,13 +22,13 @@
 package moe.ore.util
 
 import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 import moe.ore.tars.UniPacket
 import java.nio.charset.Charset
 
 object TarsUtil {
     @JvmStatic
-    fun <T : TarsStructBase> decodeWup(t : T, bytes : ByteArray) : T {
+    fun <T : TarsBase> decodeWup(t : T, bytes : ByteArray) : T {
         val input = TarsInputStream(bytes)
         input.setServerEncoding(Charset.defaultCharset())
         t.readFrom(input)
@@ -36,7 +36,7 @@ object TarsUtil {
     }
 
     @JvmStatic
-    fun <T : TarsStructBase> decodeWup(clazz : Class<T>, bytes : ByteArray) : T? {
+    fun <T : TarsBase> decodeWup(clazz : Class<T>, bytes : ByteArray) : T? {
         return try {
             val t = clazz.newInstance()
             val input = TarsInputStream(bytes)
@@ -59,7 +59,7 @@ object TarsUtil {
     @JvmStatic
     fun encodeRequest(
         requestId : Int,
-        base: TarsStructBase,
+        base: TarsBase,
         version : Int = 3
     ) : ByteArray {
         val uni = getUni(version)
@@ -75,7 +75,7 @@ object TarsUtil {
     }
 
     @JvmStatic
-    fun <T : TarsStructBase> decodeRequest(base : T, body : ByteArray) : T {
+    fun <T : TarsBase> decodeRequest(base : T, body : ByteArray) : T {
         val uni = decodeRequest(body)
         return uni.findByClass(base.respName(), base)
     }

@@ -10,7 +10,7 @@ import java.util.*
 import kotlin.random.Random
 
 @TarsClass(requireWrite = true, requireRead = true)
-class DeviceInfo : TarsStructBase() {
+class DeviceInfo : TarsBase() {
     enum class NetworkType(val value: Int) {
         /**
          * 移动网络

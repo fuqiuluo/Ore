@@ -3,14 +3,14 @@ package moe.ore.core.bot
 import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 import moe.ore.util.BytesUtil
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 
-class SsoSession : TarsStructBase() {
+class SsoSession : TarsBase() {
     /**
      * 状态默认刷新间隔
      */

@@ -25,7 +25,7 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.*
 
 @TarsClass(requireRead = true, requireWrite = true)
-class UserSigInfo : TarsStructBase() {
+class UserSigInfo : TarsBase() {
     // 保质期 28 days
     @TarsField(id = 2)
     lateinit var tgtKey: BytesTicket
@@ -114,7 +114,7 @@ open class StringTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0)
 }
 
 @TarsClass(requireRead = true, requireWrite = true)
-open class Ticket() : TarsStructBase() {
+open class Ticket() : TarsBase() {
     @TarsField(id = 1)
     var value = EMPTY_BYTE_ARRAY
     @TarsField(id = 2)
@@ -153,4 +153,4 @@ data class LoginExtraData(
     val time: Int,
     @TarsField(id = 4)
     val appId: Int
-) : TarsStructBase()
+) : TarsBase()

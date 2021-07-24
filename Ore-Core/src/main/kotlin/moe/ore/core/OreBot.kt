@@ -28,6 +28,7 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.LongHandler
+import moe.ore.core.protocol.tars.service.RequestMSFForceOffline
 import moe.ore.core.protocol.tars.service.RequestPushForceOffline
 import moe.ore.core.protocol.tars.statsvc.SvcReqMSFLoginNotify
 import moe.ore.core.protocol.wlogin.WloginHelper
@@ -78,12 +79,12 @@ class OreBot(uin: Long) : Ore(uin) {
     }
 
     init {
-        // 注入下线监听
+        // 被迫下线
         client.registerSpecialHandler(object : LongHandler("MessageSvc.PushForceOffline") {
             override fun handle(from: FromService) {
                 val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
                 changeStatus(OreStatus.OffLine) // change status
-                oreListener?.onOffLine(forceOffline.strTitle, forceOffline.strTips)
+                oreListener?.onOffLine(forceOffline.sameDevice, forceOffline.title, forceOffline.tips)
             }
         })
         // 注入上线监听
@@ -91,15 +92,15 @@ class OreBot(uin: Long) : Ore(uin) {
             override fun handle(from: FromService) {
                 // 这里的提示 腾讯一个提示会发3次 请注意！！！
                 val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
-                oreListener?.onLoginAnother(notify.iPlatform, notify.strTitle, notify.strInfo)
+                oreListener?.onLoginAnother(notify.platform, notify.title, notify.info)
             }
         })
+        // 强迫下线 所有的sig/cookie报废
         client.registerSpecialHandler(object : LongHandler("StatSvc.ReqMSFOffline") {
             override fun handle(from: FromService) {
-                println(from.body.toHexString())
-                // val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
-                // changeStatus(OreStatus.OffLine) // change status
-                // oreListener?.onOffLine(forceOffline.strTitle, forceOffline.strTips)
+                val forceOffline = UniPacket.decode(from.body).findByClass("RequestMSFForceOffline", RequestMSFForceOffline())
+                changeStatus(OreStatus.OffLine) // change status
+                oreListener?.onOffLine(forceOffline.sameDevice, forceOffline.title, forceOffline.info)
             }
         })
     }

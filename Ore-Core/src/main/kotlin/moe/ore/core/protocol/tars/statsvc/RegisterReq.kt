@@ -2,8 +2,7 @@ package moe.ore.core.protocol.tars.statsvc
 
 import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 
 @TarsClass(
     requireWrite = true,
@@ -131,4 +130,4 @@ class RegisterReq(
 
     @TarsField(id = 35)
     var vecServerBuf: ByteArray? = null
-) : TarsStructBase()
+) : TarsBase()

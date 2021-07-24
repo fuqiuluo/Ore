@@ -52,7 +52,7 @@ interface OreListener {
     /**
      * 被挤号导致下线
      */
-    fun onOffLine(tittle: String, tips : String)
+    fun onOffLine(sameDevice : Byte, tittle: String, tips : String)
 
     /**
      * 遇到滑块 返回ticket

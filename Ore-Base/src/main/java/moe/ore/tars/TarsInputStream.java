@@ -106,7 +106,7 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             while (true) {
                 int len = peakHead(hd);
-                if (hd.type == TarsStructBase.STRUCT_END) {
+                if (hd.type == TarsBase.STRUCT_END) {
                     return false;
                 }
                 if (tag <= hd.tag) return tag == hd.tag;
@@ -124,7 +124,7 @@ public final class TarsInputStream {
         do {
             readHead(hd);
             skipField(hd.type);
-        } while (hd.type != TarsStructBase.STRUCT_END);
+        } while (hd.type != TarsBase.STRUCT_END);
     }
 
     private void skipField() {
@@ -135,58 +135,58 @@ public final class TarsInputStream {
 
     private void skipField(byte type) {
         switch (type) {
-            case TarsStructBase.BYTE:
+            case TarsBase.BYTE:
                 skip(1);
                 break;
-            case TarsStructBase.SHORT:
+            case TarsBase.SHORT:
                 skip(2);
                 break;
-            case TarsStructBase.INT:
-            case TarsStructBase.FLOAT:
+            case TarsBase.INT:
+            case TarsBase.FLOAT:
                 skip(4);
                 break;
-            case TarsStructBase.LONG:
-            case TarsStructBase.DOUBLE:
+            case TarsBase.LONG:
+            case TarsBase.DOUBLE:
                 skip(8);
                 break;
-            case TarsStructBase.STRING1: {
+            case TarsBase.STRING1: {
                 //int len = bs.get();
                 int len = bs.readByte();
                 if (len < 0) len += 256;
                 skip(len);
                 break;
             }
-            case TarsStructBase.STRING4: {
+            case TarsBase.STRING4: {
                 skip(bs.readInt());
                 break;
             }
-            case TarsStructBase.MAP: {
+            case TarsBase.MAP: {
                 int size = read(0, 0, true);
                 for (int i = 0; i < size * 2; ++i)
                     skipField();
                 break;
             }
-            case TarsStructBase.LIST: {
+            case TarsBase.LIST: {
                 int size = read(0, 0, true);
                 for (int i = 0; i < size; ++i)
                     skipField();
                 break;
             }
-            case TarsStructBase.SIMPLE_LIST: {
+            case TarsBase.SIMPLE_LIST: {
                 HeadData hd = new HeadData();
                 readHead(hd);
-                if (hd.type != TarsStructBase.BYTE) {
+                if (hd.type != TarsBase.BYTE) {
                     throw new TarsDecodeException("skipField with invalid type, type value: " + type + ", " + hd.type);
                 }
                 int size = read(0, 0, true);
                 skip(size);
                 break;
             }
-            case TarsStructBase.STRUCT_BEGIN:
+            case TarsBase.STRUCT_BEGIN:
                 skipToStructEnd();
                 break;
-            case TarsStructBase.STRUCT_END:
-            case TarsStructBase.ZERO_TAG:
+            case TarsBase.STRUCT_END:
+            case TarsBase.ZERO_TAG:
                 break;
             default:
                 throw new TarsDecodeException("invalid type.");
@@ -203,10 +203,10 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     c = 0x0;
                     break;
-                case TarsStructBase.BYTE:
+                case TarsBase.BYTE:
                     c = bs.readByte();
                     break;
                 default:
@@ -223,13 +223,13 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     n = 0;
                     break;
-                case TarsStructBase.BYTE:
+                case TarsBase.BYTE:
                     n = bs.readByte();
                     break;
-                case TarsStructBase.SHORT:
+                case TarsBase.SHORT:
                     n = bs.readShort();
                     break;
                 default:
@@ -246,16 +246,16 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     n = 0;
                     break;
-                case TarsStructBase.BYTE:
+                case TarsBase.BYTE:
                     n = bs.readByte();
                     break;
-                case TarsStructBase.SHORT:
+                case TarsBase.SHORT:
                     n = bs.readShort();
                     break;
-                case TarsStructBase.INT:
+                case TarsBase.INT:
                     n = bs.readInt();
                     break;
                 default:
@@ -272,19 +272,19 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     n = 0;
                     break;
-                case TarsStructBase.BYTE:
+                case TarsBase.BYTE:
                     n = bs.readByte();
                     break;
-                case TarsStructBase.SHORT:
+                case TarsBase.SHORT:
                     n = bs.readShort();
                     break;
-                case TarsStructBase.INT:
+                case TarsBase.INT:
                     n = bs.readInt();
                     break;
-                case TarsStructBase.LONG:
+                case TarsBase.LONG:
                     n = bs.readLong();
                     break;
                 default:
@@ -301,10 +301,10 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     n = 0;
                     break;
-                case TarsStructBase.FLOAT:
+                case TarsBase.FLOAT:
                     n = bs.readFloat();
                     break;
                 default:
@@ -321,13 +321,13 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.ZERO_TAG:
+                case TarsBase.ZERO_TAG:
                     n = 0;
                     break;
-                case TarsStructBase.FLOAT:
+                case TarsBase.FLOAT:
                     n = bs.readFloat();
                     break;
-                case TarsStructBase.DOUBLE:
+                case TarsBase.DOUBLE:
                     n = bs.readDouble();
                     break;
                 default:
@@ -344,7 +344,7 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.STRING1: {
+                case TarsBase.STRING1: {
                     int len = bs.readByte();
                     if (len < 0) len += 256;
                     byte[] ss = new byte[len];
@@ -353,9 +353,9 @@ public final class TarsInputStream {
                     s = ByteArrayExtKt.toHexString(ss);
                 }
                 break;
-                case TarsStructBase.STRING4: {
+                case TarsBase.STRING4: {
                     int len = bs.readInt();
-                    if (len > TarsStructBase.MAX_STRING_LENGTH || len < 0)
+                    if (len > TarsBase.MAX_STRING_LENGTH || len < 0)
                         throw new TarsDecodeException("String too long: " + len);
                     byte[] ss = new byte[len];
                     bs.readBytes(ss);
@@ -376,7 +376,7 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.STRING1: {
+                case TarsBase.STRING1: {
                     int len = bs.readByte();
                     if (len < 0) len += 256;
                     byte[] ss = new byte[len];
@@ -384,9 +384,9 @@ public final class TarsInputStream {
                     s = new String(ss, sServerEncoding);
                 }
                 break;
-                case TarsStructBase.STRING4: {
+                case TarsBase.STRING4: {
                     int len = bs.readInt();
-                    if (len > TarsStructBase.MAX_STRING_LENGTH || len < 0)
+                    if (len > TarsBase.MAX_STRING_LENGTH || len < 0)
                         throw new TarsDecodeException("String too long: " + len);
                     byte[] ss = new byte[len];
                     //bs.get(ss);
@@ -409,7 +409,7 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.STRING1: {
+                case TarsBase.STRING1: {
                     int len = bs.readByte();
                     if (len < 0) len += 256;
                     byte[] ss = new byte[len];
@@ -418,9 +418,9 @@ public final class TarsInputStream {
                     s = new String(ss, sServerEncoding);
                 }
                 break;
-                case TarsStructBase.STRING4: {
+                case TarsBase.STRING4: {
                     int len = bs.readInt();
-                    if (len > TarsStructBase.MAX_STRING_LENGTH || len < 0)
+                    if (len > TarsBase.MAX_STRING_LENGTH || len < 0)
                         throw new TarsDecodeException("String too long: " + len);
                     byte[] ss = new byte[len];
                     //bs.get(ss);
@@ -446,7 +446,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.MAP) {
+            if (hd.type == TarsBase.MAP) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 for (int i = 0; i < size; ++i) {
@@ -481,7 +481,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.MAP) {
+            if (hd.type == TarsBase.MAP) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 for (int i = 0; i < size; ++i) {
@@ -504,47 +504,47 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 for (int i = 0; i < size; ++i) {
                     HeadData subH = new HeadData();
                     readHead(subH);
                     switch (subH.type) {
-                        case TarsStructBase.BYTE:
+                        case TarsBase.BYTE:
                             skip(1);
                             break;
-                        case TarsStructBase.SHORT:
+                        case TarsBase.SHORT:
                             skip(2);
                             break;
-                        case TarsStructBase.INT:
-                        case TarsStructBase.FLOAT:
+                        case TarsBase.INT:
+                        case TarsBase.FLOAT:
                             skip(4);
                             break;
-                        case TarsStructBase.LONG:
-                        case TarsStructBase.DOUBLE:
+                        case TarsBase.LONG:
+                        case TarsBase.DOUBLE:
                             skip(8);
                             break;
-                        case TarsStructBase.STRING1: {
+                        case TarsBase.STRING1: {
                             int len = bs.readByte();
                             if (len < 0) len += 256;
                             skip(len);
                         }
                         break;
-                        case TarsStructBase.STRING4: {
+                        case TarsBase.STRING4: {
                             skip(bs.readInt());
                         }
                         break;
-                        case TarsStructBase.MAP:
-                        case TarsStructBase.LIST: {
+                        case TarsBase.MAP:
+                        case TarsBase.LIST: {
 
                         }
                         break;
-                        case TarsStructBase.STRUCT_BEGIN:
+                        case TarsBase.STRUCT_BEGIN:
                             try {
-                                Class<?> newoneClass = Class.forName(TarsStructBase.class.getName());
+                                Class<?> newoneClass = Class.forName(TarsBase.class.getName());
                                 Constructor<?> cons = newoneClass.getConstructor();
-                                TarsStructBase struct = (TarsStructBase) cons.newInstance();
+                                TarsBase struct = (TarsBase) cons.newInstance();
                                 struct.readFrom(this);
                                 skipToStructEnd();
                                 lr.add(struct);
@@ -552,7 +552,7 @@ public final class TarsInputStream {
                                 throw new TarsDecodeException("type mismatch." + e);
                             }
                             break;
-                        case TarsStructBase.ZERO_TAG:
+                        case TarsBase.ZERO_TAG:
                             lr.add(0);
                             break;
                         default:
@@ -573,7 +573,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new boolean[size];
@@ -594,10 +594,10 @@ public final class TarsInputStream {
             HeadData hd = new HeadData();
             readHead(hd);
             switch (hd.type) {
-                case TarsStructBase.SIMPLE_LIST: {
+                case TarsBase.SIMPLE_LIST: {
                     HeadData hh = new HeadData();
                     readHead(hh);
-                    if (hh.type != TarsStructBase.BYTE) {
+                    if (hh.type != TarsBase.BYTE) {
                         throw new TarsDecodeException("type mismatch, tag: " + tag + ", type: " + hd.type + ", " + hh.type);
                     }
                     int size = read(0, 0, true);
@@ -608,7 +608,7 @@ public final class TarsInputStream {
                     bs.readBytes(lr);
                     break;
                 }
-                case TarsStructBase.LIST: {
+                case TarsBase.LIST: {
                     int size = read(0, 0, true);
                     if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                     lr = new byte[size];
@@ -630,7 +630,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new short[size];
@@ -650,7 +650,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new int[size];
@@ -670,7 +670,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new long[size];
@@ -690,7 +690,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new float[size];
@@ -710,7 +710,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 lr = new double[size];
@@ -744,7 +744,7 @@ public final class TarsInputStream {
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type == TarsStructBase.LIST) {
+            if (hd.type == TarsBase.LIST) {
                 int size = read(0, 0, true);
                 if (size < 0) throw new TarsDecodeException("size invalid: " + size);
                 T[] lr = (T[]) Array.newInstance(mt.getClass(), size);
@@ -761,8 +761,8 @@ public final class TarsInputStream {
         return null;
     }
 
-    public TarsStructBase directRead(TarsStructBase o, int tag, boolean isRequire) {
-        TarsStructBase ref = null;
+    public TarsBase directRead(TarsBase o, int tag, boolean isRequire) {
+        TarsBase ref = null;
         if (skipToTag(tag)) {
             try {
                 ref = o.newInit();
@@ -772,7 +772,7 @@ public final class TarsInputStream {
 
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type != TarsStructBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
+            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
             ref.readFrom(this);
             skipToStructEnd();
         } else if (isRequire) {
@@ -781,8 +781,8 @@ public final class TarsInputStream {
         return ref;
     }
 
-    public <T extends TarsStructBase> T read(T o, int tag, boolean isRequire) {
-        TarsStructBase ref = null;
+    public <T extends TarsBase> T read(T o, int tag, boolean isRequire) {
+        TarsBase ref = null;
         if (skipToTag(tag)) {
             try {
                 ref = o.getClass().newInstance();
@@ -793,7 +793,7 @@ public final class TarsInputStream {
 
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type != TarsStructBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
+            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
             ref.readFrom(this);
             skipToStructEnd();
         } else if (isRequire) {
@@ -802,7 +802,7 @@ public final class TarsInputStream {
         return DebugUtil.forcedConvert(ref);
     }
 
-    public TarsStructBase[] read(TarsStructBase[] o, int tag, boolean isRequire) {
+    public TarsBase[] read(TarsBase[] o, int tag, boolean isRequire) {
         return readArray(o, tag, isRequire);
     }
 
@@ -827,8 +827,8 @@ public final class TarsInputStream {
             return readMap((Map<?, ?>) o, tag, isRequire);
         } else if (o instanceof List) {
             return readArray((List<?>) o, tag, isRequire);
-        } else if (o instanceof TarsStructBase) {
-            return read((TarsStructBase) o, tag, isRequire);
+        } else if (o instanceof TarsBase) {
+            return read((TarsBase) o, tag, isRequire);
         } else if (o.getClass().isArray()) {
             if (o instanceof byte[] || o instanceof Byte[]) {
                 return read((byte[]) null, tag, isRequire);

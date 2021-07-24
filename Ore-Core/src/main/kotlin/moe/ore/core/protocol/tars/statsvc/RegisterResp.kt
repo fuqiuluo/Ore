@@ -2,13 +2,13 @@ package moe.ore.core.protocol.tars.statsvc
 
 import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 
 @TarsClass(
     requireRead = true,
     respName = "SvcRespRegister"
 )
-class RegisterResp : TarsStructBase() {
+class RegisterResp : TarsBase() {
     @TarsField(id = 9)
     var bCrashFlag: Byte = 0 // 失败类型 失败的原因
 

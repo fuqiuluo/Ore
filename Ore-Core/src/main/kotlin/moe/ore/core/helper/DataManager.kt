@@ -44,7 +44,7 @@ class DataManager private constructor(
         path: String,
         // 暂时移除
         // private val safePwd: String
-) : TarsStructBase() {
+) : TarsBase() {
 
     /**
      * 线程管理器

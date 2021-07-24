@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
-public class TarsStructBase implements Serializable {
+public class TarsBase implements Serializable {
     public static final byte BYTE = 0;
     public static final byte SHORT = 1;
     public static final byte INT = 2;
@@ -59,7 +59,7 @@ public class TarsStructBase implements Serializable {
     public void displaySimple(StringBuilder sb, int level) {
     }
 
-    public TarsStructBase newInit() {
+    public TarsBase newInit() {
         return null;
     }
 
@@ -109,7 +109,7 @@ public class TarsStructBase implements Serializable {
         return sb.toString();
     }
 
-    public static String toDisplaySimpleString(TarsStructBase struct) {
+    public static String toDisplaySimpleString(TarsBase struct) {
         if (struct == null) {
             return null;
         }

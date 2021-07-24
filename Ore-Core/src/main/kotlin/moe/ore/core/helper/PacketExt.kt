@@ -30,7 +30,7 @@ import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
 import moe.ore.core.net.packet.*
 import moe.ore.helper.*
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 import moe.ore.tars.UniPacket
 import moe.ore.util.TarsUtil
 import moe.ore.util.TeaUtil
@@ -130,9 +130,9 @@ fun Ore.sendJcePacket(
 
 @JvmOverloads
 fun Ore.sendJcePacket(
-        servName: String,
-        body: TarsStructBase,
-        requestId: Int
+    servName: String,
+    body: TarsBase,
+    requestId: Int
 ): PacketSender {
     val ticket = DataManager.manager(this.uin).userSigInfo.d2Key.ticket()
     return sendPacket(servName, TarsUtil.encodeRequest(requestId, body), PacketType.ServicePacket, ticket, ticket)

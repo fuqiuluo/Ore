@@ -2,14 +2,14 @@ package moe.ore.core.net
 
 import moe.ore.tars.TarsInputStream
 import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsBase
 
 /**
  *@author 飞翔的企鹅
  *create 2021-06-18 23:49
  */
 
-class SsoServerInfoReq : TarsStructBase() {
+class SsoServerInfoReq : TarsBase() {
     var a: Long = 0
     var b: Long = 0
     var c: Byte = 1
@@ -41,7 +41,7 @@ class SsoServerInfoReq : TarsStructBase() {
     }
 }
 
-class SsoServerInfoResp : TarsStructBase() {
+class SsoServerInfoResp : TarsBase() {
     var A: ArrayList<IPAddressInfo>? = null
     var B1: ArrayList<IPAddressInfo>? = null
     var u: ArrayList<IPAddressInfo>? = null
@@ -171,7 +171,7 @@ class SsoServerInfoResp : TarsStructBase() {
     }
 
 
-    class IPAddressInfo : TarsStructBase() {
+    class IPAddressInfo : TarsBase() {
         var ip = ""
         var port = 0
         var c: Byte = 0

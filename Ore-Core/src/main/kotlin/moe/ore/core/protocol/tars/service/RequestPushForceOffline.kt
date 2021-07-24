@@ -1,18 +1,20 @@
 package moe.ore.core.protocol.tars.service
 
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsStructBase
+import moe.ore.tars.TarsClass
+import moe.ore.tars.TarsField
+import moe.ore.tars.TarsBase
 
-class RequestPushForceOffline : TarsStructBase() {
-    var bSameDevice: Byte = 0
-    var lUin: Long = 0
-    var strTips = ""
-    var strTitle = ""
+@TarsClass(requireRead = true)
+class RequestPushForceOffline : TarsBase() {
+    @TarsField(id = 3)
+    var sameDevice: Byte = 0
 
-    override fun readFrom(input: TarsInputStream) {
-        lUin = input.read(lUin, 0, true)
-        strTitle = input.readString(1, false)
-        strTips = input.readString(2, false)
-        bSameDevice = input.read(bSameDevice, 3, false)
-    }
+    @TarsField(id = 0)
+    var uin: Long = 0
+
+    @TarsField(id = 2)
+    var tips = ""
+
+    @TarsField(id = 1)
+    var title = ""
 }

@@ -1,6 +1,6 @@
 package moe.ore.tars
 
-class RequestPacket : TarsStructBase() {
+class RequestPacket : TarsBase() {
     companion object {
         @JvmStatic
         val cacheContext = mapOf("" to "")

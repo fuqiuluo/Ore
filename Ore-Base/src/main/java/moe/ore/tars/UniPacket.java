@@ -62,7 +62,7 @@ public class UniPacket {
     private HashMap<String, byte[]> _newData = new HashMap<>();
     private HashMap<String, HashMap<String, byte[]>> _data = new HashMap<>();
 
-    public void put(@NotNull TarsStructBase base) {
+    public void put(@NotNull TarsBase base) {
         servantName = base.servantName();
         funcName = base.funcName();
         String req = base.reqName();
@@ -74,7 +74,7 @@ public class UniPacket {
         this.put(req, base);
     }
 
-    public <T extends TarsStructBase> void put(String mapName, T t) {
+    public <T extends TarsBase> void put(String mapName, T t) {
         if (mapName == null) {
             throw new IllegalArgumentException("put key can not is null");
         } else if (t == null) {
@@ -100,7 +100,7 @@ public class UniPacket {
         }
     }
 
-    public <T extends TarsStructBase> T findByClass(String mapName, T base) {
+    public <T extends TarsBase> T findByClass(String mapName, T base) {
         TarsInputStream input = new TarsInputStream(find(mapName));
         return input.read(base, 0, true);
     }
