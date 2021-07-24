@@ -9,6 +9,8 @@ import java.io.File
 
 class TarsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
+
+
         project.afterEvaluate { thisProject ->
             // 配置项目文件 （构建前执行发生）
             // 构建前给任务注入监听

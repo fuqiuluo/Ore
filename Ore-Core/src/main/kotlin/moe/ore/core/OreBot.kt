@@ -33,6 +33,7 @@ import moe.ore.core.protocol.tars.statsvc.SvcReqMSFLoginNotify
 import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.helper.toHexString
 import moe.ore.tars.UniPacket
 
 class OreBot(uin: Long) : Ore(uin) {
@@ -91,6 +92,14 @@ class OreBot(uin: Long) : Ore(uin) {
                 // 这里的提示 腾讯一个提示会发3次 请注意！！！
                 val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
                 oreListener?.onLoginAnother(notify.iPlatform, notify.strTitle, notify.strInfo)
+            }
+        })
+        client.registerSpecialHandler(object : LongHandler("StatSvc.ReqMSFOffline") {
+            override fun handle(from: FromService) {
+                println(from.body.toHexString())
+                // val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
+                // changeStatus(OreStatus.OffLine) // change status
+                // oreListener?.onOffLine(forceOffline.strTitle, forceOffline.strTips)
             }
         })
     }
