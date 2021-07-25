@@ -14,10 +14,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+fun main(args: Array<String>) {
+
+}
+
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
-    val ore = OreManager.addBot(3042628723, "911586abcd", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
+    val ore = OreManager.addBot(3042628723, "911586ABCD", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
     val manager = DataManager.manager(ore.uin)
 
     ore.oreListener = object : OreListener {
@@ -34,11 +38,11 @@ fun main() {
 
             val oreBot = (ore as OreBot)
             if (result == LoginResult.Success) {
-//                保存数据
                 DataManager.flush(ore.uin)
             }
 
-            println(TroopManagerWeb(ore.uin).getGroupList())
+
+
         }
 
         override fun onLoginAnother(platform: Long, tittle: String, info: String) {
@@ -74,6 +78,4 @@ fun main() {
 
     ore.login()
     // ore.tokenLogin()
-
-
 }

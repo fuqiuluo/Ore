@@ -57,6 +57,7 @@ object TarsUtil {
     }
 
     @JvmStatic
+    @JvmOverloads
     fun encodeRequest(
         requestId : Int,
         base: TarsBase,

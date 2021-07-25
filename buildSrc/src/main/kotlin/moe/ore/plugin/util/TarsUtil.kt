@@ -1,6 +1,6 @@
-package moe.ore.tars.util
+package moe.ore.plugin.util
 
-import moe.ore.tars.FieldInfo
+import moe.ore.plugin.FieldInfo
 
 object TarsUtil {
     fun quickSort(list: ArrayList<FieldInfo>) : ArrayList<FieldInfo> {

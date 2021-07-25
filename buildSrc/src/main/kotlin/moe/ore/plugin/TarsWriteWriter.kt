@@ -1,7 +1,7 @@
-package moe.ore.tars
+package moe.ore.plugin
 
-import moe.ore.tars.full.ClassFuller
-import moe.ore.tars.util.AsmUtil
+import moe.ore.plugin.full.ClassFuller
+import moe.ore.plugin.util.AsmUtil
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import java.util.*

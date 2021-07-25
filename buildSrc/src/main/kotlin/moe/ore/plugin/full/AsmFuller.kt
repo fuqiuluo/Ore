@@ -1,5 +1,5 @@
 @file:Suppress("unused", "NOTHING_TO_INLINE")
-package moe.ore.tars.full
+package moe.ore.plugin.full
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Label

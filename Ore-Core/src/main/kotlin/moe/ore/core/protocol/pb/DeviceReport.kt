@@ -22,16 +22,41 @@
 package moe.ore.core.protocol.pb
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
+import moe.ore.helper.EMPTY_BYTE_ARRAY
+import moe.ore.protobuf.Protobuf
 
 @Serializable
-data class DeviceReport(
-    var bootloader: ByteArray,
-    var version: ByteArray,
-    var codename: ByteArray,
-    var incremental: ByteArray,
-    var fingerprint: ByteArray,
-    var bootId: ByteArray,
-    var androidId: ByteArray,
-    var baseband: ByteArray,
-    var innerVer: ByteArray
-) 
+ class DeviceReport() : Protobuf<DeviceReport> {
+    constructor(
+       bootloader: ByteArray,
+       version: ByteArray,
+       codename: ByteArray,
+       incremental: ByteArray,
+       fingerprint: ByteArray,
+       bootId: ByteArray,
+       androidId: ByteArray,
+       baseband: ByteArray,
+       innerVer: ByteArray
+    ) : this() {
+       this.bootloader = bootloader
+       this.version = version
+       this.codename = codename
+       this.incremental = incremental
+       this.fingerprint = fingerprint
+       this.bootId = bootId
+       this.androidId = androidId
+       this.baseband = baseband
+       this.innerVer = innerVer
+    }
+
+    @ProtoNumber(number = 1) @JvmField var bootloader: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 2) @JvmField var version: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 3) @JvmField var codename: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 4) @JvmField var incremental: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 5) @JvmField var fingerprint: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 6) @JvmField var bootId: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 7) @JvmField var androidId: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 8) @JvmField var baseband: ByteArray = EMPTY_BYTE_ARRAY
+    @ProtoNumber(number = 9) @JvmField var innerVer: ByteArray = EMPTY_BYTE_ARRAY
+ }

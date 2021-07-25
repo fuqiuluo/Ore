@@ -1,17 +1,14 @@
-package moe.ore.tars
+package moe.ore.plugin
 
-import moe.ore.tars.full.ClassFuller
-import moe.ore.tars.util.AsmUtil
-import moe.ore.tars.util.AsmUtil.getAnnotation
-import moe.ore.tars.util.AsmUtil.hasAnnotation
-import moe.ore.tars.util.AsmUtil.hasMethod
-import moe.ore.tars.util.FileUtil
-import moe.ore.tars.util.TarsUtil
+import moe.ore.plugin.full.ClassFuller
+import moe.ore.plugin.util.AsmUtil.getAnnotation
+import moe.ore.plugin.util.AsmUtil.hasAnnotation
+import moe.ore.plugin.util.AsmUtil.hasMethod
+import moe.ore.plugin.util.FileUtil
+import moe.ore.plugin.util.TarsUtil
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.AnnotationNode
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import java.io.File

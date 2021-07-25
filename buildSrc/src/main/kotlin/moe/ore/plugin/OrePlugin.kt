@@ -1,13 +1,11 @@
-package moe.ore.tars
+package moe.ore.plugin
 
-import moe.ore.tars.util.FileUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import moe.ore.plugin.util.FileUtil
 import java.io.File
 
-//import org.jetbrains.kotlin.konan.file.File
-
-class TarsPlugin : Plugin<Project> {
+class OrePlugin : Plugin<Project> {
     override fun apply(project: Project) {
 
 
@@ -28,6 +26,7 @@ class TarsPlugin : Plugin<Project> {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
                             if(classFile.name.endsWith(".class")) {
                                 TarsTransform(classFile).transform()
+
                             }
                         }
                         println("finish build tars file")

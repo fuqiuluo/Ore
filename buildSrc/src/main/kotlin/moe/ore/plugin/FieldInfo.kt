@@ -1,4 +1,4 @@
-package moe.ore.tars
+package moe.ore.plugin
 
 data class FieldInfo(
     val name : String,

@@ -1,4 +1,4 @@
-package moe.ore.tars.util
+package moe.ore.plugin.util
 
 import java.io.*
 

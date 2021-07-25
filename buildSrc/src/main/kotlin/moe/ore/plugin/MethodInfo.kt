@@ -1,4 +1,4 @@
-package moe.ore.tars
+package moe.ore.plugin
 
 data class MethodInfo(
     val access : Int,

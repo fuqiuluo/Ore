@@ -42,7 +42,7 @@ class OreBot(uin: Long) : Ore(uin) {
 
     private val threadManager: ThreadManager = manager.threadManager
 
-    var client: BotClient = BotClient(uin).apply {
+    val client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
             override fun onConnect() {
                 when (this@OreBot.status()) {
@@ -103,6 +103,8 @@ class OreBot(uin: Long) : Ore(uin) {
                 oreListener?.onOffLine(forceOffline.sameDevice, forceOffline.title, forceOffline.info)
             }
         })
+
+
     }
 
     override fun login() {

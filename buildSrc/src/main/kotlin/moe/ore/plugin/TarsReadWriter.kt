@@ -1,8 +1,8 @@
-package moe.ore.tars
+package moe.ore.plugin
 
-import moe.ore.tars.TarsTransform.Companion.CLASS_TARS_INPUT
-import moe.ore.tars.full.ClassFuller
-import moe.ore.tars.full.CodeBuilder
+import moe.ore.plugin.TarsTransform.Companion.CLASS_TARS_INPUT
+import moe.ore.plugin.full.ClassFuller
+import moe.ore.plugin.full.CodeBuilder
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import java.util.*

@@ -1,9 +1,6 @@
-package moe.ore.tars.util
+package moe.ore.plugin.util
 
-import moe.ore.tars.TarsTransform
-import moe.ore.tars.util.AsmUtil.hasAnnotation
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.tree.AnnotationNode
