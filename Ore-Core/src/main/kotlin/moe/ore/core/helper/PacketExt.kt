@@ -149,14 +149,15 @@ fun Ore.sendPacket(
             PacketType.LoginPacket,
 
         firstToken: ByteArray? = null,
-        secondToken: ByteArray? = null
+        secondToken: ByteArray? = null,
+
+        seq : Int = -1
 ): PacketSender {
     val bot = this as OreBot
     val client = bot.client
     val manager = DataManager.manager(bot.uin)
-    val session = manager.session
     val to = ToService(
-            seq = session.nextSeqId(),
+            seq = seq.let { if (it == -1) manager.session.nextSeqId() else seq },
             commandName = cmd,
             body = body
     )
