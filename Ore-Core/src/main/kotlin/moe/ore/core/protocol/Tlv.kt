@@ -402,7 +402,7 @@ class Tlv(
     }
 
     private fun t52d() = buildTlv(0x52d) {
-        writeBytes(DeviceReport.serializer().encode(deviceInfo.deviceReport))
+        writeBytes(deviceInfo.deviceReport.toByteArray())
     }
 
     fun t542() = buildTlv(0x542) {

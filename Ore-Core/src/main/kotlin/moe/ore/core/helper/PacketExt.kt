@@ -31,6 +31,7 @@ import moe.ore.core.OreBot
 import moe.ore.core.net.packet.*
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.*
+import moe.ore.protobuf.Protobuf
 import moe.ore.tars.TarsBase
 import moe.ore.tars.UniPacket
 import moe.ore.util.TarsUtil
@@ -98,14 +99,14 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 /**
  * 上线之后才能用 因为用d2Key加密 否则sendPacket
  * */
-inline fun <reified T> Ore.sendPbPacket(
+inline fun Ore.sendPbPacket(
         servName: String,
-        oidbSsoPkg: T
+        oidbSsoPkg: OidbSSOPkg
 ): PacketSender {
-    return sendPacket(servName, ProtoBuf.encodeToByteArray(oidbSsoPkg))
+    return sendPacket(servName, oidbSsoPkg.toByteArray())
 }
 
-inline fun <reified T> Ore.sendPbPacket(
+inline fun <reified T: Protobuf<T>> Ore.sendPbPacket(
         servName: String,
         command: Int,
         body: T,
@@ -113,13 +114,13 @@ inline fun <reified T> Ore.sendPbPacket(
 ): PacketSender {
     val oidb = OidbSSOPkg()
     oidb.command = command
-    oidb.bodyBuffer = ProtoBuf.encodeToByteArray(body)
+    oidb.bodyBuffer = body.toByteArray()
     oidb.serviceType = serviceType
 
     val manager = DataManager.manager(this.uin)
     oidb.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
 
-    return sendPacket(servName, ProtoBuf.encodeToByteArray(OidbSSOPkg))
+    return sendPacket(servName, oidb.toByteArray())
 }
 
 fun Ore.sendJcePacket(

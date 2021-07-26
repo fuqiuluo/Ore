@@ -1,3 +1,4 @@
+import kotlinx.io.core.toByteArray
 import moe.ore.api.LoginResult
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
@@ -7,7 +8,9 @@ import moe.ore.core.OreBot
 import moe.ore.core.OreManager
 import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.helper.DataManager
+import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.group.TroopManagerWeb
+import moe.ore.helper.toHexString
 import moe.ore.tars.*
 import java.io.File
 import java.util.*
@@ -15,6 +18,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 fun main(args: Array<String>) {
+    var deviceReport = DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = "aaa".toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())
 
 }
 

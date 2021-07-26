@@ -626,7 +626,7 @@ class CodeBuilder(val mn: MethodNode) {
     }
 
     /**
-     * type : 完整类名
+     * type : 类型名
      */
     inline fun getField(fromClass : String, name : String, type : String, isStatic : Boolean = false) {
         mn.visitFieldInsn(if(isStatic) GETSTATIC else GETFIELD, fromClass, name, type)

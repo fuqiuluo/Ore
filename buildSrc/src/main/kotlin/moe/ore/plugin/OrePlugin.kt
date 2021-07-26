@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import moe.ore.plugin.util.FileUtil
 import java.io.File
+import moe.ore.plugin.full.ClassFuller
 
 class OrePlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -23,9 +24,10 @@ class OrePlugin : Plugin<Project> {
                     if(FileUtil.has(buildDir + File.separator + "classes")) {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
                             if(classFile.name.endsWith(".class")) {
-                                TarsTransform(classFile).transform()
-
-
+                                val fuller = ClassFuller()
+                                fuller.from(FileUtil.readFile(classFile))
+                                TarsTransform(classFile, fuller).transform()
+                                ProtoBufTransform(classFile, fuller).transform()
                             }
                         }
                         println("finish build tars file")

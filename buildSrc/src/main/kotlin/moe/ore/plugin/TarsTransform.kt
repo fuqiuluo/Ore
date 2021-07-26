@@ -14,11 +14,10 @@ import org.objectweb.asm.tree.MethodNode
 import java.io.File
 import java.util.*
 
-
 class TarsTransform(
-    private val clzFile: File
+    private val clzFile: File,
+    private val clz: ClassFuller
 ) {
-    private val bytes : ByteArray by lazy { FileUtil.readFile(clzFile) }
     private val fields : TreeMap<Int, FieldInfo> by lazy { TreeMap() }
     private val tarsClassInfo = TarsClass()
     private lateinit var className : String
@@ -73,8 +72,6 @@ class TarsTransform(
     }
 
     private fun doFirst() : ClassFuller? {
-        val clz = ClassFuller()
-        clz.from(bytes)
         if(clz.hasAnnotation(ANNOTATION_TARS_CLASS, true)) {
             println("Class[${clz.name}] is tars class.")
             this.className = clz.name

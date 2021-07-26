@@ -22,6 +22,7 @@
 package moe.ore.core.protocol.pb
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.protobuf.ProtoNumber
 import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.protobuf.Protobuf
