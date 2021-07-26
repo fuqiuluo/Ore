@@ -50,9 +50,14 @@ interface OreListener {
     fun onLoginAnother(platform : Long, tittle : String, info : String)
 
     /**
-     * 被挤号导致下线
+     * 被踢下线
      */
-    fun onOffLine(sameDevice : Byte, tittle: String, tips : String)
+    fun onKicked(sameDevice : Byte, tittle: String, tips : String)
+
+    /**
+     * 被踢下线 且 所有token报废
+     */
+    fun onKickedAndClearToken(sameDevice : Byte, tittle: String, tips : String)
 
     /**
      * 遇到滑块 返回ticket

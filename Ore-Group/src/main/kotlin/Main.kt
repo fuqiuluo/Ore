@@ -48,7 +48,11 @@ fun main() {
             println("[notice]($platform) $tittle --> $info")
         }
 
-        override fun onOffLine(sameDevice: Byte, tittle: String, tips: String) {
+        override fun onKicked(sameDevice: Byte, tittle: String, tips: String) {
+            println("[kicked]($sameDevice) $tittle --> $tips")
+        }
+
+        override fun onKickedAndClearToken(sameDevice: Byte, tittle: String, tips: String) {
             println("[offline]($sameDevice) $tittle --> $tips")
         }
 

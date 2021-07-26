@@ -80,4 +80,10 @@ object TarsUtil {
         val uni = decodeRequest(body)
         return uni.findByClass(base.respName(), base)
     }
+
+    @JvmStatic
+    fun <T : TarsBase> decodeRequest(base : T, resp: String, body : ByteArray) : T {
+        val uni = decodeRequest(body)
+        return uni.findByClass(resp, base)
+    }
 }

@@ -90,6 +90,11 @@ class DataManager private constructor(
         }
     }
 
+    fun clearToken() {
+        this.userSigInfo = UserSigInfo()
+        this.flush()
+    }
+
     /**
      * 销毁
      */

@@ -1,20 +1,10 @@
 package moe.ore.core.transfile.dns
 
-import moe.ore.core.net.BotClient
-import moe.ore.core.net.packet.FromService
-import moe.ore.core.net.packet.LongHandler
 import moe.ore.core.protocol.pb.configpush.DomainIp
 
 class InnerDns private constructor() {
     private val domainDns = hashMapOf<String, DomainData>()
     private val domainDnsIpv6 = hashMapOf<String, DomainData>()
-    private val handler = object : LongHandler("ConfigPushSvc.PushDomain") {
-        override fun handle(from: FromService) {
-            updateDomainServerList(from.body)
-        }
-    }
-
-    fun init(client: BotClient) = client.registerSpecialHandler(handler)
 
     @JvmOverloads
     operator fun get(domain : String, isIpv6 : Boolean = false) : DomainData? {
@@ -24,7 +14,7 @@ class InnerDns private constructor() {
         return domainDns[domain]
     }
 
-    private fun updateDomainServerList(data: ByteArray) {
+    fun updateDomainServerList(data: ByteArray) {
         DomainIp.NameRspBody().from(data).subCmdNameRsp?.let { rsp ->
             rsp.ipListInfo.forEach { info ->
                 if(info.result == 0) {

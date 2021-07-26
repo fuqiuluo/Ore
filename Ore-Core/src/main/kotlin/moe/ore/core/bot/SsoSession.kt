@@ -102,22 +102,6 @@ class SsoSession : TarsBase() {
         }
         return id
     }
-
-    override fun writeTo(output: TarsOutputStream) {
-//        output.write(randSeed, 1)
-        output.write(randomKey, 2)
-        output.write(pwd, 3)
-        output.write(msgCookie, 4)
-
-    }
-
-    override fun readFrom(input: TarsInputStream) {
-//        randSeed = input.read(randSeed, 1, false)
-        randomKey = input.read(randomKey, 2, false)
-        pwd = input.read(pwd, 3, false)
-        msgCookie = input.read(msgCookie, 4, false)
-
-    }
 }
 
 class UinSimpleInfo {
