@@ -7,8 +7,6 @@ import java.io.File
 
 class OrePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-
-
         project.afterEvaluate { thisProject ->
             // 配置项目文件 （构建前执行发生）
             // 构建前给任务注入监听
@@ -27,6 +25,7 @@ class OrePlugin : Plugin<Project> {
                             if(classFile.name.endsWith(".class")) {
                                 TarsTransform(classFile).transform()
 
+
                             }
                         }
                         println("finish build tars file")
@@ -35,6 +34,10 @@ class OrePlugin : Plugin<Project> {
                     }
                 }
             }
+
+
+
+
         }
     }
 }
