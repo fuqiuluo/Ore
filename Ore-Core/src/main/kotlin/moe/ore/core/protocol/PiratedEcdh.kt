@@ -62,10 +62,10 @@ class PiratedEcdh(
 
     init {
 //        TinkConfig.register()
-        if(initShareKeyByBouncycastle() == 0) {
-            hasBcLib = true
-            println("can use ecdh lib")
-        }
+        //if(initShareKeyByBouncycastle() == 0) {
+        //    hasBcLib = true
+        //    println("can use ecdh lib")
+        //}
     }
 
     private fun constructX509PublicKey(bs: ByteArray): PublicKey {

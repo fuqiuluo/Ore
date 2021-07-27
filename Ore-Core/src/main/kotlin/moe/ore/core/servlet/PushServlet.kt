@@ -11,6 +11,7 @@ class PushServlet: MSFServlet(arrayOf(
             "ConfigPushSvc.PushDomain" -> InnerDns.default.updateDomainServerList(from.body)
 
 
+
         }
     }
 }
