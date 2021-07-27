@@ -124,7 +124,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 .handler(object : ChannelInitializer<SocketChannel>() {
                     public override fun initChannel(socketChannel: SocketChannel) {
                         // 注意添加顺序决定执行的先后
-                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 5, baseIdleTime, baseIdleTime + 10, TimeUnit.SECONDS))
+                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 3, baseIdleTime, baseIdleTime + (3 * 2), TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
                         socketChannel.pipeline().addLast("handler", usefulListener)
@@ -144,6 +144,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         runCatching {
             socketChannel.pipeline().remove("ping")
         }
-        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime + 5, baseIdleTime, baseIdleTime + 10, TimeUnit.SECONDS))
+        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime + 3, baseIdleTime, baseIdleTime + (3 * 2), TimeUnit.SECONDS))
     }
 }
