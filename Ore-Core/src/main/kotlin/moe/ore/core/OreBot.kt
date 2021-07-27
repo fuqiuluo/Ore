@@ -24,6 +24,7 @@ package moe.ore.core
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.helper.DataManager
+import moe.ore.core.helper.sendPacket
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.packet.FromService
@@ -33,6 +34,7 @@ import moe.ore.core.protocol.tars.service.RequestPushForceOffline
 import moe.ore.core.protocol.tars.statsvc.SvcReqMSFLoginNotify
 import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.core.servlet.PushServlet
+import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.UniPacket
@@ -102,12 +104,11 @@ class OreBot(uin: Long) : Ore(uin) {
         }) // 这里的提示 腾讯一个提示会发3次 请注意！！！
 
 
-        // 给予request返回
         client.registerSpecialHandler(object : LongHandler("OnlinePush.SidTicketExpired") {
             override fun handle(from: FromService) {
-                // sendPacket(from.commandName, EMPTY_BYTE_ARRAY, PacketType.LoginPacket, seq = from.seq).call()
+                sendPacket(from.commandName, EMPTY_BYTE_ARRAY, seq = from.seq).call()
             }
-        })
+        }) // return 0, ignore
 
         PushServlet().init(client)
     }

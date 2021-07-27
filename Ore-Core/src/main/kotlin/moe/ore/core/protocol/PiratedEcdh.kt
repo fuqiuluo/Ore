@@ -69,7 +69,7 @@ class PiratedEcdh(
     }
 
     private fun constructX509PublicKey(bs: ByteArray): PublicKey {
-        val kf = KeyFactory.getInstance("EC")
+        val kf = KeyFactory.getInstance("EC", "BC")
         return kf.generatePublic(X509EncodedKeySpec(bs))
     }
 
@@ -78,7 +78,7 @@ class PiratedEcdh(
             val pub = constructX509PublicKey(
                 x509Prefix + bs
             )
-            val agreement = KeyAgreement.getInstance("ECDH")
+            val agreement = KeyAgreement.getInstance("ECDH", "BC")
             agreement.init(pkcs8PrivateKey)
             agreement.doPhase(pub, true)
             val sKey = ByteArray(16).also { System.arraycopy(agreement.generateSecret(), 0, it, 0, 16) }
@@ -91,7 +91,7 @@ class PiratedEcdh(
 
     fun initShareKeyByBouncycastle() : Int {
         try {
-            val pairGenerator = KeyPairGenerator.getInstance("EC")
+            val pairGenerator = KeyPairGenerator.getInstance("EC", "BC")
             pairGenerator.initialize(ECGenParameterSpec("prime256v1"))
             val pair = pairGenerator.genKeyPair()
             val pubKey = pair.public
@@ -101,7 +101,7 @@ class PiratedEcdh(
             val pub = constructX509PublicKey(
                 x509Prefix + svrPubKey
             )
-            val agreement = KeyAgreement.getInstance("ECDH")
+            val agreement = KeyAgreement.getInstance("ECDH", "BC")
             agreement.init(priKey)
             agreement.doPhase(pub, true)
             val sKey = ByteArray(16).also { System.arraycopy(agreement.generateSecret(), 0, it, 0, 16) }
