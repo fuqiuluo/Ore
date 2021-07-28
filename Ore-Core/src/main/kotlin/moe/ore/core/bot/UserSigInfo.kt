@@ -146,16 +146,11 @@ open class Ticket() : TarsBase() {
 }
 
 @TarsClass(requireWrite = true, requireRead = true)
-class LoginExtraData : TarsBase() {
-    @TarsField(id = 1)
-    val uin: Long = 0
-
-    @TarsField(id = 2)
-    val ip: ByteArray = EMPTY_BYTE_ARRAY
-
-    @TarsField(id = 3)
-    val time: Int = 0
-
-    @TarsField(id = 4)
-    val appId: Int = 0
+data class LoginExtraData(
+    @TarsField(id = 1) val uin: Long,
+    @TarsField(id = 2) val ip: ByteArray,
+    @TarsField(id = 3) val time: Int,
+    @TarsField(id = 4) val appId: Int,
+) : TarsBase() {
+    constructor() : this(0, EMPTY_BYTE_ARRAY, 0, 0)
 }
