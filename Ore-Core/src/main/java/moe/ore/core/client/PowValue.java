@@ -1,5 +1,8 @@
 package moe.ore.core.client;
 
+import kotlinx.io.core.BytePacketBuilder;
+import moe.ore.helper.BytePacketExtKt;
+
 import java.nio.ByteBuffer;
 
 public class PowValue {
@@ -109,39 +112,34 @@ public class PowValue {
     }
 
     public byte[] array() {
-        ByteBuffer buffer = ByteBuffer.allocate(4096);
-        buffer.put((byte) this.version);
-        buffer.put((byte) this.checkType);
-        buffer.put((byte) this.algorithmType);
-        buffer.put((byte) this.hasHashResult);
-        buffer.putShort((short) this.baseCount);
-        int i2 = 0;
-        while (true) {
-            int[] iArr = this.filling;
-            if (i2 >= iArr.length) {
-                break;
-            }
-            buffer.put((byte) iArr[i2]);
-            i2++;
+        BytePacketBuilder builder = BytePacketExtKt.newBuilder();
+        builder.writeByte((byte) this.version);
+        builder.writeByte((byte) this.checkType);
+        builder.writeByte((byte) this.algorithmType);
+        builder.writeByte((byte) this.hasHashResult);
+        builder.writeShort((short) this.baseCount);
+        for (int fill : this.filling) {
+            builder.writeByte((byte) fill);
         }
-        buffer.putShort((short) this.originSize);
+
+        builder.writeShort((short) this.originSize);
         if (this.originSize > 0) {
-            buffer.put(this.origin);
+            builder.writeFully(this.origin, 0, this.originSize);
         }
-        buffer.putShort((short) this.cpSize);
+        builder.writeShort((short) this.cpSize);
         if (this.cpSize > 0) {
-            buffer.put(this.cp);
+            builder.writeFully(this.cp, 0, this.cpSize);
         }
-        buffer.putShort((short) this.sm3Size);
+        builder.writeShort((short) this.sm3Size);
         if (this.sm3Size > 0) {
-            buffer.put(this.sm);
+            builder.writeFully(this.sm, 0, this.sm3Size);
         }
         if (this.hasHashResult == 1) {
-            buffer.putShort((short) this.hashResultSize);
-            buffer.put(this.hashResult);
-            buffer.putInt(this.cost);
-            buffer.putInt(this.cnt);
+            builder.writeShort((short) this.hashResultSize);
+            builder.writeFully(this.hashResult, 0, this.hashResultSize);
+            builder.writeInt(this.cost);
+            builder.writeInt(this.cnt);
         }
-        return buffer.array();
+        return BytePacketExtKt.toByteArray(builder);
     }
 }

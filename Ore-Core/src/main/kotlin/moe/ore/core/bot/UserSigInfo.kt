@@ -146,9 +146,7 @@ open class Ticket() : TarsBase() {
 }
 
 @TarsClass(requireWrite = true, requireRead = true)
-class LoginExtraData(
-
-) : TarsBase() {
+class LoginExtraData : TarsBase() {
     @TarsField(id = 1)
     val uin: Long = 0
 
