@@ -18,12 +18,12 @@ import moe.ore.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
-class QPay(val uin : Long, var payWord : String) : IQPay {
+class QPay(val uin: Long, var payWord: String) : IQPay {
     /**
      * 支付配置文件
      */
 
-    var hasRoot : Boolean = true
+    var hasRoot: Boolean = true
 
     private val dataManager = DataManager.manager(uin)
     private val protocol = ProtocolInternal[dataManager.protocolType]
@@ -31,31 +31,37 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
     private val device = dataManager.deviceInfo
     private val session = dataManager.session
 
-    private var defaultKeyIndex : Int = Random.nextInt(0, 16)
+    private var defaultKeyIndex: Int = Random.nextInt(0, 16)
 
     // =========================================================================
 
-    override fun getWalletBalance() : Double {
+    override fun getWalletBalance(): Double {
         try {
             val skey = session.sKey.ticket()
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbWallet, mapOf(
-                    "req_text" to encryptToReqText(mapOf(
-                        "skey" to skey,
-                        "uin" to uin.toString(),
-                        "h_net_type" to "WIFI",
-                        "h_model" to "android_mqq",
-                        "h_edition" to "20",
-                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
-                            // 这个0代表支付环境是否有root
-                            (if(hasRoot) 1 else 0)
-                        }|",
-                        "h_qq_guid" to device.guid.toHexString(),
-                        "h_qq_appid" to "537070774",
-                        // 写死
-                        "h_exten" to ""
-                    ), defaultKeyIndex),
+                    "req_text" to encryptToReqText(
+                        mapOf(
+                            "skey" to skey,
+                            "uin" to uin.toString(),
+                            "h_net_type" to "WIFI",
+                            "h_model" to "android_mqq",
+                            "h_edition" to "20",
+                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                                MD5.hexDigest(
+                                    device.androidId + device.macAddress
+                                )
+                            }|7C9809E2D6C9B9277643C6088BCD181C|${
+                                // 这个0代表支付环境是否有root
+                                (if (hasRoot) 1 else 0)
+                            }|",
+                            "h_qq_guid" to device.guid.toHexString(),
+                            "h_qq_appid" to "537070774",
+                            // 写死
+                            "h_exten" to ""
+                        ), defaultKeyIndex
+                    ),
                     "skey_type" to "2", // 0 为vkey 2 为skey
                     "random" to "$defaultKeyIndex",
                     // 密钥的标识
@@ -63,38 +69,51 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                     "skey" to skey
                 )
             )
-            if(result?.code == 200) {
+            if (result?.code == 200) {
                 val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
                 val hbWallet = Gson().fromJson(data, QPayWallet::class.java)
                 result.close()
                 return hbWallet.balance.toInt() * 0.01
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return 0.00
     }
 
-    override fun sendTrCommonHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int) : QPayBalance? {
+    override fun sendTrCommonHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int): QPayBalance? {
         return sendTrHb(groupId, HbType.Common, wishing, totalAmount, totalNum)
     }
 
-    override fun sendTrLuckyHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int) : QPayBalance? {
+    override fun sendTrLuckyHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int): QPayBalance? {
         return sendTrHb(groupId, HbType.Lucky, wishing, totalAmount, totalNum)
     }
 
-    override fun sendTrExclusiveHb(groupId: Long, wishing: String, totalAmount: Int, totalNum: Int, grabUinList: Array<Long>) : QPayBalance? {
-        return sendTrHb(groupId, HbType.Exclusive, wishing, totalAmount, totalNum, mapOf("grab_uin_list" to fun () : String {
-            var buffer = ""
-            grabUinList.forEachIndexed { index, grabUin ->
-                if(index == 0) {
-                    buffer += grabUin
-                } else {
-                    buffer += "|$grabUin"
+    override fun sendTrExclusiveHb(
+        groupId: Long,
+        wishing: String,
+        totalAmount: Int,
+        totalNum: Int,
+        grabUinList: Array<Long>
+    ): QPayBalance? {
+        return sendTrHb(
+            groupId,
+            HbType.Exclusive,
+            wishing,
+            totalAmount,
+            totalNum,
+            mapOf("grab_uin_list" to fun(): String {
+                var buffer = ""
+                grabUinList.forEachIndexed { index, grabUin ->
+                    if (index == 0) {
+                        buffer += grabUin
+                    } else {
+                        buffer += "|$grabUin"
+                    }
                 }
-            }
-            return buffer
-        }()))
+                return buffer
+            }())
+        )
     }
 
     override fun sendTrPasswordHb(groupId: Long, word: String, totalAmount: Int, totalNum: Int): QPayBalance? {
@@ -106,9 +125,11 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
     }
 
     override fun sendTrRareHb(groupId: Long, word: String, totalAmount: Int, totalNum: Int): QPayBalance? {
-        return sendTrHb(groupId, HbType.Rare, word, totalAmount, totalNum, mapOf(
-            "client_extend" to "{\"type\":\"shengpizi\"}"
-        ))
+        return sendTrHb(
+            groupId, HbType.Rare, word, totalAmount, totalNum, mapOf(
+                "client_extend" to "{\"type\":\"shengpizi\"}"
+            )
+        )
     }
 
     // =========================================================================
@@ -132,8 +153,20 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
     ): QPayBalance? {
         val skey = session.sKey.ticket()
         val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
-        val hbPack = getHBPack(skey, pskey, groupId, 0, hbType.busType, hbType.channel, wishing, totalAmount, totalNum, 3, textMap)!!
-        if(hbPack.retcode != 0) {
+        val hbPack = getHBPack(
+            skey,
+            pskey,
+            groupId,
+            0,
+            hbType.busType,
+            hbType.channel,
+            wishing,
+            totalAmount,
+            totalNum,
+            3,
+            textMap
+        )!!
+        if (hbPack.retcode != 0) {
             error(hbPack.retmsg)
         }
         val gate = getHBGate(skey, pskey, hbPack.token_id)
@@ -173,13 +206,13 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
          * 1好友 3群 4非好友
          */
         recvType: Int,
-        textMap : Map<String, Any>
-    ) : QPayHbPack? {
+        textMap: Map<String, Any>
+    ): QPayHbPack? {
         /**
          * 最多发200块的红包
          */
-        check(totalAmount in 1 .. 200 * 10 * 10) { "总金额不合法" }
-        check(totalNum in 1 .. 100) { "红包个数不合法" }
+        check(totalAmount in 1..200 * 10 * 10) { "总金额不合法" }
+        check(totalNum in 1..100) { "红包个数不合法" }
         try {
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
@@ -203,14 +236,19 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "74",
-                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
+                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                            MD5.hexDigest(
+                                device.androidId + device.macAddress
+                            )
+                        }|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
-                            (if(hasRoot) 1 else 0)
+                            (if (hasRoot) 1 else 0)
                         }|",
                         "h_qq_guid" to device.guid.toHexString(),
                         "h_qq_appid" to "537068363",
                         "h_exten" to ""
-                    ).also { textMap.forEach { (t, u) -> it[t] = u.toString() } }, defaultKeyIndex),
+                    ).also { textMap.forEach { (t, u) -> it[t] = u.toString() } }, defaultKeyIndex
+                    ),
                     "skey_type" to "2",
                     "random" to "$defaultKeyIndex",
                     // 密钥的标识
@@ -218,45 +256,51 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                     "skey" to skey
                 )
             )
-            if(result?.code == 200) {
+            if (result?.code == 200) {
                 val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
                 // println(data)
                 val hbPack = Gson().fromJson(data, QPayHbPack::class.java)
                 result.close()
                 return hbPack
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return null
     }
 
-    private fun getHBGate(skey: String, pskey: String, token_id: String) : QPayHbGate? {
+    private fun getHBGate(skey: String, pskey: String, token_id: String): QPayHbGate? {
         try {
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbGateUrl, mapOf(
-                    "req_text" to encryptToReqText(mapOf(
-                        "pskey" to pskey,
-                        "pskey_scene" to "client",
-                        "skey_type" to "2",
-                        "come_from" to "2",
-                        "token_id" to token_id,
-                        "skey" to skey,
-                        "uin" to uin.toString(),
-                        "sdk_channel" to "0",
-                        "soter_flag" to "2",
-                        "h_net_type" to "WIFI",
-                        "h_model" to "android_mqq",
-                        "h_edition" to "74",
-                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
-                            // 这个0代表支付环境是否有root
-                            (if(hasRoot) 1 else 0)
-                        }|",
-                        "h_qq_guid" to device.guid.toHexString(),
-                        "h_qq_appid" to "537068363",
-                        "h_exten" to ""
-                    ), defaultKeyIndex),
+                    "req_text" to encryptToReqText(
+                        mapOf(
+                            "pskey" to pskey,
+                            "pskey_scene" to "client",
+                            "skey_type" to "2",
+                            "come_from" to "2",
+                            "token_id" to token_id,
+                            "skey" to skey,
+                            "uin" to uin.toString(),
+                            "sdk_channel" to "0",
+                            "soter_flag" to "2",
+                            "h_net_type" to "WIFI",
+                            "h_model" to "android_mqq",
+                            "h_edition" to "74",
+                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                                MD5.hexDigest(
+                                    device.androidId + device.macAddress
+                                )
+                            }|7C9809E2D6C9B9277643C6088BCD181C|${
+                                // 这个0代表支付环境是否有root
+                                (if (hasRoot) 1 else 0)
+                            }|",
+                            "h_qq_guid" to device.guid.toHexString(),
+                            "h_qq_appid" to "537068363",
+                            "h_exten" to ""
+                        ), defaultKeyIndex
+                    ),
                     "skey_type" to "2",
                     "random" to "$defaultKeyIndex",
                     // 密钥的标识
@@ -264,7 +308,7 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                     "skey" to skey
                 )
             )
-            if(result?.code == 200) {
+            if (result?.code == 200) {
                 val str = result.body!!.string()
                 val data = decryptToJsonStr(str, defaultKeyIndex)
                 val hbGate = Gson().fromJson(data, QPayHbGate::class.java)
@@ -272,49 +316,55 @@ class QPay(val uin : Long, var payWord : String) : IQPay {
                 defaultKeyIndex = hbGate.trans_seq.toInt()
                 return hbGate
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return null
     }
 
-    private fun getHBBalance(tokenId: String, gate: QPayHbGate) : QPayBalance? {
+    private fun getHBBalance(tokenId: String, gate: QPayHbGate): QPayBalance? {
         try {
-            val timeBs = getTimes().toByteArray()
-            val time = timeBs.toHexString()
+            // val timeBs = getTimes().toByteArray()
+            // val time = timeBs.toHexString()
             val pskey = session.pSKeyMap["tenpay.com"]!!["pskey"]!!.ticket()
             val okhttp = OkhttpUtil()
             val result = okhttp.post(
                 HbBalanceUrl, mapOf(
-                    "req_text" to encryptToReqText(mapOf(
-                        "pskey" to pskey,
-                        "p" to HbRSA.RSAEncrypt(payWord),
-                        "token_id" to tokenId,
-                        "is_reentry" to "0",
-                        "skey" to gate.skey,
-                        "timestamp" to getTimes(),
-                        "h_net_type" to "WIFI",
-                        "h_model" to "android_mqq",
-                        "h_edition" to "74",
-                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${MD5.hexDigest(device.androidId + device.macAddress)}|7C9809E2D6C9B9277643C6088BCD181C|${
-                            // 这个0代表支付环境是否有root
-                            (if(hasRoot) 1 else 0)
-                        }|",
-                        "h_qq_guid" to device.guid.toHexString(),
-                        "h_qq_appid" to "537068363",
-                        "h_exten" to ""
-                    ), defaultKeyIndex),
+                    "req_text" to encryptToReqText(
+                        mapOf(
+                            "pskey" to pskey,
+                            "p" to HbRSA.RSAEncrypt(payWord),
+                            "token_id" to tokenId,
+                            "is_reentry" to "0",
+                            "skey" to gate.skey,
+                            "timestamp" to getTimes(),
+                            "h_net_type" to "WIFI",
+                            "h_model" to "android_mqq",
+                            "h_edition" to "74",
+                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                                MD5.hexDigest(
+                                    device.androidId + device.macAddress
+                                )
+                            }|7C9809E2D6C9B9277643C6088BCD181C|${
+                                // 这个0代表支付环境是否有root
+                                (if (hasRoot) 1 else 0)
+                            }|",
+                            "h_qq_guid" to device.guid.toHexString(),
+                            "h_qq_appid" to "537068363",
+                            "h_exten" to ""
+                        ), defaultKeyIndex
+                    ),
                     "msgno" to "$uin${getTime()}0003",
                     "skey" to gate.skey
                 )
             )
-            if(result?.code == 200) {
+            if (result?.code == 200) {
                 val data = decryptToJsonStr(result.body!!.string(), defaultKeyIndex)
                 val balance = Gson().fromJson(data, QPayBalance::class.java)
                 result.close()
                 return balance
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return null

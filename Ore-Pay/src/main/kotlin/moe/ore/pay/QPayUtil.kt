@@ -57,22 +57,22 @@ internal object QPayUtil {
     }
 
     @JvmStatic
-    fun String.formatToJson() : String {
+    fun String.formatToJson(): String {
         return String(toByteArray().toHexString().replace("00".toRegex(), "").hex2ByteArray())
     }
 
     @JvmStatic
-    fun getMsgno(uin : Long, seq : Int) : String {
+    fun getMsgno(uin: Long, seq: Int): String {
         return "$uin${getTime()}${BytesUtil.int16ToBuf(seq).toHexString()}"
     }
 
     @JvmStatic
-    fun Map<String, Any>.toRequestString() : String {
+    fun Map<String, Any>.toRequestString(): String {
         // println(this)
         val buffer = StringBuffer()
         var isFirst = true
         this.forEach { (key, value) ->
-            if(isFirst) {
+            if (isFirst) {
                 buffer.append(key)
                 isFirst = false
             } else {
@@ -84,12 +84,12 @@ internal object QPayUtil {
         return buffer.toString()
     }
 
-    fun tryToDecrypt(data : String) {
+    fun tryToDecrypt(data: String) {
         var id = 0
         desKeys.forEach {
             DesECBUtil.decryptDES(data.hex2ByteArray(), it).let { bytes ->
                 val str = String(bytes)
-                if(str.startsWith("p") || str.startsWith("u") || str.startsWith("s")) {
+                if (str.startsWith("p") || str.startsWith("u") || str.startsWith("s")) {
                     println("KeyId : $id")
                     println(bytes.toHexString())
                     println(str)
