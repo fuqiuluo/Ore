@@ -1,4 +1,3 @@
-import kotlinx.io.core.toByteArray
 import moe.ore.api.LoginResult
 import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
@@ -6,17 +5,9 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
-import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.helper.DataManager
-import moe.ore.core.protocol.pb.DeviceReport
-import moe.ore.core.transfile.dns.InnerDns
-import moe.ore.group.TroopManagerWeb
-import moe.ore.helper.toHexString
-import moe.ore.tars.*
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
@@ -77,7 +68,6 @@ fun main() {
 
 
     }
-
 
     ore.login()
     // ore.tokenLogin()

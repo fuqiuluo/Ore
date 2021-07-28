@@ -22,7 +22,9 @@
 package moe.ore.core.bot
 
 import moe.ore.helper.EMPTY_BYTE_ARRAY
-import moe.ore.tars.*
+import moe.ore.tars.TarsBase
+import moe.ore.tars.TarsClass
+import moe.ore.tars.TarsField
 
 @TarsClass(requireRead = true, requireWrite = true)
 class UserSigInfo : TarsBase() {
@@ -144,13 +146,18 @@ open class Ticket() : TarsBase() {
 }
 
 @TarsClass(requireWrite = true, requireRead = true)
-data class LoginExtraData(
+class LoginExtraData(
+
+) : TarsBase() {
     @TarsField(id = 1)
-    val uin: Long,
+    val uin: Long = 0
+
     @TarsField(id = 2)
-    val ip: ByteArray,
+    val ip: ByteArray = EMPTY_BYTE_ARRAY
+
     @TarsField(id = 3)
-    val time: Int,
+    val time: Int = 0
+
     @TarsField(id = 4)
-    val appId: Int
-) : TarsBase()
+    val appId: Int = 0
+}
