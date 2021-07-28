@@ -1,47 +1,41 @@
-package moe.ore.core.net
+package moe.ore.core.protocol.tars.configpush
 
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
-import moe.ore.tars.TarsBase
+import moe.ore.tars.*
 
 /**
  *@author 飞翔的企鹅
  *create 2021-06-18 23:49
  */
+@TarsClass(requireWrite = true)
+internal class SsoServerInfoReq : TarsBase() {
+    @TarsField(id = 1) var uin: Long = 0
 
-class SsoServerInfoReq : TarsBase() {
-    var a: Long = 0
-    var b: Long = 0
-    var c: Byte = 1
-    var d: String = "46000"
-    var e: Int = 100
-    var f: Long = 0
-    var g: String = "867109044454073"
-    var h: Long = 0
-    var i: Long = 0
-    var j: Long = 0
-    var k: Byte = 0
-    var l: Byte = 0
-    var m: Long = 0
+    @TarsField(id = 2) var timeStamp: Long = 0
 
-    override fun writeTo(output: TarsOutputStream) {
-        output.write(a, 1)
-        output.write(b, 2)
-        output.write(c, 3)
-        output.write(d, 4)
-        output.write(e, 5)
-        output.write(f, 6)
-        output.write(g, 7)
-        output.write(h, 8)
-        output.write(i, 9)
-        output.write(j, 10)
-        output.write(k, 11)
-        output.write(l, 12)
-        output.write(m, 13)
-    }
+    @TarsField(id = 3) var type: Byte = 1
+
+    @TarsField(id = 4) var imsi: String = "46000"
+
+    @TarsField(id = 5) var netType: Int = 100
+
+    @TarsField(id = 6) var appId: Long = 0
+
+    @TarsField(id = 7) var imei: String = "867109044454073"
+
+    @TarsField(id = 8) var gsmCid: Long = 0
+
+    @TarsField(id = 9) var i: Long = 0
+
+    @TarsField(id = 10) var j: Long = 0
+
+    @TarsField(id = 11) var checkType: Byte = 0
+
+    @TarsField(id = 12) var activeNetIp: Byte = 0
+
+    @TarsField(id = 13) var ipAddress: Long = 0
 }
 
-class SsoServerInfoResp : TarsBase() {
+internal class SsoServerInfoResp : TarsBase() {
     var A: ArrayList<IPAddressInfo>? = null
     var B1: ArrayList<IPAddressInfo>? = null
     var u: ArrayList<IPAddressInfo>? = null

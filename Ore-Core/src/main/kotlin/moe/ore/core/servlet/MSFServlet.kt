@@ -9,7 +9,10 @@ import moe.ore.util.TarsUtil
 abstract class MSFServlet(
     private val handleCmd : Array<String>
 ) {
+    lateinit var client: BotClient
+
     fun init(client: BotClient) {
+        this.client = client
         handleCmd.forEach {
             client.registerSpecialHandler(object : LongHandler(it) {
                 override fun handle(from: FromService) {

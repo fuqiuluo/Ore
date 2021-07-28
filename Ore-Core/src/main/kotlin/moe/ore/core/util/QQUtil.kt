@@ -21,8 +21,8 @@
 
 package moe.ore.core.util
 
-import moe.ore.core.net.SsoServerInfoReq
-import moe.ore.core.net.SsoServerInfoResp
+import moe.ore.core.protocol.tars.configpush.SsoServerInfoReq
+import moe.ore.core.protocol.tars.configpush.SsoServerInfoResp
 import moe.ore.helper.*
 import moe.ore.tars.UniPacket
 import moe.ore.util.HttpUtils
@@ -98,7 +98,10 @@ object QQUtil {
 
     @JvmStatic
     fun getOicqServer(appId: Long = 0x200300b9): Pair<String, Int>? {
+        //  env
         val isUseDebugSo = false
+        val isWifi = true
+
         try {
             val uniPacket = UniPacket()
             uniPacket.servantName = "ConfigHttp"
@@ -106,17 +109,17 @@ object QQUtil {
             uniPacket.version = 3
             uniPacket.requestId = 0
             uniPacket.put("HttpServerListReq", SsoServerInfoReq().apply {
-                this.a = 0 // uin string 转数字失败即可设置为0
-                this.c = 1
-                this.d = "460023785098616" // subscriberId(imsi)
-                this.f = appId
-                this.b = 0 // xxx / 1000
-                this.g = "867109044454073" // imei
-                this.h = 0 // gsm cid
-                this.e = 100
-                this.k = 1
-                this.l = 0
-                this.m = 0
+                this.uin = 0
+                this.type = 1
+                this.imsi = "460023785098616"
+                this.appId = appId
+                this.timeStamp = 0
+                this.imei = "867109044454073"
+                this.gsmCid = 0
+                this.netType = if(isWifi) 100 else 1
+                this.checkType = 1 // 1 or 0
+                this.activeNetIp = 0
+                this.ipAddress = 0
             })
             val encrypt = TeaUtil.encrypt(newBuilder().apply {
                 writeBlockWithIntLen({ it + 4 }) {

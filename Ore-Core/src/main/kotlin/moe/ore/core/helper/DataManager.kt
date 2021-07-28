@@ -28,6 +28,7 @@ import moe.ore.core.bot.SsoSession
 import moe.ore.core.bot.UserSigInfo
 import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
@@ -58,14 +59,13 @@ class DataManager private constructor(
     @Transient
     var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
 
-    /**
-     * 管理器
-     */
     var session = SsoSession()
 
     lateinit var botAccount: BotAccount
 
     val ecdh: PiratedEcdh by lazy { PiratedEcdh() }
+
+    val uploadServerList = arrayListOf<FileStorageServerListInfo>()
 
     /**
      * 保存各种Token
@@ -105,7 +105,7 @@ class DataManager private constructor(
         if(save) {
             this.flush()
         }
-        managerMap.remove(uin)
+        managerMap.remove(uin, this)
     }
 
     fun flush() {

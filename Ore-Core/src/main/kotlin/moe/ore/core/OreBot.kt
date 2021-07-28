@@ -110,7 +110,7 @@ class OreBot(uin: Long) : Ore(uin) {
             }
         }) // return 0, ignore
 
-        PushServlet().init(client)
+        PushServlet(uin).init(client)
     }
 
     override fun login() {

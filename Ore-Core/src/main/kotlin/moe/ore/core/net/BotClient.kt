@@ -51,6 +51,7 @@ class BotClient(val uin: Long) {
      */
     private val specialHandler = ConcurrentHashMap<String, Handler>()
 
+
     var listener: ClientListener? = null
 
     private val connection: BotConnection = BotConnection(object : UsefulListener() {
