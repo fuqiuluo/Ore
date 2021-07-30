@@ -127,7 +127,7 @@ object QQUtil {
                 }
             }.toByteArray(), ConfigSvrKey)
             val url = if (isUseDebugSo) "https://configsvr.sparta.html5.qq.com/configsvr/serverlist.jsp?mType=getssolist" else "https://configsvr.msf.3g.qq.com/configsvr/serverlist.jsp?mType=getssolist"
-            val result = HttpUtils().post(url, encrypt)
+            val result = HttpUtils.post(url, encrypt)
             result?.let {
                 val decrypt = TeaUtil.decrypt(result, ConfigSvrKey)
                 val decode = UniPacket.decode(decrypt, 4)

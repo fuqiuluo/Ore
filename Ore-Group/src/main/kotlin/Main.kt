@@ -9,6 +9,10 @@ import moe.ore.core.helper.DataManager
 import java.io.File
 import java.util.*
 
+fun main(args: Array<String>) {
+
+}
+
 fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 

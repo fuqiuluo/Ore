@@ -1,13 +1,12 @@
 package moe.ore.util
 
-import java.io.*
+import java.io.DataOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
 
-class HttpUtils {
+object HttpUtils {
     fun post(url: String, data: ByteArray): ByteArray? {
-
         try {
             val conn = URL(url).openConnection() as HttpURLConnection
             conn.requestMethod = "POST"

@@ -23,7 +23,6 @@ package moe.ore.api.listener
 
 import moe.ore.api.LoginResult
 import moe.ore.api.OreStatus
-import moe.ore.api.data.Result
 
 /**
  * 机器人事件监听器

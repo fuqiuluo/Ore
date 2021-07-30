@@ -47,7 +47,7 @@ public class Cryptor {
     // 后面已经没有数据，这时候就会出错，这个变量就是用来判断这种情况免得出错
     private int contextStart;
     // 随机数对象
-    private static final Random random = CrypterUtil.random();
+    private static final Random random = new Random();
     // 字节输出流
     private final ByteArrayOutputStream bas;
 
@@ -153,25 +153,10 @@ public class Cryptor {
         return out;
     }
 
-    /**
-     * @param in
-     *            需要被解密的密文
-     * @param k
-     *            密钥
-     * @return Message 已解密的消息
-     */
     public byte[] decrypt(byte[] in, byte[] k) {   
         return decrypt(in, 0, in.length, k);
     }
 
-    /**
-     * 加密
-     * @param in 明文字节数组
-     * @param offset 开始加密的偏移
-     * @param len 加密长度
-     * @param k 密钥
-     * @return 密文字节数组
-     */
     public byte[] encrypt(byte[] in, int offset, int len, byte[] k) {
         // 检查密钥
         if(k == null)
@@ -239,37 +224,22 @@ public class Cryptor {
         return out;
     }
 
-    /**
-     * @param in
-     *            需要加密的明文
-     * @param k
-     *            密钥
-     * @return Message 密文
-     */
     public byte[] encrypt(byte[] in, byte[] k) {
         return encrypt(in, 0, in.length, k);
     }
 
-    /**
-     * 加密一个8字节块
-     * 
-     * @param in
-     *     明文字节数组
-     * @return
-     *     密文字节数组
-     */
     private byte[] encipher(byte[] in) {
         // 迭代次数，16次
         int loop = 0x10;
         // 得到明文和密钥的各个部分，注意java没有无符号类型，所以为了表示一个无符号的整数
         // 我们用了long，这个long的前32位是全0的，我们通过这种方式模拟无符号整数，后面用到的long也都是一样的
         // 而且为了保证前32位为0，需要和0xFFFFFFFF做一下位与            
-        long y = CrypterUtil.getUnsignedInt(in, 0, 4);
-        long z = CrypterUtil.getUnsignedInt(in, 4, 4);
-        long a = CrypterUtil.getUnsignedInt(key, 0, 4);
-        long b = CrypterUtil.getUnsignedInt(key, 4, 4);
-        long c = CrypterUtil.getUnsignedInt(key, 8, 4);
-        long d = CrypterUtil.getUnsignedInt(key, 12, 4);
+        long y = getUnsignedInt(in, 0, 4);
+        long z = getUnsignedInt(in, 4, 4);
+        long a = getUnsignedInt(key, 0, 4);
+        long b = getUnsignedInt(key, 4, 4);
+        long c = getUnsignedInt(key, 8, 4);
+        long d = getUnsignedInt(key, 12, 4);
         // 这是算法的一些控制变量，为什么delta是0x9E3779B9呢？
         // 这个数是TEA算法的delta，实际是就是(sqr(5) - 1) * 2^31 (根号5，减1，再乘2的31次方)
         long sum = 0;
@@ -309,12 +279,12 @@ public class Cryptor {
         // 得到密文和密钥的各个部分，注意java没有无符号类型，所以为了表示一个无符号的整数
         // 我们用了long，这个long的前32位是全0的，我们通过这种方式模拟无符号整数，后面用到的long也都是一样的
         // 而且为了保证前32位为0，需要和0xFFFFFFFF做一下位与
-        long y = CrypterUtil.getUnsignedInt(in, offset, 4);
-        long z = CrypterUtil.getUnsignedInt(in, offset + 4, 4);
-        long a = CrypterUtil.getUnsignedInt(key, 0, 4);
-        long b = CrypterUtil.getUnsignedInt(key, 4, 4);
-        long c = CrypterUtil.getUnsignedInt(key, 8, 4);
-        long d = CrypterUtil.getUnsignedInt(key, 12, 4);
+        long y = getUnsignedInt(in, offset, 4);
+        long z = getUnsignedInt(in, offset + 4, 4);
+        long a = getUnsignedInt(key, 0, 4);
+        long b = getUnsignedInt(key, 4, 4);
+        long c = getUnsignedInt(key, 8, 4);
+        long d = getUnsignedInt(key, 12, 4);
         // 算法的一些控制变量，sum在这里也有数了，这个sum和迭代次数有关系
         // 因为delta是这么多，所以sum如果是这么多的话，迭代的时候减减减，减16次，最后
         // 得到0。反正这就是为了得到和加密时相反顺序的控制变量，这样才能解密呀～～
@@ -351,7 +321,7 @@ public class Cryptor {
 
     /**
      * 解密
-     * 
+     *
      * @param in
      *     密文
      * @return
@@ -432,6 +402,19 @@ public class Cryptor {
         return random.nextInt();
     }
 
+    public static long getUnsignedInt(byte[] in, int offset, int len) {
+        long ret = 0L;
+        int end;
+        if(len > 8)
+            end = offset + 8;
+        else
+            end = offset + len;
+        for(int i = offset; i < end; i++) {
+            ret <<= 8;
+            ret |= in[i] & 0xff;
+        }
+        return ret & 0xffffffffL | ret >>> 32;
+    }
 }
 
 

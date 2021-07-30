@@ -3,10 +3,10 @@ package moe.ore.core.bot
 import kotlinx.io.core.toByteArray
 import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.hex2ByteArray
-import moe.ore.tars.*
-import moe.ore.util.BytesUtil
+import moe.ore.tars.TarsBase
+import moe.ore.tars.TarsClass
+import moe.ore.tars.TarsField
 import moe.ore.util.MD5
-import java.util.*
 import kotlin.random.Random
 
 @TarsClass(requireWrite = true, requireRead = true)
@@ -80,43 +80,4 @@ class DeviceInfo : TarsBase() {
     var clientIp = byteArrayOf(0, 0, 0, 0)
     
     var deviceReport = DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())
-
-    companion object {
-        @JvmStatic
-        private fun getImei15(imei: String): String {
-            val imeiChar = imei.toCharArray()
-            var resultInt = 0
-            var i = 0
-            while (i < imeiChar.size) {
-                val a = imeiChar[i].toString().toInt()
-                i++
-                val temp = imeiChar[i].toString().toInt() * 2
-                val b = if (temp < 10) temp else temp - 9
-                resultInt += a + b
-                i++
-            }
-            resultInt %= 10
-            resultInt = if (resultInt == 0) 0 else 10 - resultInt
-            return imei + resultInt
-        }
-
-        @JvmStatic
-        private fun getRandomAndroidId(): String {
-            return UUID.randomUUID().toString().replace("-", "").substring(0, 16)
-        }
-
-        @JvmStatic
-        private fun getRandomMacAddress(): String {
-            val randomKey = BytesUtil.randomKey(6)
-            val sb = StringBuilder()
-            val length: Int = randomKey.size
-            for (i in 0 until length) {
-                sb.append(String.format("%02X:", java.lang.Byte.valueOf(randomKey[i])))
-            }
-            if (sb.isNotEmpty()) {
-                sb.deleteCharAt(sb.length - 1)
-            }
-            return sb.toString()
-        }
-    }
 }
