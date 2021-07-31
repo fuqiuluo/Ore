@@ -21,6 +21,7 @@
 
 package moe.ore.core.net
 
+import io.netty.channel.ChannelHandlerContext
 import moe.ore.core.OreManager
 import moe.ore.core.helper.readMsfSsoPacket
 import moe.ore.core.net.decoder.PacketResponse
@@ -63,7 +64,9 @@ class BotClient(val uin: Long) {
             listener?.onFailConnect()
         }
 
-        override fun onMassage(msg: PacketResponse) {
+        override fun messageReceived(ctx: ChannelHandlerContext?, msg: PacketResponse) {
+//            println("--------"+Thread.currentThread().name)
+//            Thread.sleep(3000)
             ThreadManager[uin].addTask {
                 try {
                     // 检查key是否需要刷新
@@ -83,7 +86,7 @@ class BotClient(val uin: Long) {
                             specialHandler[from.commandName]!!.check(from)
                         }
                     }
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
@@ -93,7 +96,7 @@ class BotClient(val uin: Long) {
     /**
      * 设置心跳间隔
      */
-    fun setHeartbeatInterval(time : Int) {
+    fun setHeartbeatInterval(time: Int) {
         connection.setNewIdleStateHandlerTime(time)
     }
 
@@ -120,7 +123,7 @@ class BotClient(val uin: Long) {
         connection.send(requestBody)
     }
 
-    fun connect(host : String, port : Int): BotClient {
+    fun connect(host: String, port: Int): BotClient {
         connection.connect(host, port)
         return this
     }

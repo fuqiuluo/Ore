@@ -21,11 +21,8 @@
 
 package moe.ore.core.net.listener
 
-import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelFutureListener
+import io.netty.channel.*
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelHandlerAdapter
-import io.netty.channel.ChannelHandlerContext
 import moe.ore.core.net.decoder.PacketResponse
 
 /**
@@ -33,13 +30,13 @@ import moe.ore.core.net.decoder.PacketResponse
  * create 2021-05-30 13:18
  */
 @Sharable
-abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
-    @Throws(Exception::class)
-    override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
-        msg?.let {
-            this.onMassage(msg as PacketResponse)
-        }
-    }
+abstract class UsefulListener : SimpleChannelInboundHandler<PacketResponse>(true), ChannelFutureListener {
+//    @Throws(Exception::class)
+//    override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
+//        msg?.let {
+//            this.onMassage(msg as PacketResponse)
+//        }
+//    }
 
 
 
@@ -61,5 +58,5 @@ abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
 
     protected abstract fun onFailConnect()
 
-    protected abstract fun onMassage(msg: PacketResponse)
+//    protected abstract fun onMassage(msg: PacketResponse)
 }

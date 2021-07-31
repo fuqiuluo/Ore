@@ -30,6 +30,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.timeout.IdleStateHandler
+import io.netty.util.concurrent.DefaultEventExecutorGroup
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.HeartBeatListener
 //import moe.ore.core.net.listener.IdleStateHandler
@@ -123,12 +124,14 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 .handler(LoggingHandler(LogLevel.INFO))
                 .handler(object : ChannelInitializer<SocketChannel>() {
                     public override fun initChannel(socketChannel: SocketChannel) {
-                        var eventLoopGroup = NioEventLoopGroup()
-                        // 注意添加顺序决定执行的先后
+//                        val eventLoopGroup: EventLoopGroup = NioEventLoopGroup()
+//                        val executorGroup = DefaultEventExecutorGroup(16)
+
+                    // 注意添加顺序决定执行的先后
                         socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 3, baseIdleTime.toLong(), baseIdleTime.toLong() + (3 * 2), TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
-                        socketChannel.pipeline().addLast(eventLoopGroup,"handler", usefulListener)
+                        socketChannel.pipeline().addLast("handler", usefulListener)
                         socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
 //                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                     }
