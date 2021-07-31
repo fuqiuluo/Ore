@@ -24,7 +24,6 @@ package moe.ore.core.net.listener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelInboundHandlerAdapter
 import moe.ore.api.OreStatus
 import moe.ore.core.OreManager
 import moe.ore.core.net.BotConnection
@@ -36,7 +35,7 @@ import java.io.IOException
  * create 2021-05-30 13:18
  */
 @Sharable
-class ReconnectionListener(private val connection: BotConnection) : ChannelInboundHandlerAdapter() {
+class ReconnectionListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         when (cause) {
             is IOException -> {

@@ -24,7 +24,6 @@ package moe.ore.core.net.listener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
 import moe.ore.api.OreStatus
@@ -40,7 +39,7 @@ import moe.ore.helper.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class HeartBeatListener(private val connection: BotConnection) : ChannelInboundHandlerAdapter() {
+class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {

@@ -21,7 +21,6 @@
 
 package moe.ore.core.net.listener
 
-import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
@@ -34,7 +33,7 @@ import java.net.SocketAddress
  * create 2021-05-30 13:18
  */
 @Sharable
-class EventListener(private val botConnection: BotConnection) : ChannelDuplexHandler() {
+class EventListener(private val botConnection: BotConnection) : ChannelHandlerAdapter() {
     @Throws(Exception::class)
 
     override fun handlerAdded(ctx: ChannelHandlerContext) {

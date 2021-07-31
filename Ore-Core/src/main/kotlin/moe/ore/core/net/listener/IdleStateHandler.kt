@@ -21,43 +21,12 @@
 
 package moe.ore.core.net.listener
 
-import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelHandlerAdapter
-import io.netty.channel.ChannelHandlerContext
-import moe.ore.core.net.decoder.PacketResponse
+import java.util.concurrent.TimeUnit
 
 /**
- * @author 飞翔的企鹅
- * create 2021-05-30 13:18
+ *@author 飞翔的企鹅
+ *create 2021-05-31 13:56
  */
 @Sharable
-abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
-    @Throws(Exception::class)
-    override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
-        msg?.let {
-            this.onMassage(msg as PacketResponse)
-        }
-    }
-
-    override fun channelActive(ctx: ChannelHandlerContext?) {
-        // println(System.currentTimeMillis())
-        // 握手成功 并沒有载入服务器
-    }
-
-    override fun operationComplete(future: ChannelFuture?) {
-        if (future != null && future.isSuccess) {
-            // println("成功接入服务器")
-            this.onConnect()
-        } else {
-            this.onFailConnect()
-        }
-    }
-
-    protected abstract fun onConnect()
-
-    protected abstract fun onFailConnect()
-
-    protected abstract fun onMassage(msg: PacketResponse)
-}
+class IdleStateHandler(readerIdleTime: Long, writerIdleTime: Long, allIdleTime: Long, unit: TimeUnit) : io.netty.handler.timeout.IdleStateHandler(readerIdleTime, writerIdleTime, allIdleTime, unit)
