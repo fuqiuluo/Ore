@@ -80,7 +80,7 @@ abstract class SmsHelper {
 
     abstract fun otherWayUrl() : String
 
-    abstract fun sendSms() : Result<Boolean>
+    abstract fun sendSms() : moe.ore.api.data.Result<Boolean>
 
     abstract fun submitSms(code : String)
 

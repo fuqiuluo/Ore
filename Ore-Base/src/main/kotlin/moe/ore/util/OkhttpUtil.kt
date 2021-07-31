@@ -108,7 +108,7 @@ class OkhttpUtil(
         return response
     }
 
-    fun post(url: String, bodyParams: Map<String, Any>): Response? {
+    fun post(url: String, bodyParams: Map<String, Any>): Response {
         val body = toRequestBody(bodyParams)
         return post(url, body)
     }

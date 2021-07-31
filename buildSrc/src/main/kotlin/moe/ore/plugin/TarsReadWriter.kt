@@ -66,7 +66,7 @@ class TarsReadWriter(
                                     loadObject(2)
                                     forPut(keyType) // key
                                     forPut(newClassName) // value
-                                    invokeInterface("java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+                                    invokeVirtual("java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
                                     pop() // 弹出put操作的返回值
 
                                     loadObject(2)

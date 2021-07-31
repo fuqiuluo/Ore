@@ -6,14 +6,15 @@ import java.net.URL
 
 
 object HttpUtils {
-    fun post(url: String, data: ByteArray): ByteArray? {
-        try {
+    @JvmOverloads
+    fun post(url: String, data: ByteArray, connectTimeout: Int = 3000, readTimeout: Int = 3000): ByteArray? {
+        runCatching<ByteArray?> {
             val conn = URL(url).openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.doInput = true
-            conn.connectTimeout = 3000
-            conn.readTimeout = 3000
+            conn.connectTimeout = connectTimeout
+            conn.readTimeout = readTimeout
             val out = DataOutputStream(conn.outputStream)
             out.write(data)
             out.flush()
@@ -23,9 +24,7 @@ object HttpUtils {
             } else {
                 null
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        }.onSuccess { return it }.onFailure { it.printStackTrace() }
         return null
     }
 }

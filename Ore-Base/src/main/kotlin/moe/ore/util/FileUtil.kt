@@ -21,73 +21,39 @@
 
 package moe.ore.util
 
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.Files
 
 object FileUtil {
     @JvmStatic
-    fun has(string: String) = File(string).exists()
-
-    @Throws(IOException::class)
-    @JvmStatic
-    fun readFile(f: File): ByteArray {
-        return readFile(f.absolutePath)
-    }
-
-    @Throws(IOException::class)
-    @JvmStatic
-    fun readFile(filename: String) : ByteArray {
-        return readFileBytes(filename)
-    }
-
-    @Throws(IOException::class)
-    @JvmStatic
-    fun readFileString(f: File): String {
-        return String(readFile(f))
-    }
+    fun has(filePath: String) = File(filePath).exists()
 
     @JvmStatic
-    @Throws(IOException::class)
-    fun readFileString(path: String): String {
-        return String(readFileBytes(path))
-    }
+    fun readFileBytes(f: File): ByteArray = Files.readAllBytes(f.toPath())
 
-    @Throws(IOException::class)
     @JvmStatic
-    fun readFileBytes(path: String): ByteArray {
-        return readFileBytes(FileInputStream(path))
-    }
+    fun readFileBytes(filePath: String) = readFileBytes(File(filePath).also { f ->
+        check(f.exists()) { "file not exits" }
+        check(f.isFile) { "File is not a file" }
+        check(f.canRead()) { "file can not read" }
+    })
 
-    @Throws(IOException::class)
+    @JvmStatic fun readFileString(f: File) = String(readFileBytes(f))
+
+    @JvmStatic fun readFileString(path: String) = String(readFileBytes(path))
+
     @JvmStatic
-    fun readFileBytes(inputStream: InputStream): ByteArray {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        while (true) {
-            val read = inputStream.read()
-            if (read == -1) {
-                inputStream.close()
-                val byteArray = byteArrayOutputStream.toByteArray()
-                byteArrayOutputStream.close()
-                return byteArray
-            }
-            byteArrayOutputStream.write(read)
-        }
-    }
+    fun saveFile(path: String, content: String) = saveFile(path, content.toByteArray())
 
-    @Throws(IOException::class)
-    @JvmStatic
-    fun saveFile(path: String, content: String) {
-        saveFile(path, content.toByteArray())
-    }
-
-    @Throws(IOException::class)
     @JvmStatic
     fun saveFile(path: String, content: ByteArray) {
         val file = File(path)
         if (!file.exists()) {
-            checkParentFile(file.parentFile)
-            if (!file.createNewFile()) {
-                return
+            checkFileExists(file.parentFile) { exists ->
+                if(!exists) mkdirs()
             }
+            if (!file.createNewFile()) return
         }
         val fileOutputStream = FileOutputStream(file)
         fileOutputStream.write(content)
@@ -96,9 +62,5 @@ object FileUtil {
     }
 
     @JvmStatic
-    private fun checkParentFile(file: File) {
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-    }
+    private fun checkFileExists(file: File, block: File.(Boolean) -> Unit) = block.invoke(file, file.exists())
 }

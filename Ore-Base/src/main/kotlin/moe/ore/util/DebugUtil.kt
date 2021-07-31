@@ -28,12 +28,6 @@ object DebugUtil {
         return Thread.getAllStackTraces().keys.toTypedArray()
     }
 
-    /**
-     * 反射违规操作-强转
-     *
-     * @param source 目标类型
-     * @param any Any 被强转对象
-     */
     @JvmStatic
     fun <T> forcedConvert(any: Any?) : T? {
         return any as? T

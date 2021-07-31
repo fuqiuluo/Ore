@@ -37,7 +37,7 @@ fun newBuilder() = BytePacketBuilder()
 fun BytePacketBuilder.toByteArray(): ByteArray {
     val reader = this.build()
     val array = ByteArray(reader.remaining.toInt())
-    reader.readAvailable(array)
+    reader.readFully(array)
     return array
 }
 

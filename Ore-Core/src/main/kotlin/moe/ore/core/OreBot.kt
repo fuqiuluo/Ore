@@ -36,13 +36,12 @@ import moe.ore.core.protocol.wlogin.WloginHelper
 import moe.ore.core.servlet.PushServlet
 import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.runtimeError
-import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.UniPacket
 
 class OreBot(uin: Long) : Ore(uin) {
     private val manager = DataManager.manager(uin)
 
-    private val threadManager: ThreadManager = manager.threadManager
+    private val coroutineManager = manager.coroutineManager
 
     val client: BotClient = BotClient(uin).apply {
         this.listener = object : ClientListener {
@@ -115,7 +114,7 @@ class OreBot(uin: Long) : Ore(uin) {
 
     override fun login() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
+        coroutineManager.addTask {
             oreListener?.onLoginStart()
         }
         // 连接到服务器会自动发送登录包
@@ -124,7 +123,7 @@ class OreBot(uin: Long) : Ore(uin) {
 
     override fun tokenLogin() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
+        coroutineManager.addTask {
             oreListener?.onLoginStart()
         }
         this.status = OreStatus.Reconnecting
@@ -135,7 +134,7 @@ class OreBot(uin: Long) : Ore(uin) {
     @Deprecated("二维码登录的入口不在这里哦！")
     override fun qrLogin() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
+        coroutineManager.addTask {
             oreListener?.onLoginStart()
         }
         this.status = OreStatus.QRLogin

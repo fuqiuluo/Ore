@@ -16,7 +16,7 @@ import moe.ore.core.net.packet.PacketSender
 import moe.ore.core.net.packet.PacketSender.Companion.sync
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.helper.currentTimeSeconds
-import moe.ore.helper.thread.sleepQuietly
+import moe.ore.helper.sleepQuietly
 import moe.ore.helper.toByteReadPacket
 import moe.ore.util.TeaUtil
 
@@ -141,7 +141,6 @@ class QRLoginHelper(
             }
         }
     }
-
 
     private fun checkQRCode() = WtLoginCheckQR(verifySig!!).sendTo(client)
 

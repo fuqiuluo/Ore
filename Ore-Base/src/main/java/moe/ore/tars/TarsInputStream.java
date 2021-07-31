@@ -442,7 +442,7 @@ public final class TarsInputStream {
     }
 
     public Map<String, String> readStringMap(int tag, boolean isRequire) {
-        HashMap<String, String> mr = new HashMap<String, String>();
+        HashMap<String, String> mr = new HashMap<>();
         if (skipToTag(tag)) {
             HeadData hd = new HeadData();
             readHead(hd);
@@ -464,7 +464,7 @@ public final class TarsInputStream {
     }
 
     public <K, V> HashMap<K, V> readMap(Map<K, V> m, int tag, boolean isRequire) {
-        return (HashMap<K, V>) readMap(new HashMap<K, V>(), m, tag, isRequire);
+        return (HashMap<K, V>) readMap(new HashMap<>(), m, tag, isRequire);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -732,11 +732,11 @@ public final class TarsInputStream {
 
     public <T> List<T> readArray(List<T> l, int tag, boolean isRequire) {
         if (l == null || l.isEmpty()) {
-            return new ArrayList<T>();
+            return new ArrayList<>();
         }
         T[] tt = readArrayImpl(l.get(0), tag, isRequire);
         if (tt == null) return null;
-        return new ArrayList<T>(Arrays.asList(tt));
+        return new ArrayList<>(Arrays.asList(tt));
     }
 
     @SuppressWarnings("unchecked")
@@ -852,7 +852,7 @@ public final class TarsInputStream {
         }
     }
 
-    protected Charset sServerEncoding = StandardCharsets.UTF_8;
+    Charset sServerEncoding = StandardCharsets.UTF_8;
 
     public int setServerEncoding(Charset se) {
         sServerEncoding = se;

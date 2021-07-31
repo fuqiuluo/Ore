@@ -113,7 +113,7 @@ public class Cryptor {
             }
             if(pos == 8) {
                 m = in;
-                if(decrypt8Bytes(in, offset, len)) return null;
+                decrypt8Bytes(in, offset, len);
             }
         }
 
@@ -130,8 +130,7 @@ public class Cryptor {
             if(pos == 8) {
                 m = in;
                 preCrypt = crypt - 8;
-                if(decrypt8Bytes(in, offset, len))
-                    return null;
+                decrypt8Bytes(in, offset, len);
             }
         }
 
@@ -146,8 +145,7 @@ public class Cryptor {
             if(pos == 8) {
                 m = in;
                 preCrypt = crypt;
-                if(decrypt8Bytes(in, offset, len))
-                    return null;
+                decrypt8Bytes(in, offset, len);
             }
         }
         return out;
@@ -164,8 +162,7 @@ public class Cryptor {
 
         plain = new byte[8];
         prePlain = new byte[8];
-        pos = 1;           
-        padding = 0; 
+        padding = 0;
         crypt = preCrypt = 0;
         this.key = k;
         header = true;
@@ -371,11 +368,11 @@ public class Cryptor {
      * @return
      *     true表示解密成功
      */
-    private boolean decrypt8Bytes(byte[] in , int offset, int len) {
+    private void decrypt8Bytes(byte[] in , int offset, int len) {
         // 这里第一步就是判断后面还有没有数据，没有就返回，如果有，就执行 crypt ^ prePlain
         for(pos = 0; pos < 8; pos++) {
-            if(contextStart + pos >= len) 
-                return false;
+            if(contextStart + pos >= len)
+                return;
             prePlain[pos] ^= in[offset + crypt + pos];
         }
 
@@ -388,7 +385,6 @@ public class Cryptor {
         contextStart += 8;
         crypt += 8;
         pos = 0;
-        return false;
     }
 
     /**

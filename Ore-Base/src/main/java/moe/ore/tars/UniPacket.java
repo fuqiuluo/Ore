@@ -66,9 +66,7 @@ public class UniPacket {
         servantName = base.servantName();
         funcName = base.funcName();
         String req = base.reqName();
-        if(servantName == null || servantName.isEmpty() ||
-                funcName == null || funcName.isEmpty() ||
-                req == null || req.isEmpty() ) {
+        if(servantName == null || servantName.isEmpty() || funcName == null || funcName.isEmpty() || req.isEmpty()) {
             KotlinExtKt.runtimeError("servant or func or req name is null", null);
         }
         this.put(req, base);

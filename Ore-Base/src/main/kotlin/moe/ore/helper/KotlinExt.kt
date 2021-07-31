@@ -57,11 +57,17 @@ fun timeoutEvent(time : Long, block : TimerTask.() -> Unit) : Timer {
     }, time)
     return timer
 }
-fun Closeable.closeQuietly() {
-    try {
-        close()
-    } catch (rethrown: RuntimeException) {
-        throw rethrown
-    } catch (_: Exception) {
+
+inline fun <C, R> C.fastTry(block: C.() -> R): Result<R> {
+    return try {
+        Result.success(block.invoke(this))
+    } catch (e: Throwable) {
+        Result.failure(e)
     }
+}
+
+fun Closeable.closeQuietly() {
+    kotlin.runCatching {
+        close()
+    }.onFailure { it.printStackTrace() }
 }

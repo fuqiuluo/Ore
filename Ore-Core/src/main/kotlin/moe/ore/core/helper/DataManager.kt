@@ -30,9 +30,12 @@ import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
+import moe.ore.helper.coroutine.CoroutineManager
 import moe.ore.helper.runtimeError
-import moe.ore.helper.thread.ThreadManager
-import moe.ore.tars.*
+import moe.ore.tars.TarsBase
+import moe.ore.tars.TarsClass
+import moe.ore.tars.TarsField
+import moe.ore.tars.TarsInputStream
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
 
@@ -50,7 +53,7 @@ class DataManager private constructor(
     /**
      * 线程管理器
      */
-    val threadManager = ThreadManager[uin]
+    val coroutineManager = CoroutineManager[uin]
 
     /**
      * 数据保存目录
@@ -85,7 +88,7 @@ class DataManager private constructor(
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
-                readFrom(TarsInputStream(FileUtil.readFile(dataPath)))
+                readFrom(TarsInputStream(FileUtil.readFileBytes(dataPath)))
             }
         }
     }
@@ -100,8 +103,7 @@ class DataManager private constructor(
      */
     @JvmOverloads
     fun destroy(save : Boolean = true) {
-        // threadManager 只有由dataManager来释放
-        threadManager.shutdown()
+        coroutineManager.close()
         if(save) {
             this.flush()
         }

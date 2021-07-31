@@ -27,15 +27,15 @@ import moe.ore.util.TeaUtil
 
 class WloginHelper(val uin: Long,
                    private val client: BotClient,
-                   val listener: OreListener? = null) : Thread() {
+                   val listener: OreListener? = null) {
     private val eventHandler by lazy { EventHandler(listener, client, this) }
     private val manager = DataManager.manager(uin)
-    private val threadManager = manager.threadManager
+    private val coroutineManager = manager.coroutineManager
     private val ecdh = manager.ecdh
 
     private var wtMode: Int = 0
 
-    override fun run() {
+    fun run() {
         when (wtMode) {
             MODE_QR_LOGIN -> handle(WtLoginQRToken(uin).sendTo(client), ecdh.shareKey)
             MODE_PASSWORD_LOGIN -> handle(WtLoginPassword(uin).sendTo(client), ecdh.shareKey)
@@ -97,7 +97,7 @@ class WloginHelper(val uin: Long,
      */
     fun loginByQrToken() {
         this.wtMode = MODE_QR_LOGIN
-        threadManager.addTask(this)
+        coroutineManager.addTask { run() }
     }
 
     /**
@@ -105,7 +105,7 @@ class WloginHelper(val uin: Long,
      */
     fun loginByToken() {
         this.wtMode = MODE_TOKEN_LOGIN
-        threadManager.addTask(this)
+        coroutineManager.addTask { run() }
     }
 
     /**
@@ -113,7 +113,7 @@ class WloginHelper(val uin: Long,
      */
     fun loginByPassword() {
         this.wtMode = MODE_PASSWORD_LOGIN
-        threadManager.addTask(this)
+        coroutineManager.addTask { run() }
     }
 
     /**
@@ -121,7 +121,7 @@ class WloginHelper(val uin: Long,
      */
     fun refreshSig() {
         this.wtMode = MODE_EXCHANGE_EMP_SIG
-        threadManager.addTask(this)
+        coroutineManager.addTask { run() }
     }
 
     /**
@@ -129,7 +129,7 @@ class WloginHelper(val uin: Long,
      */
     fun refreshSt() {
         this.wtMode = MODE_EXCHANGE_EMP_ST
-        threadManager.addTask(this)
+        coroutineManager.addTask { run() }
     }
 
     class EventHandler(
