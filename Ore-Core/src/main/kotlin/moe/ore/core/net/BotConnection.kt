@@ -116,7 +116,6 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
             nioEventLoopGroup = NioEventLoopGroup()
         }
         bootstrap.group(nioEventLoopGroup)
-                .option(ChannelOption.SINGLE_EVENTEXECUTOR_PER_GROUP, false)
                 .option(ChannelOption.TCP_NODELAY, java.lang.Boolean.TRUE)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .channel(NioSocketChannel::class.java as Class<out Channel>)
