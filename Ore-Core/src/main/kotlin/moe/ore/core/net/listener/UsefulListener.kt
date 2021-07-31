@@ -21,11 +21,8 @@
 
 package moe.ore.core.net.listener
 
-import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelFutureListener
+import io.netty.channel.*
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelHandlerAdapter
-import io.netty.channel.ChannelHandlerContext
 import moe.ore.core.net.decoder.PacketResponse
 
 /**
@@ -33,7 +30,7 @@ import moe.ore.core.net.decoder.PacketResponse
  * create 2021-05-30 13:18
  */
 @Sharable
-abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
+abstract class UsefulListener : ChannelInboundHandlerAdapter(), ChannelFutureListener {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any?) {
         msg?.let {

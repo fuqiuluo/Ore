@@ -32,6 +32,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.timeout.IdleStateHandler
 import moe.ore.core.net.decoder.BotDecoder
+import moe.ore.core.net.listener.EventListener
 import moe.ore.core.net.listener.HeartBeatListener
 //import moe.ore.core.net.listener.IdleStateHandler
 import moe.ore.core.net.listener.ReconnectionListener
@@ -49,7 +50,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     lateinit var channelFuture: ChannelFuture
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
 
-    //    private val eventListener: EventListener = EventListener(this)
+    private val eventListener: EventListener = EventListener(this)
     val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
 
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)
@@ -129,7 +130,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
                         socketChannel.pipeline().addLast("handler", usefulListener)
                         socketChannel.pipeline().addLast("caughtHandler", reconnectionHandler)
-//                socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
+                        socketChannel.pipeline().addLast("event", eventListener) //接受除了上面已注册的东西之外的事件
                     }
                 })
         return bootstrap
