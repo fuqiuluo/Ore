@@ -41,6 +41,8 @@ abstract class UsefulListener : ChannelHandlerAdapter(), ChannelFutureListener {
         }
     }
 
+
+
     override fun channelActive(ctx: ChannelHandlerContext?) {
         // println(System.currentTimeMillis())
         // 握手成功 并沒有载入服务器

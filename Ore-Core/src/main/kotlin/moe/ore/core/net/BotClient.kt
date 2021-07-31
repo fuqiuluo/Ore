@@ -28,7 +28,7 @@ import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.net.packet.Handler
 import moe.ore.core.net.packet.SingleHandler
-import moe.ore.helper.coroutine.CoroutineManager
+import moe.ore.helper.thread.ThreadManager
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -63,29 +63,31 @@ class BotClient(val uin: Long) {
             listener?.onFailConnect()
         }
 
-        override fun onMassage(msg: PacketResponse) { CoroutineManager[uin].addTask {
-            try {
-                // 检查key是否需要刷新
-                OreManager.checkTicketAndRefresh(uin)
-                msg.body.readMsfSsoPacket(uin) { uinStr, from ->
-                    check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
-                    val hash = from.hashCode()
-                    println("A = $from")
-                    if (commonHandler.containsKey(hash)) {
-                        commonHandler[hash]!!.let {
-                            if (it.check(from)) {
-                                // println("注销")
-                                unRegisterCommonHandler(it.hashCode())
+        override fun onMassage(msg: PacketResponse) {
+            ThreadManager[uin].addTask {
+                try {
+                    // 检查key是否需要刷新
+                    OreManager.checkTicketAndRefresh(uin)
+                    msg.body.readMsfSsoPacket(uin) { uinStr, from ->
+                        check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
+                        val hash = from.hashCode()
+                        println("A = $from")
+                        if (commonHandler.containsKey(hash)) {
+                            commonHandler[hash]!!.let {
+                                if (it.check(from)) {
+                                    // println("注销")
+                                    unRegisterCommonHandler(it.hashCode())
+                                }
                             }
+                        } else if (specialHandler.containsKey(from.commandName)) {
+                            specialHandler[from.commandName]!!.check(from)
                         }
-                    } else if (specialHandler.containsKey(from.commandName)) {
-                        specialHandler[from.commandName]!!.check(from)
                     }
+                } catch (e : Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e : Exception) {
-                e.printStackTrace()
             }
-        } }
+        }
     }, uin)
 
     /**

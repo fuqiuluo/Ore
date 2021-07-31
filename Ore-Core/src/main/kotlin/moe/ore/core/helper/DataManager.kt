@@ -30,8 +30,8 @@ import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
-import moe.ore.helper.coroutine.CoroutineManager
 import moe.ore.helper.runtimeError
+import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.TarsBase
 import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
@@ -53,7 +53,7 @@ class DataManager private constructor(
     /**
      * 线程管理器
      */
-    val coroutineManager = CoroutineManager[uin]
+    val threadManager = ThreadManager[uin]
 
     /**
      * 数据保存目录
@@ -103,7 +103,7 @@ class DataManager private constructor(
      */
     @JvmOverloads
     fun destroy(save : Boolean = true) {
-        coroutineManager.close()
+        threadManager.shutdown()
         if(save) {
             this.flush()
         }
