@@ -1,5 +1,6 @@
 package moe.ore.helper.coroutine
 
+/*
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -41,3 +42,4 @@ class CoroutineManager(val uin: Long) {
         }
     }
 }
+*/
