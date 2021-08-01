@@ -23,8 +23,6 @@ package moe.ore.core.helper
 
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readBytes
-import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.OreBot
@@ -99,18 +97,18 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
 /**
  * 上线之后才能用 因为用d2Key加密 否则sendPacket
  * */
-inline fun Ore.sendPbPacket(
-        servName: String,
-        oidbSsoPkg: OidbSSOPkg
+fun Ore.sendOidbPacket(
+    commandName: String,
+    oidbSsoPkg: OidbSSOPkg
 ): PacketSender {
-    return sendPacket(servName, oidbSsoPkg.toByteArray())
+    return sendPacket(commandName, oidbSsoPkg.toByteArray())
 }
 
-inline fun <reified T: Protobuf<T>> Ore.sendPbPacket(
-        servName: String,
-        command: Int,
-        body: T,
-        serviceType : Int = 0
+inline fun <reified T: Protobuf<T>> Ore.sendOidbPacket(
+    commandName: String,
+    command: Int,
+    body: T,
+    serviceType : Int = 0
 ): PacketSender {
     val oidb = OidbSSOPkg()
     oidb.command = command
@@ -120,22 +118,22 @@ inline fun <reified T: Protobuf<T>> Ore.sendPbPacket(
     val manager = DataManager.manager(this.uin)
     oidb.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
 
-    return sendPacket(servName, oidb.toByteArray())
+    return sendPacket(commandName, oidb.toByteArray())
 }
 
 fun Ore.sendJcePacket(
-        servName: String,
-        body: UniPacket,
+    commandName: String,
+    body: UniPacket,
 ): PacketSender {
-    return sendPacket(servName, body.encode(), PacketType.ServicePacket)
+    return sendPacket(commandName, body.encode(), PacketType.ServicePacket)
 }
 
 fun Ore.sendJcePacket(
-    servName: String,
+    commandName: String,
     body: TarsBase,
     requestId: Int
 ): PacketSender {
-    return sendPacket(servName, TarsUtil.encodeRequest(requestId, body))
+    return sendPacket(commandName, TarsUtil.encodeRequest(requestId, body))
 }
 
 @JvmOverloads

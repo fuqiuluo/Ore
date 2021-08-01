@@ -38,6 +38,11 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.runtimeError
 import moe.ore.tars.UniPacket
 
+/*
+fun newBot(uin: Long, password: String) {
+    // single bot
+}*/
+
 class OreBot(uin: Long) : Ore(uin) {
     private val manager = DataManager.manager(uin)
 

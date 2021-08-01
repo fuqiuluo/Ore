@@ -21,19 +21,21 @@
 
 package moe.ore.core.net
 
+//import moe.ore.core.net.listener.IdleStateHandler
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.Unpooled
-import io.netty.channel.*
+import io.netty.channel.Channel
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.timeout.IdleStateHandler
-import io.netty.util.concurrent.DefaultEventExecutorGroup
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.HeartBeatListener
-//import moe.ore.core.net.listener.IdleStateHandler
 import moe.ore.core.net.listener.ReconnectionListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.util.QQUtil
@@ -95,7 +97,12 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     fun send(bytes: ByteArray) {
         // println("Send: " + bytes.toHexString())
-        channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(bytes))
+        // println("a1")
+        channelFuture.channel().also {
+            it.write(Unpooled.copiedBuffer(bytes))
+            it.flush()
+        }
+        // println("a2")
     }
 
     companion object {

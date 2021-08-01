@@ -1,8 +1,6 @@
 package moe.ore.core.bot
 
 import moe.ore.helper.EMPTY_BYTE_ARRAY
-import moe.ore.tars.TarsInputStream
-import moe.ore.tars.TarsOutputStream
 import moe.ore.tars.TarsBase
 import moe.ore.util.BytesUtil
 import java.security.SecureRandom
@@ -71,7 +69,7 @@ class SsoSession : TarsBase() {
     // from t167
     var imgType = 1
 
-    private val seqFactory = AtomicInteger(Random().nextInt(100000))
+    private val seqFactory = AtomicInteger(Random().nextInt(100000) + 60000)
 
     var t104: ByteArray? = null
 
@@ -81,7 +79,7 @@ class SsoSession : TarsBase() {
     fun nextSeqId(): Int {
         var id: Int
         synchronized(this) {
-            id = seqFactory.incrementAndGet()
+            id = seqFactory.addAndGet(2)
             if (id > 1000000) {
                 seqFactory.set(Random().nextInt(100000) + 60000)
             }
@@ -89,13 +87,13 @@ class SsoSession : TarsBase() {
         return id
     }
 
-    private val requestIdFactory = AtomicInteger(Random().nextInt(100000))
+    private val requestIdFactory = AtomicInteger(Random().nextInt(100000) + 60000)
 
     @Synchronized
     fun nextRequestId(): Int {
         var id: Int
         synchronized(this) {
-            id = requestIdFactory.incrementAndGet()
+            id = requestIdFactory.addAndGet(2)
             if (id > 1000000) {
                 requestIdFactory.set(Random().nextInt(100000) + 60000)
             }

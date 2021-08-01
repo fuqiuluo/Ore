@@ -19,6 +19,7 @@
  *
  */
 
+@file:Suppress("EqualsOrHashCode")
 package moe.ore.core.net.packet
 
 import moe.ore.core.helper.DEFAULT_TEA_KEY
@@ -89,8 +90,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
 
         // =============================================
         PacketType.ServicePacket,
-        PacketType.SvcRegister ->
-            userStSig.d2Key.ticket()
+        PacketType.SvcRegister -> userStSig.d2Key.ticket()
     }
 
     val out = newBuilder().apply { writeBlockWithIntLen( { it + 4 } ) {
@@ -222,7 +222,7 @@ open class PacketSender (
     }
 
     private fun send() {
-        println("F = Packet[cmd = $commandName, body = ${body.toHexString()}]")
+        println("F = Packet[cmd = $commandName, seq = $seq,body = ${body.toHexString()}]")
         this.client.send(body)
     }
 

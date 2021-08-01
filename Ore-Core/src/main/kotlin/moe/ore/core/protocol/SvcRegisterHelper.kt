@@ -13,10 +13,6 @@ import moe.ore.util.TarsUtil
 import kotlin.random.Random
 
 class SvcRegisterHelper(val uin: Long) {
-    companion object {
-        const val RESULT_REGISTER_FAIL = -100
-    }
-
     val ore = OreManager.getBot(uin)!!
     val manager = DataManager.manager(uin)
     val device = manager.deviceInfo
@@ -71,9 +67,7 @@ class SvcRegisterHelper(val uin: Long) {
         ) sync 5 * 1000
         return if(from != null) {
             TarsUtil.decodeRequest(RegisterResp(), from.body)
-        } else {
-            RegisterResp()
-        }
+        } else RegisterResp()
     }
 
 }

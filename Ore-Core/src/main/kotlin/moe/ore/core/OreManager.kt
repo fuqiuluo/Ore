@@ -43,6 +43,7 @@ object OreManager {
      */
     @JvmStatic
     fun getBot(uin : Long) = botMap[uin]
+    operator fun get(uin: Long) = getBot(uin)
 
     /**
      * 添加Bot

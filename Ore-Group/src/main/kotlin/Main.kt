@@ -3,9 +3,8 @@ import moe.ore.api.OreStatus
 import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
-import moe.ore.core.OreBot
 import moe.ore.core.OreManager
-import moe.ore.core.helper.DataManager
+import moe.ore.group.troopManager
 import java.io.File
 import java.util.*
 
@@ -13,7 +12,6 @@ fun main() {
     // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
 
     val ore = OreManager.addBot(3042628723, "911586ABCD", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
-    val manager = DataManager.manager(ore.uin)
 
     ore.oreListener = object : OreListener {
         override fun onStatusChanged(status: OreStatus) {
@@ -27,11 +25,10 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            val oreBot = (ore as OreBot)
-            if (result == LoginResult.Success) {
-                DataManager.flush(ore.uin)
-            }
+            Thread.sleep(5000)
 
+            val manager = ore.troopManager()
+            manager.getTroopInfo(1016398585)
 
         }
 

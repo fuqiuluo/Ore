@@ -182,7 +182,7 @@ class WloginHelper(val uin: Long,
                     userStInfo.d2 = bsTicket(it)
                 }
                 map[0x305]?.let {
-                    println("载入d2key")
+                    println("载入d2key：${it.toHexString()}")
                     userStInfo.d2Key = bsTicket(it)
                 }
 
