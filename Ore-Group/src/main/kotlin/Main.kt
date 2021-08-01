@@ -9,8 +9,6 @@ import java.io.File
 import java.util.*
 
 fun main() {
-    // val ore = OreManager.addBot(203411690, "911586ABc", "C:\Users\13723\Desktop\Ore")
-
     val ore = OreManager.addBot(3042628723, "911586ABCD", File("C:\\Users\\13723\\Desktop\\Ore").absolutePath)
 
     ore.oreListener = object : OreListener {
@@ -25,10 +23,9 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-            Thread.sleep(5000)
 
             val manager = ore.troopManager()
-            manager.getTroopInfo(1016398585)
+            println(manager.getTroopList())
 
         }
 

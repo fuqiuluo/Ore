@@ -112,29 +112,43 @@ class CodeBuilder(val mn: MethodNode) {
 
     inline fun pushShort(b : Byte) = pushInt(b.toInt())
 
-    inline fun constM1() = mn.visitInsn(ICONST_M1)
+    inline fun iConstM1() = mn.visitInsn(ICONST_M1)
 
-    inline fun constN0() = mn.visitInsn(ICONST_0)
+    inline fun iConstN0() = mn.visitInsn(ICONST_0)
 
-    inline fun constN1() = mn.visitInsn(ICONST_1)
+    inline fun iConstN1() = mn.visitInsn(ICONST_1)
 
-    inline fun constN2() = mn.visitInsn(ICONST_2)
+    inline fun iConstN2() = mn.visitInsn(ICONST_2)
 
-    inline fun constN3() = mn.visitInsn(ICONST_3)
+    inline fun iConstN3() = mn.visitInsn(ICONST_3)
 
-    inline fun constN4() = mn.visitInsn(ICONST_4)
+    inline fun iConstN4() = mn.visitInsn(ICONST_4)
 
-    inline fun constN5() = mn.visitInsn(ICONST_5)
+    inline fun iConstN5() = mn.visitInsn(ICONST_5)
+
+    inline fun lConstN0() = mn.visitInsn(LCONST_0)
+
+    inline fun lConstN1() = mn.visitInsn(LCONST_1)
+
+    inline fun fConstN0() = mn.visitInsn(FCONST_0)
+
+    inline fun fConstN1() = mn.visitInsn(FCONST_1)
+
+    inline fun fConstN2() = mn.visitInsn(FCONST_2)
+
+    inline fun dConstN0() = mn.visitInsn(DCONST_0)
+
+    inline fun dConstN1() = mn.visitInsn(DCONST_1)
 
     inline fun pushInt(i : Int) {
         when(i) {
-            -1 -> constM1()
-            0 -> constN0()
-            1 -> constN1()
-            2 -> constN2()
-            3 -> constN3()
-            4 -> constN4()
-            5 -> constN5()
+            -1 -> iConstM1()
+            0 -> iConstN0()
+            1 -> iConstN1()
+            2 -> iConstN2()
+            3 -> iConstN3()
+            4 -> iConstN4()
+            5 -> iConstN5()
             in -128 .. 127 -> {
                 mn.visitIntInsn(BIPUSH, i)
             }

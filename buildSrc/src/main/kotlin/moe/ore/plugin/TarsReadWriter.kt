@@ -101,7 +101,7 @@ class TarsReadWriter(
                                         storeObject(2) // save to p2
 
                                         loadObject(2)
-                                        constN0() // array index
+                                        iConstN0() // array index
                                         forPut(newClassName)
                                         storeObjectTA()
 
@@ -152,31 +152,31 @@ class TarsReadWriter(
     private fun CodeBuilder.forPut(type : String) {
         when(type) {
             "java/lang/Byte" -> {
-                constN0()
+                iConstN0()
                 invokeStatic("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;")
             }
             "java/lang/Short" -> {
-                constN0()
+                iConstN0()
                 invokeStatic("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;")
             }
             "java/lang/Integer" -> {
-                constN0()
+                iConstN0()
                 invokeStatic("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
             }
             "java/lang/Long" -> {
-                constN0()
+                lConstN0()
                 invokeStatic("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;")
             }
             "java/lang/Float" -> {
-                constN0()
+                fConstN0()
                 invokeStatic("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;")
             }
             "java/lang/Double" -> {
-                constN0()
+                dConstN0()
                 invokeStatic("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;")
             }
             "java/lang/Character" -> {
-                constN0()
+                iConstN0()
                 invokeStatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;")
             }
             "java/lang/String" -> ldc("")

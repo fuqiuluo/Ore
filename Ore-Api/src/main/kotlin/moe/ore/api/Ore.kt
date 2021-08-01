@@ -29,6 +29,11 @@ import kotlin.properties.Delegates
  */
 abstract class Ore(val uin : Long) {
     /**
+     * 保存服务的map哦
+     */
+    val servletMap = hashMapOf<String, IPacketServlet>()
+
+    /**
      * 机器人状态
      */
     protected var status : OreStatus by Delegates.observable(OreStatus.NoLogin) { _, _, new: OreStatus ->

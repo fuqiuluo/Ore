@@ -82,7 +82,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
         threadPool.shutdown() // 使新任务无法提交.
         try {
             // 等待未完成任务结束
-            if (!threadPool.awaitTermination(1000 * 60 * 3, TimeUnit.MILLISECONDS)) {
+            if (!threadPool.awaitTermination(1000 * 3, TimeUnit.MILLISECONDS)) {
                 threadPool.shutdownNow() // 取消当前执行的任务
                 // 等待任务取消的响应
             }

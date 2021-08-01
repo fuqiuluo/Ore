@@ -1,6 +1,7 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package moe.ore.core.bot
 
+import moe.ore.api.IPacketServlet
 import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
 import moe.ore.core.helper.sendJcePacket
@@ -11,7 +12,7 @@ import moe.ore.protobuf.Protobuf
 import moe.ore.tars.TarsBase
 import moe.ore.util.TarsUtil
 
-open class PacketServlet(val ore: Ore) {
+open class PacketServlet(val ore: Ore) : IPacketServlet {
     val manager = DataManager.manager(ore.uin)
     val session = manager.session
 
