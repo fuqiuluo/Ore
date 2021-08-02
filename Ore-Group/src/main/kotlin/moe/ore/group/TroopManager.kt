@@ -3,7 +3,6 @@ package moe.ore.group
 import moe.ore.api.Ore
 import moe.ore.core.bot.PacketServlet
 import moe.ore.group.tars.*
-import moe.ore.helper.cache.DisketteCache
 import moe.ore.tars.TarsInputStream
 
 const val TAG_TROOP_MANAGER = "TroopManager"
@@ -41,7 +40,7 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
      * cache 是否获取缓存内的数据
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
-        val disketteCache = DisketteCache.build("troop_list", 3 * 60 * 60)
+        val disketteCache = manager.diskCache.build("troop_list", 3 * 60 * 60)
         if(cache && !disketteCache.isExpired) {
             return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
         }

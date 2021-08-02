@@ -30,6 +30,7 @@ import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
+import moe.ore.helper.cache.DisketteCache
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.TarsBase
@@ -38,6 +39,7 @@ import moe.ore.tars.TarsField
 import moe.ore.tars.TarsInputStream
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
+import java.io.File
 
 @TarsClass(requireWrite = true, requireRead = true)
 class DataManager private constructor(
@@ -49,6 +51,11 @@ class DataManager private constructor(
         // 暂时移除
         // private val safePwd: String
 ) : TarsBase() {
+
+    /**
+     * 缓存器
+     */
+    val diskCache: DisketteCache = DisketteCache().apply { init(File(path + "/" + MD5.toMD5(uin.toString()))) }
 
     /**
      * 线程管理器

@@ -2,7 +2,7 @@ package moe.ore.helper.cache
 
 import java.io.File
 
-object DisketteCache {
+class DisketteCache {
     // private val cacheMap = hashMapOf<String, Cache>()
     private lateinit var cacheDir: File
 
