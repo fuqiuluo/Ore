@@ -1,56 +1,59 @@
 package moe.ore.helper.cache
 
-import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.currentTimeSeconds
-import moe.ore.util.FileUtil
+import moe.ore.tars.TarsBase
 import java.io.File
 import java.io.RandomAccessFile
 
 class FileCache(
-    var shelfLife: Int,
-    cacheDir: File,
-    tag: String,
+        var shelfLife: Int,
+        cacheDir: File,
+        tag: String,
 ) {
-    private val cacheFile = File(cacheDir.absolutePath + "/$tag.c")
+    private val cacheFile = File(cacheDir.absolutePath + File.separator + tag + ".c")
+    // private val accessFile = RandomAccessFile(cacheFile, "rw")
+
+    /**
+     * cache in memory
+     */
+    // private lateinit var datas: ByteArray
+
+    /**
+     * is expired
+     */
     var isExpired: Boolean = true
 
-    init {
-        if(cacheFile.exists() && cacheFile.canRead() && cacheFile.canWrite() && cacheFile.length() >= 8) {
-            initValues()
-        } else {
-            FileUtil.saveFile(cacheFile.absolutePath, EMPTY_BYTE_ARRAY)
-            // cacheDir.writeBytes(EMPTY_BYTE_ARRAY)
+    fun get(): ByteArray {
+        if(isExpired) error("cache is expired...")
+        return RandomAccessFile(cacheFile, "r").use {
+            it.skipBytes(8)
+            ByteArray(it.readInt()).apply { it.readFully(this) }
         }
+    }
+
+    init {
+        if (!cacheFile.exists() || !cacheFile.canRead() || !cacheFile.canWrite()) error("without permission")
+        initValues()
     }
 
     private fun initValues() {
-        if(cacheFile.exists()) {
-            val reader = RandomAccessFile(cacheFile, "r")
-            if(reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
-                reader.close()
-                cacheFile.delete() // 过期 -> 删除
-            } else {
-                this.isExpired = false
-            }
+        val accessFile = RandomAccessFile(cacheFile, "r")
+        if (accessFile.readInt() + accessFile.readInt() > currentTimeSeconds()) {
+            isExpired = false
         }
     }
 
-    fun get(): ByteArray {
-        val reader = RandomAccessFile(cacheFile, "r")
-        reader.skipBytes(8)
-        val data = ByteArray(reader.readInt()).apply { reader.readFully(this) }
-        reader.close()
-        return data
+    fun put(data: ByteArray) {
+        val accessFile = RandomAccessFile(cacheFile, "r")
+        accessFile.setLength(0)
+        accessFile.seek(0)
+        accessFile.writeInt(currentTimeSeconds())
+        accessFile.writeInt(shelfLife)
+        accessFile.writeInt(data.size)
+        accessFile.write(data)
     }
 
-    fun edit(data: ByteArray) {
-        this.isExpired = false
-        val writer = RandomAccessFile(cacheFile, "rws")
-        writer.writeInt(currentTimeSeconds())
-        writer.writeInt(shelfLife)
-        writer.writeInt(data.size)
-        writer.setLength(3 * 4)
-        writer.write(data)
-        writer.close()
+    fun put(tars: TarsBase) {
+        put(tars.toByteArray())
     }
 }

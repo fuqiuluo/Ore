@@ -55,7 +55,7 @@ class DataManager private constructor(
     /**
      * 缓存器
      */
-    val diskCache: DisketteCache = DisketteCache().apply { init(File(path + "/" + MD5.toMD5(uin.toString()))) }
+    val diskCache: DisketteCache = DisketteCache().init(File(path + "/cache/" + MD5.toMD5(uin.toString())))
 
     /**
      * 线程管理器
@@ -68,6 +68,7 @@ class DataManager private constructor(
     @JvmField
     @Transient
     var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
+
 
     var session = SsoSession()
 
@@ -88,6 +89,7 @@ class DataManager private constructor(
      */
     @TarsField(id = 4)
     var deviceInfo = DeviceInfo()
+
     @TarsField(id = 5, isEnum = true)
     var protocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
@@ -109,9 +111,9 @@ class DataManager private constructor(
      * 销毁
      */
     @JvmOverloads
-    fun destroy(save : Boolean = true) {
+    fun destroy(save: Boolean = true) {
         threadManager.shutdown()
-        if(save) {
+        if (save) {
             this.flush()
         }
         managerMap.remove(uin, this)
@@ -160,7 +162,7 @@ class DataManager private constructor(
          * 转移 而不会销毁原来的
          */
         @JvmStatic
-        fun copyTo(oldUin: Long, newUin : Long) : DataManager {
+        fun copyTo(oldUin: Long, newUin: Long): DataManager {
             val oldManager = manager(oldUin)
             val newManager = init(newUin, oldManager.dataPath)
             newManager.deviceInfo = oldManager.deviceInfo
