@@ -6,7 +6,6 @@ import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
 
 @TarsClass(
-    requireWrite = true,
     servantName = FRIEND_LIST_SERVANT,
     funcName = "GetMultiTroopInfoReq",
     reqName = "GMTIREQ"
@@ -20,7 +19,6 @@ class GetMultiTroopInfoReq: TarsBase() {
 }
 
 @TarsClass(
-    requireRead = true,
     respName = "GMTIRESP"
 )
 class GetMultiTroopInfoResp: TarsBase() {

@@ -7,7 +7,8 @@ import moe.ore.plugin.util.AsmUtil.hasMethod
 import moe.ore.plugin.util.FileUtil
 import moe.ore.plugin.util.TarsUtil
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.Opcodes.ACC_PUBLIC
+import org.objectweb.asm.Opcodes.ARETURN
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
@@ -27,6 +28,9 @@ class TarsTransform(
     }
 
     private fun doLast(clz : ClassFuller?) = clz?.runCatching {
+        if (!hasMethod("setFieldByName") && !hasMethod("getFieldByName") && !hasMethod("containField"))
+            TarsFieldWriter(this, this@TarsTransform.fields).invoke()
+
         if (tarsClassInfo.requireWrite && !hasMethod("writeTo"))
             TarsWriteWriter(this, this@TarsTransform.fields).invoke()
 
@@ -180,8 +184,8 @@ class TarsTransform(
         const val CLASS_TARS_INPUT = "moe/ore/tars/TarsInputStream"
 
         data class TarsClass(
-            var requireRead: Boolean = false,
-            var requireWrite : Boolean = false,
+            var requireRead: Boolean = true,
+            var requireWrite : Boolean = true,
             var servantName : String = "",
             var funcName : String = "",
             var reqName : String = "",

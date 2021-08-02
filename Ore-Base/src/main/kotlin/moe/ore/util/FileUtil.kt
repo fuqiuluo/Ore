@@ -22,15 +22,13 @@
 package moe.ore.util
 
 import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.Files
 
 object FileUtil {
     @JvmStatic
     fun has(filePath: String) = File(filePath).exists()
 
     @JvmStatic
-    fun readFileBytes(f: File): ByteArray = Files.readAllBytes(f.toPath())
+    fun readFileBytes(f: File): ByteArray = f.readBytes()
 
     @JvmStatic
     fun readFileBytes(filePath: String) = readFileBytes(File(filePath).also { f ->
@@ -55,10 +53,7 @@ object FileUtil {
             }
             if (!file.createNewFile()) return
         }
-        val fileOutputStream = FileOutputStream(file)
-        fileOutputStream.write(content)
-        fileOutputStream.flush()
-        fileOutputStream.close()
+        file.writeBytes(content)
     }
 
     @JvmStatic
