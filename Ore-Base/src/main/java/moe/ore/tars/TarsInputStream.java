@@ -210,7 +210,7 @@ public final class TarsInputStream {
                     c = bs.readByte();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -233,7 +233,7 @@ public final class TarsInputStream {
                     n = bs.readShort();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -259,7 +259,7 @@ public final class TarsInputStream {
                     n = bs.readInt();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -288,7 +288,7 @@ public final class TarsInputStream {
                     n = bs.readLong();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -308,7 +308,7 @@ public final class TarsInputStream {
                     n = bs.readFloat();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -331,7 +331,7 @@ public final class TarsInputStream {
                     n = bs.readDouble();
                     break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -363,7 +363,7 @@ public final class TarsInputStream {
                 }
                 break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -395,7 +395,7 @@ public final class TarsInputStream {
                 }
                 break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -429,7 +429,7 @@ public final class TarsInputStream {
                 }
                 break;
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -455,7 +455,7 @@ public final class TarsInputStream {
                     mr.put(k, v);
                 }
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -490,7 +490,7 @@ public final class TarsInputStream {
                     mr.put(k, v);
                 }
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -549,18 +549,18 @@ public final class TarsInputStream {
                                 skipToStructEnd();
                                 lr.add(struct);
                             } catch (Exception e) {
-                                throw new TarsDecodeException("type mismatch." + e);
+                                throw new TarsDecodeException("[" + tag + "]type mismatch." + e);
                             }
                             break;
                         case TarsBase.ZERO_TAG:
                             lr.add(0);
                             break;
                         default:
-                            throw new TarsDecodeException("type mismatch.");
+                            throw new TarsDecodeException("[" + tag + "]type mismatch.");
                     }
                 }
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -580,7 +580,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -617,7 +617,7 @@ public final class TarsInputStream {
                     break;
                 }
                 default:
-                    throw new TarsDecodeException("type mismatch.");
+                    throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -637,7 +637,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -657,7 +657,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -677,7 +677,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -697,7 +697,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -717,7 +717,7 @@ public final class TarsInputStream {
                 for (int i = 0; i < size; ++i)
                     lr[i] = read(lr[0], 0, true);
             } else {
-                throw new TarsDecodeException("type mismatch.");
+                throw new TarsDecodeException("[" + tag + "]type mismatch.");
             }
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
@@ -754,7 +754,7 @@ public final class TarsInputStream {
                 }
                 return lr;
             }
-            throw new TarsDecodeException("type mismatch.");
+            throw new TarsDecodeException("[" + tag + "]type mismatch.");
         } else if (isRequire) {
             throw new TarsDecodeException("require field not exist.");
         }
@@ -772,7 +772,7 @@ public final class TarsInputStream {
 
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
+            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("[" + tag + "]type mismatch.");
             ref.readFrom(this);
             skipToStructEnd();
         } else if (isRequire) {
@@ -793,7 +793,7 @@ public final class TarsInputStream {
 
             HeadData hd = new HeadData();
             readHead(hd);
-            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("type mismatch.");
+            if (hd.type != TarsBase.STRUCT_BEGIN) throw new TarsDecodeException("[" + tag + "]type mismatch.");
             ref.readFrom(this);
             skipToStructEnd();
         } else if (isRequire) {

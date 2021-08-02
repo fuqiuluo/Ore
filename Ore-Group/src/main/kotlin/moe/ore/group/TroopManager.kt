@@ -57,6 +57,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
                     Result.success(resp.also { disketteCache.put(it.toByteArray()).close() })
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
+                // error?.printStackTrace()
                 Result.failure(error!!)
             }
         }
