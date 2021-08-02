@@ -24,7 +24,7 @@ class FileCache(
     var isExpired: Boolean = true
 
     fun get(): ByteArray {
-        if(isExpired) error("cache is expired")
+        if(isExpired) error("cache is expired...")
         return RandomAccessFile(cacheFile, "r").use {
             it.skipBytes(8)
             ByteArray(it.readInt()).apply { it.readFully(this) }
