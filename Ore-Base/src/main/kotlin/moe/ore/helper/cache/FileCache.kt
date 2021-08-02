@@ -1,56 +1,69 @@
 package moe.ore.helper.cache
 
-import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.currentTimeSeconds
-import moe.ore.util.FileUtil
 import java.io.File
 import java.io.RandomAccessFile
 
 class FileCache(
-    var shelfLife: Int,
-    cacheDir: File,
-    tag: String,
+        var shelfLife: Int,
+        cacheDir: File,
+        tag: String,
 ) {
-    private val cacheFile = File(cacheDir.absolutePath + "/$tag.c")
-    var isExpired: Boolean = true
+    private val cacheFile = File(cacheDir.absolutePath + File.separator + tag + ".c")
+    private val reader = RandomAccessFile(cacheFile, "rw")
+
+    private var datas: ByteArray? = null
+
+    fun get(): ByteArray? {
+        if (datas != null) {
+            return datas
+        }
+        reader.seek(0)
+        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
+//            不用做删除和关闭 因为没有读取到的时候 一会请求完成后一般会复写这个文件
+//                this.isExpired = true
+//                reader.close()
+//                cacheFile.delete() // 过期 -> 删除
+            return null
+        } else {
+            reader.seek(8)
+            return ByteArray(reader.readInt()).apply { reader.readFully(this) }.also { datas = it }
+        }
+    }
+
+//    var isExpired: Boolean = false
 
     init {
-        if(cacheFile.exists() && cacheFile.canRead() && cacheFile.canWrite() && cacheFile.length() >= 8) {
-            initValues()
-        } else {
-            FileUtil.saveFile(cacheFile.absolutePath, EMPTY_BYTE_ARRAY)
-            // cacheDir.writeBytes(EMPTY_BYTE_ARRAY)
-        }
+        if (!cacheFile.exists() || !cacheFile.canRead() || !cacheFile.canWrite()) error("without permission")
+        //            initValues()
     }
 
-    private fun initValues() {
-        if(cacheFile.exists()) {
-            val reader = RandomAccessFile(cacheFile, "r")
-            if(reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
-                reader.close()
-                cacheFile.delete() // 过期 -> 删除
-            } else {
-                this.isExpired = false
-            }
-        }
+//    private fun initValues() {
+//        reader.seek(0)
+//        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
+//            this.isExpired = true
+//            reader.close()
+//            cacheFile.delete() // 过期 -> 删除
+//        }
+//    }
+
+//    fun get(): ByteArray {
+//        reader.seek(8)
+//        val data = ByteArray(reader.readInt()).apply { reader.readFully(this) }
+//        return data
+//    }
+
+    fun put(data: ByteArray): FileCache {
+        reader.setLength(0)
+        reader.seek(0)
+        reader.writeInt(currentTimeSeconds())
+        reader.writeInt(shelfLife)
+        reader.writeInt(data.size)
+        reader.write(data)
+        return this
     }
 
-    fun get(): ByteArray {
-        val reader = RandomAccessFile(cacheFile, "r")
-        reader.skipBytes(8)
-        val data = ByteArray(reader.readInt()).apply { reader.readFully(this) }
+    fun close() {
         reader.close()
-        return data
-    }
-
-    fun edit(data: ByteArray) {
-        this.isExpired = false
-        val writer = RandomAccessFile(cacheFile, "rws")
-        writer.writeInt(currentTimeSeconds())
-        writer.writeInt(shelfLife)
-        writer.writeInt(data.size)
-        writer.setLength(3 * 4)
-        writer.write(data)
-        writer.close()
     }
 }
