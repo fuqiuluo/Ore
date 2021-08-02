@@ -63,6 +63,41 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
         return Result.failure(UnknownError())
     }
 
+    /**
+     * 获取群成员列表
+     */
+    fun getTroopMemberList(groupCode: Long, cache: Boolean = true) {
+        val disketteCache = manager.diskCache.load("troop_member_$groupCode", 3 * 60 * 60)
+        if (cache && disketteCache.isExpired) {
+            // return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
+        }
+
+        fun invoke(nextUin: Long) {
+            sendJceAndParse("friendlist.getTroopMemberList", GetTroopMemberListReq().apply {
+                this.uin = ore.uin
+                this.version = 3
+                this.nextUin = nextUin
+                this.reqType = 1
+                this.getListAppointTime = (System.currentTimeMillis() * 0.001).toLong()
+                this.richCardNameVersion = 1
+            }, GetTroopListRespV2()) { isSuccess, resp, error ->
+                /*return if (isSuccess && resp != null) {
+                    if (resp.result == 0) {
+                        Result.success(resp.also { disketteCache.put(it) })
+                    } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
+                } else {
+                    // error?.printStackTrace()
+                    Result.failure(error!!)
+                }*/
+            }
+            // Result.failure(UnknownError())
+        }
+
+        invoke(0)
+
+    }
+
+
 
 }
 

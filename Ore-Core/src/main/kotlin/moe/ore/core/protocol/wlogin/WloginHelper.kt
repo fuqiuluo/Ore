@@ -365,7 +365,7 @@ class WloginHelper(val uin: Long,
                 }
 
 //                // 执行flush保存数据
-//                manager.flush()
+                manager.flush()
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 

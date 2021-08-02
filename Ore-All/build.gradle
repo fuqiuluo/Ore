@@ -26,9 +26,9 @@ dependencies {
     implementation project(":Ore-Core")
 
     // Ore功能实现模块
-    implementation project(":Ore-Pay")
+    implementation project(":Ore-Pay") // QQ钱包相关
 
-    implementation project(":Ore-Group")
+    implementation project(":Ore-Group") // 群功能相关 没有聊天
 
 }
 

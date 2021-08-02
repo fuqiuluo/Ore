@@ -32,8 +32,11 @@ class FileCache(
     }
 
     init {
-        if (!cacheFile.exists() || !cacheFile.canRead() || !cacheFile.canWrite()) error("without permission")
-        initValues()
+        if(cacheFile.exists()) {
+            if (!cacheFile.canRead() || !cacheFile.canWrite()) {
+                error("without permission")
+            } else initValues()
+        }
     }
 
     private fun initValues() {
