@@ -10,7 +10,7 @@ const val TAG_TROOP_MANAGER = "TroopManager"
 
 const val FRIEND_LIST_SERVANT = "mqq.IMService.FriendListServiceServantObj"
 
-class TroopManager(ore: Ore): PacketServlet(ore) {
+class TroopManager(ore: Ore) : PacketServlet(ore) {
     /**
      * 获取群简略资料
      * ps：仅可获取已添加的群
@@ -25,8 +25,8 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
             }
             this.richInfo = 1
         }, GetMultiTroopInfoResp()) { isSuccess, resp, error ->
-            return if(isSuccess && resp != null) {
-                if(resp.result == 0) {
+            return if (isSuccess && resp != null) {
+                if (resp.result == 0) {
                     Result.success(resp.troopInfo!!)
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
@@ -41,9 +41,10 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
      * cache 是否获取缓存内的数据
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
-        val disketteCache = DisketteCache.build("troop_list", 3 * 60 * 60)
-        if(cache && !disketteCache.isExpired) {
-            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
+        val disketteCache = manager.disketteCache.build("troop_list", 3 * 60 * 60)
+        val load = disketteCache.load()
+        if (cache && load != null) {
+            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(load)) })
         }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
             this.uin = ore.uin
@@ -52,9 +53,9 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
             this.versionNum = 1
             this.getLongGroupName = 1
         }, GetTroopListRespV2()) { isSuccess, resp, error ->
-            return if(isSuccess && resp != null) {
-                if(resp.result == 0) {
-                    Result.success(resp.also { disketteCache.edit(it.toByteArray()) })
+            return if (isSuccess && resp != null) {
+                if (resp.result == 0) {
+                    Result.success(resp.also { disketteCache.put(it.toByteArray()).close() })
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
                 Result.failure(error!!)
@@ -66,7 +67,7 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
 
 }
 
-fun Ore.troopManager() : TroopManager {
+fun Ore.troopManager(): TroopManager {
     return (this.servletMap.getOrPut(TAG_TROOP_MANAGER) { TroopManager(this) }) as TroopManager
 }
 
