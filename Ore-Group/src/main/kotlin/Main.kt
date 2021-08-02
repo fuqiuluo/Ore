@@ -25,7 +25,8 @@ fun main() {
 
 
             val manager = ore.troopManager()
-            println(manager.getTroopList())
+            manager.getTroopList()
+
 
         }
 

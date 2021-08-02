@@ -39,6 +39,7 @@ import moe.ore.tars.TarsField
 import moe.ore.tars.TarsInputStream
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
+import java.io.File
 
 @TarsClass(requireWrite = true, requireRead = true)
 class DataManager private constructor(
@@ -50,6 +51,11 @@ class DataManager private constructor(
         // 暂时移除
         // private val safePwd: String
 ) : TarsBase() {
+
+    /**
+     * 缓存器
+     */
+    val diskCache: DisketteCache = DisketteCache().apply { init(File(path + "/" + MD5.toMD5(uin.toString()))) }
 
     /**
      * 线程管理器

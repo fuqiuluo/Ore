@@ -6,8 +6,11 @@ class DisketteCache {
     // private val cacheMap = hashMapOf<String, Cache>()
     private lateinit var cacheDir: File
 
-    fun init(cacheDir: String): DisketteCache {
-        this.cacheDir = File(cacheDir)
+    fun init(cacheDir: File): DisketteCache {
+        if(!cacheDir.exists()) {
+            cacheDir.mkdirs()
+        }
+        this.cacheDir = cacheDir
         return this
     }
 
