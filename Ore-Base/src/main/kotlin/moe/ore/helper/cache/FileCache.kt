@@ -5,7 +5,7 @@ import java.io.File
 import java.io.RandomAccessFile
 
 class FileCache(
-        var shelfLife: Int,
+        private var shelfLife: Int,
         cacheDir: File,
         tag: String,
 ) {
@@ -17,9 +17,7 @@ class FileCache(
     var isExpired: Boolean = true
 
     fun getAndClose(): ByteArray {
-        val bytes = get()
-        close()
-        return bytes
+        return get().also { close() }
     }
 
     fun get(): ByteArray {
@@ -58,7 +56,7 @@ class FileCache(
     }
 
     fun putAndClose(data: ByteArray) {
-        put(data).close()
+        put(data).also { close() }
     }
 
     fun close() {
