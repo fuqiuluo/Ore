@@ -7,6 +7,9 @@ class DisketteCache {
     private lateinit var cacheDir: File
 
     fun init(cacheDir: File) {
+        if(!cacheDir.exists()) {
+            cacheDir.mkdirs()
+        }
         this.cacheDir = cacheDir
     }
 
