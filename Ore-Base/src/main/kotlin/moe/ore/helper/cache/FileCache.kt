@@ -16,6 +16,12 @@ class FileCache(
 
     var isExpired: Boolean = true
 
+    fun getAndClose(): ByteArray {
+        val bytes = get()
+        close()
+        return bytes
+    }
+
     fun get(): ByteArray {
         if (this::datas.isInitialized) {
             return datas
@@ -49,6 +55,10 @@ class FileCache(
         reader.writeInt(data.size)
         reader.write(data)
         return this
+    }
+
+    fun putAndClose(data: ByteArray) {
+        put(data).close()
     }
 
     fun close() {

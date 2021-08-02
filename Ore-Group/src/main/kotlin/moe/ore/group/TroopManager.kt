@@ -43,7 +43,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
         val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
         if (cache && disketteCache.isExpired) {
-            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
+            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.getAndClose())) })
         }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
             this.uin = ore.uin
@@ -54,7 +54,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
         }, GetTroopListRespV2()) { isSuccess, resp, error ->
             return if (isSuccess && resp != null) {
                 if (resp.result == 0) {
-                    Result.success(resp.also { disketteCache.put(it.toByteArray()).close() })
+                    Result.success(resp.also { disketteCache.putAndClose(it.toByteArray()) })
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
                 // error?.printStackTrace()
