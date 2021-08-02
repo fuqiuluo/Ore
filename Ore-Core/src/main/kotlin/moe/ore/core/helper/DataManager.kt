@@ -55,7 +55,7 @@ class DataManager private constructor(
     /**
      * 缓存器
      */
-    val diskCache: DisketteCache = DisketteCache().apply { init(File(path + "/" + MD5.toMD5(uin.toString()))) }
+    val diskCache: DisketteCache = DisketteCache().init(File(path + "/cache/" + MD5.toMD5(uin.toString())))
 
     /**
      * 线程管理器
@@ -68,8 +68,6 @@ class DataManager private constructor(
     @JvmField
     @Transient
     var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
-
-    val disketteCache: DisketteCache = DisketteCache().init(path + "/cache/" + MD5.toMD5(uin.toString()))
 
 
     var session = SsoSession()

@@ -14,7 +14,7 @@ class FileCache(
 
     private var datas: ByteArray? = null
 
-    fun load(): ByteArray? {
+    fun get(): ByteArray? {
         if (datas != null) {
             return datas
         }

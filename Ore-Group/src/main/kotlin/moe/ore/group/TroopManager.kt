@@ -41,10 +41,9 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
      * cache 是否获取缓存内的数据
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
-        val disketteCache = manager.disketteCache.build("troop_list", 3 * 60 * 60)
-        val load = disketteCache.load()
-        if (cache && load != null) {
-            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(load)) })
+        val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
+        if (cache && disketteCache.get() != null) {
+            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
         }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
             this.uin = ore.uin

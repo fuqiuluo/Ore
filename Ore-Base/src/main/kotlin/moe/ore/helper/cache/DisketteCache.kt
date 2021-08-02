@@ -14,7 +14,7 @@ class DisketteCache {
         return this
     }
 
-    fun build(
+    fun load(
             tag: String,
             shelfLife: Int = 60 * 60 * 24, // default； 1 day
     ): FileCache {
