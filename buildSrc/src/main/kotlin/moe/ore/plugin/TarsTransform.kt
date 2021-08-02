@@ -184,8 +184,8 @@ class TarsTransform(
         const val CLASS_TARS_INPUT = "moe/ore/tars/TarsInputStream"
 
         data class TarsClass(
-            var requireRead: Boolean = false,
-            var requireWrite : Boolean = false,
+            var requireRead: Boolean = true,
+            var requireWrite : Boolean = true,
             var servantName : String = "",
             var funcName : String = "",
             var reqName : String = "",

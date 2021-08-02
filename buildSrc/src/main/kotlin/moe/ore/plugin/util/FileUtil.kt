@@ -34,18 +34,6 @@ object FileUtil {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun readFileString(f: File): String {
-        return String(readFile(f))
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    fun readFileString(path: String): String {
-        return String(readFileBytes(path))
-    }
-
-    @Throws(IOException::class)
-    @JvmStatic
     fun readFileBytes(path: String): ByteArray {
         return readFileBytes(FileInputStream(path))
     }
@@ -64,12 +52,6 @@ object FileUtil {
             }
             byteArrayOutputStream.write(read)
         }
-    }
-
-    @Throws(IOException::class)
-    @JvmStatic
-    fun saveFile(path: String, content: String) {
-        saveFile(path, content.toByteArray())
     }
 
     @Throws(IOException::class)

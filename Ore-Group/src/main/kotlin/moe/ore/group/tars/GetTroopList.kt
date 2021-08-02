@@ -6,7 +6,6 @@ import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
 
 @TarsClass(
-    requireWrite = true,
     servantName = FRIEND_LIST_SERVANT,
     funcName = "GetTroopListReqV2Simplify",
     reqName = "GetTroopListReqV2Simplify"
@@ -32,7 +31,6 @@ class GetTroopListReqV2Simplify: TarsBase() {
 }
 
 @TarsClass(
-    requireRead = true,
     respName = "GetTroopListRespV2"
 )
 data class GetTroopListRespV2(
@@ -52,7 +50,7 @@ data class GetTroopListRespV2(
 
     @TarsField(7) var troopRank: ArrayList<GroupRankInfo>? = null,
 
-    @TarsField(8) var favoriteTroop: ArrayList<TroopNum>? = null,
+    @TarsField(8) var favoriteTroop: ArrayList<FavoriteGroup>? = null,
 
     @TarsField(9) var troopListExt: ArrayList<TroopNum>? = null,
 

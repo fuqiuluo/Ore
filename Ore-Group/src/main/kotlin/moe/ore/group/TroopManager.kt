@@ -3,14 +3,14 @@ package moe.ore.group
 import moe.ore.api.Ore
 import moe.ore.core.bot.PacketServlet
 import moe.ore.group.tars.*
+import moe.ore.helper.cache.DisketteCache
+import moe.ore.tars.TarsInputStream
 
 const val TAG_TROOP_MANAGER = "TroopManager"
 
 const val FRIEND_LIST_SERVANT = "mqq.IMService.FriendListServiceServantObj"
 
 class TroopManager(ore: Ore): PacketServlet(ore) {
-    private var cacheTroopList: GetTroopListRespV2? = null
-
     /**
      * 获取群简略资料
      * ps：仅可获取已添加的群
@@ -41,7 +41,10 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
      * cache 是否获取缓存内的数据
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
-        if(cache && cacheTroopList != null) return Result.success(cacheTroopList!!)
+        val disketteCache = DisketteCache.build("troop_list", 3 * 60 * 60)
+        if(cache && !disketteCache.isExpired) {
+            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
+        }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
             this.uin = ore.uin
             this.groupFlagExt = 1
@@ -51,7 +54,7 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
         }, GetTroopListRespV2()) { isSuccess, resp, error ->
             return if(isSuccess && resp != null) {
                 if(resp.result == 0) {
-                    Result.success(resp.also { cacheTroopList = it })
+                    Result.success(resp.also { disketteCache.edit(it.toByteArray()) })
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
                 Result.failure(error!!)
@@ -59,6 +62,7 @@ class TroopManager(ore: Ore): PacketServlet(ore) {
         }
         return Result.failure(UnknownError())
     }
+
 
 }
 
