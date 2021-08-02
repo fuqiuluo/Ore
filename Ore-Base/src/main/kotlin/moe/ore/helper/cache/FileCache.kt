@@ -1,6 +1,7 @@
 package moe.ore.helper.cache
 
 import moe.ore.helper.currentTimeSeconds
+import moe.ore.tars.TarsBase
 import java.io.File
 import java.io.RandomAccessFile
 
@@ -10,27 +11,24 @@ class FileCache(
         tag: String,
 ) {
     private val cacheFile = File(cacheDir.absolutePath + File.separator + tag + ".c")
-    private val reader = RandomAccessFile(cacheFile, "rw")
+    // private val accessFile = RandomAccessFile(cacheFile, "rw")
 
-    private lateinit var datas: ByteArray
+    /**
+     * cache in memory
+     */
+    // private lateinit var datas: ByteArray
 
+    /**
+     * is expired
+     */
     var isExpired: Boolean = true
 
-    fun getAndClose(): ByteArray {
-        val bytes = get()
-        close()
-        return bytes
-    }
-
     fun get(): ByteArray {
-        if (this::datas.isInitialized) {
-            return datas
+        if(isExpired) error("cache is expired")
+        return RandomAccessFile(cacheFile, "r").use {
+            it.skipBytes(8)
+            ByteArray(it.readInt()).apply { it.readFully(this) }
         }
-        if (!isExpired) {
-            reader.seek(8)
-            return ByteArray(reader.readInt()).apply { reader.readFully(this) }.also { datas = it }
-        }
-        error("cache isExpired")
     }
 
     init {
@@ -39,29 +37,23 @@ class FileCache(
     }
 
     private fun initValues() {
-        reader.seek(0)
-        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
-            this.isExpired = true
-        } else {
+        val accessFile = RandomAccessFile(cacheFile, "r")
+        if (accessFile.readInt() + accessFile.readInt() > currentTimeSeconds()) {
             isExpired = false
         }
     }
 
-    fun put(data: ByteArray): FileCache {
-        reader.setLength(0)
-        reader.seek(0)
-        reader.writeInt(currentTimeSeconds())
-        reader.writeInt(shelfLife)
-        reader.writeInt(data.size)
-        reader.write(data)
-        return this
+    fun put(data: ByteArray) {
+        val accessFile = RandomAccessFile(cacheFile, "r")
+        accessFile.setLength(0)
+        accessFile.seek(0)
+        accessFile.writeInt(currentTimeSeconds())
+        accessFile.writeInt(shelfLife)
+        accessFile.writeInt(data.size)
+        accessFile.write(data)
     }
 
-    fun putAndClose(data: ByteArray) {
-        put(data).close()
-    }
-
-    fun close() {
-        reader.close()
+    fun put(tars: TarsBase) {
+        put(tars.toByteArray())
     }
 }

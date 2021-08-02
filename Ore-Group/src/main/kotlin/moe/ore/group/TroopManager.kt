@@ -3,7 +3,6 @@ package moe.ore.group
 import moe.ore.api.Ore
 import moe.ore.core.bot.PacketServlet
 import moe.ore.group.tars.*
-import moe.ore.helper.cache.DisketteCache
 import moe.ore.tars.TarsInputStream
 
 const val TAG_TROOP_MANAGER = "TroopManager"
@@ -43,7 +42,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
         val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
         if (cache && disketteCache.isExpired) {
-            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.getAndClose())) })
+            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
         }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
             this.uin = ore.uin
@@ -54,7 +53,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
         }, GetTroopListRespV2()) { isSuccess, resp, error ->
             return if (isSuccess && resp != null) {
                 if (resp.result == 0) {
-                    Result.success(resp.also { disketteCache.putAndClose(it.toByteArray()) })
+                    Result.success(resp.also { disketteCache.put(it) })
                 } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
             } else {
                 // error?.printStackTrace()
