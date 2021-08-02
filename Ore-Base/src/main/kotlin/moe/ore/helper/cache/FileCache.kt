@@ -12,46 +12,34 @@ class FileCache(
     private val cacheFile = File(cacheDir.absolutePath + File.separator + tag + ".c")
     private val reader = RandomAccessFile(cacheFile, "rw")
 
-    private var datas: ByteArray? = null
+    private lateinit var datas: ByteArray
 
-    fun get(): ByteArray? {
-        if (datas != null) {
+    var isExpired: Boolean = true
+
+    fun get(): ByteArray {
+        if (this::datas.isInitialized) {
             return datas
         }
-        reader.seek(0)
-        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
-//            不用做删除和关闭 因为没有读取到的时候 一会请求完成后一般会复写这个文件
-//                this.isExpired = true
-//                reader.close()
-//                cacheFile.delete() // 过期 -> 删除
-            return null
-        } else {
+        if (!isExpired) {
             reader.seek(8)
             return ByteArray(reader.readInt()).apply { reader.readFully(this) }.also { datas = it }
         }
+        error("cache isExpired")
     }
-
-//    var isExpired: Boolean = false
 
     init {
         if (!cacheFile.exists() || !cacheFile.canRead() || !cacheFile.canWrite()) error("without permission")
-        //            initValues()
+        initValues()
     }
 
-//    private fun initValues() {
-//        reader.seek(0)
-//        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
-//            this.isExpired = true
-//            reader.close()
-//            cacheFile.delete() // 过期 -> 删除
-//        }
-//    }
-
-//    fun get(): ByteArray {
-//        reader.seek(8)
-//        val data = ByteArray(reader.readInt()).apply { reader.readFully(this) }
-//        return data
-//    }
+    private fun initValues() {
+        reader.seek(0)
+        if (reader.readInt() + reader.readInt() <= currentTimeSeconds()) {
+            this.isExpired = true
+        } else {
+            isExpired = false
+        }
+    }
 
     fun put(data: ByteArray): FileCache {
         reader.setLength(0)

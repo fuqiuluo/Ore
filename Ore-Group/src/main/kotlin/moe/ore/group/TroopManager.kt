@@ -42,7 +42,7 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
         val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
-        if (cache && disketteCache.get() != null) {
+        if (cache && disketteCache.isExpired) {
             return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
         }
         sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
