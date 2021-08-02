@@ -40,9 +40,9 @@ data class GetTroopListRespV2(
 
     @TarsField(2) var result: Int = 0,
 
-    @TarsField(3) var errCode: Int = 0,
+    @TarsField(3) var errCode: Short = 0,
 
-    @TarsField(4) var cookie: ByteArray? = null,
+    @TarsField(4) var cookies: ByteArray? = null,
 
     @TarsField(5) var troopList: ArrayList<TroopNum>?= null,
 
