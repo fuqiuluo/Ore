@@ -73,10 +73,10 @@ class WloginHelper(val uin: Long,
                     40 -> eventHandler.onFreeze()
                     180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
-                    9 -> throw Error("协议不合法")
-                    235 -> throw Error("协议版本过低")
+                    9 -> error("协议不合法")
+                    235 -> error("协议版本过低")
                     237 -> eventHandler.onNetEnvWrong()
-                    239 -> eventHandler.onDevicelock(tlvMap)
+                    160, 239 -> eventHandler.onDevicelock(tlvMap) // fix some bug
                     else -> {
                         tlvMap[0x146]?.let {
                             println(String(it))

@@ -28,10 +28,9 @@ import kotlin.properties.Delegates
  * Ore实体对象接口文件
  */
 abstract class Ore(val uin : Long) {
-    /**
-     * 保存服务的map哦
-     */
-    val servletMap = hashMapOf<String, IPacketServlet>()
+    // val servletMap = hashMapOf<String, IPacketServlet>() /*
+    //     * 保存服务的map哦
+    //     */ stop service
 
     /**
      * 机器人状态
