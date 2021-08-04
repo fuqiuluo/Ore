@@ -1,10 +1,11 @@
 package moe.ore.plugin
 
-import moe.ore.plugin.full.*
-import java.io.File
+import moe.ore.plugin.full.ClassFuller
+import moe.ore.plugin.full.CodeBuilder
 import moe.ore.plugin.util.FileUtil
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.Opcodes.ACC_PUBLIC
+import java.io.File
 
 class ProtoBufTransform (
     private val clzFile: File,
@@ -15,10 +16,10 @@ class ProtoBufTransform (
     fun transform() {
         if (clz.interfaces.contains(CLASS_PROTOBUF_INTERFACE)) {
             clz.methods.removeIf { it.name == "toByteArray" && it.desc == "()[B" } // remove method
-            clz.methods.removeIf { it.name == "from" && it.desc == "([B)L$className;" } // remove method
+            // clz.methods.removeIf { it.name == "from" && it.desc == "([B)L$className;" } // remove method
 
             doFirst() // create make buf
-            doLast() // create parser method
+            // doLast() // create parser method
 
             // ====== save to file
             val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)

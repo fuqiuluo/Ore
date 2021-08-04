@@ -10,7 +10,8 @@ interface Protobuf<T : Protobuf<T>> {
         return EMPTY_BYTE_ARRAY
     }
 
+    /**
     fun from(data : ByteArray) : T {
         return this as T
-    }
+    }**/
 }

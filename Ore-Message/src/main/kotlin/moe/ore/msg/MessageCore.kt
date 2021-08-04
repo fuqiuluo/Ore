@@ -12,8 +12,10 @@ class MessageCenter(
     private val ore: OreBot
 ): IPacketServlet() {
     init {
+        // OnlinePush.PbPushGroupMsg || OnlinePush.PbPushDisMsg || OnlinePush.PbC2CMsgSync || OnlinePush.PbPushC2CMsg || OnlinePush.PbPushBindUinMsg
         ore.client.registerSpecialHandler(object: LongHandler("OnlinePush.PbPushGroupMsg") {
             override fun handle(from: FromService) {
+
 
             }
         })
