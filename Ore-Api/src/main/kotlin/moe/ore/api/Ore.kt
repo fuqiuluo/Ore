@@ -28,9 +28,9 @@ import kotlin.properties.Delegates
  * Ore实体对象接口文件
  */
 abstract class Ore(val uin : Long) {
-    // val servletMap = hashMapOf<String, IPacketServlet>() /*
-    //     * 保存服务的map哦
-    //     */ stop service
+    private val servletMap = hashMapOf<String, IPacketServlet>() // 保存服务的map哦
+
+    // lateinit var client: Any
 
     /**
      * 机器人状态
@@ -73,4 +73,9 @@ abstract class Ore(val uin : Long) {
     fun changeStatus(status: OreStatus) {
         this.status = status
     }
+
+    /**
+     * 获取缓存在内存的服务
+     */
+    fun <T: IPacketServlet> getServletOrPut(tag: String, block: () -> T): T = servletMap.getOrPut(tag, block) as T
 }

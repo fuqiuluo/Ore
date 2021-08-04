@@ -1,6 +1,7 @@
 package moe.ore.group
 
 import kotlinx.io.core.readBytes
+import moe.ore.api.IPacketServlet
 import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
 import moe.ore.group.request.GetMultiTroopInfo
@@ -15,11 +16,11 @@ import moe.ore.helper.toByteReadPacket
 import moe.ore.helper.writeBytesWithIntLen
 import moe.ore.tars.TarsInputStream
 
-const val TAG_TROOP_MANAGER = "TroopManager"
+const val TAG_TROOP_MANAGER = "TROOP_MANAGER"
 
 const val FRIEND_LIST_SERVANT = "mqq.IMService.FriendListServiceServantObj"
 
-class TroopManager(private val ore: Ore) {
+class TroopManager(private val ore: Ore): IPacketServlet() {
     private val manager = DataManager.manager(ore.uin)
     private val diskCache = manager.diskCache
 
@@ -103,7 +104,7 @@ class TroopManager(private val ore: Ore) {
 }
 
 fun Ore.troopManager(): TroopManager {
-    return TroopManager(this)
+    return getServletOrPut(TAG_TROOP_MANAGER) { TroopManager(this) }
 }
 
 /**
