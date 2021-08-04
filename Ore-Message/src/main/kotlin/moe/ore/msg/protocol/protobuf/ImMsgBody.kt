@@ -7,14 +7,14 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.protobuf.Protobuf
 
 @Serializable
-data class MsgBody(
-    @ProtoNumber(1) @JvmField var rich_text: RichText? = null,
-    @ProtoNumber(2) @JvmField var msg_content: ByteArray = EMPTY_BYTE_ARRAY,
-    @ProtoNumber(3) @JvmField var msg_encrypt_content: ByteArray = EMPTY_BYTE_ARRAY,
+internal data class MsgBody(
+    @ProtoNumber(1) @JvmField var richText: RichText? = null,
+    @ProtoNumber(2) @JvmField var msgContent: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(3) @JvmField var msgEncryptContent: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<MsgBody>
 
 @Serializable
-data class RichText(
+internal data class RichText(
     @ProtoNumber(1) @JvmField var attr: Attr? = null,
     @ProtoNumber(2) @JvmField var elems: ArrayList<Elem>? = null,
     @ProtoNumber(3) @JvmField var not_online_file: NotOnlineFile? = null,
@@ -24,13 +24,13 @@ data class RichText(
 ): Protobuf<RichText>
 
 @Serializable
-data class Trans211TmpMsg(
+internal data class Trans211TmpMsg(
     @ProtoNumber(1) @JvmField var bytes_msg_body: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint32_c2c_cmd: UInt = 0u,
 ): Protobuf<Trans211TmpMsg>
 
 @Serializable
-data class Ptt(
+internal data class Ptt(
     @ProtoNumber(1) @JvmField var uint32_file_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint64_src_uin: ULong = 0u,
     @ProtoNumber(3) @JvmField var bytes_file_uuid: ByteArray = EMPTY_BYTE_ARRAY,
@@ -58,7 +58,7 @@ data class Ptt(
 ): Protobuf<Ptt>
 
 @Serializable
-data class TmpPtt(
+internal data class TmpPtt(
     @ProtoNumber(1) @JvmField var uint32_file_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_file_uuid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_file_md5: ByteArray = EMPTY_BYTE_ARRAY,
@@ -74,7 +74,7 @@ data class TmpPtt(
 ): Protobuf<TmpPtt>
 
 @Serializable
-data class NotOnlineFile(
+internal data class NotOnlineFile(
     @ProtoNumber(1) @JvmField var uint32_file_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_sig: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_file_uuid: ByteArray = EMPTY_BYTE_ARRAY,
@@ -98,7 +98,7 @@ data class NotOnlineFile(
 ): Protobuf<NotOnlineFile>
 
 @Serializable
-data class Elem(
+internal data class Elem(
     @ProtoNumber(1) @JvmField var text: Text? = null,
     @ProtoNumber(2) @JvmField var face: Face? = null,
     @ProtoNumber(3) @JvmField var online_image: OnlineImage? = null,
@@ -155,44 +155,44 @@ data class Elem(
 ): Protobuf<Elem>
 
 @Serializable
-data class CommonElem(
+internal data class CommonElem(
     @ProtoNumber(1) @JvmField var uint32_service_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_pb_elem: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var uint32_business_type: UInt = 0u,
 ): Protobuf<CommonElem>
 
 @Serializable
-data class EIMInfo(
+internal data class EIMInfo(
     @ProtoNumber(1) @JvmField var uint64_root_id: ULong = 0u,
     @ProtoNumber(2) @JvmField var uint32_flag: UInt = 0u,
 ): Protobuf<EIMInfo>
 
 @Serializable
-data class LightAppElem(
+internal data class LightAppElem(
     @ProtoNumber(1) @JvmField var bytes_data: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_msg_resid: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<LightAppElem>
 
 @Serializable
-data class GroupPostElem(
+internal data class GroupPostElem(
     @ProtoNumber(1) @JvmField var uint32_trans_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_trans_msg: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<GroupPostElem>
 
 @Serializable
-data class PatsElem(
+internal data class PatsElem(
     @ProtoNumber(1) @JvmField var uint32_pat_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_pat_count: UInt = 0u,
 ): Protobuf<PatsElem>
 
 @Serializable
-data class WorkflowNotifyMsg(
+internal data class WorkflowNotifyMsg(
     @ProtoNumber(1) @JvmField var bytes_ext_msg: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint64_create_uin: ULong = 0u,
 ): Protobuf<WorkflowNotifyMsg>
 
 @Serializable
-data class GroupBusinessMsg(
+internal data class GroupBusinessMsg(
     @ProtoNumber(1) @JvmField var uint32_flags: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_head_url: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_head_clk_url: ByteArray = EMPTY_BYTE_ARRAY,
@@ -204,7 +204,7 @@ data class GroupBusinessMsg(
 ): Protobuf<GroupBusinessMsg>
 
 @Serializable
-data class LolaMsg(
+internal data class LolaMsg(
     @ProtoNumber(1) @JvmField var bytes_msg_resid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_encode_content: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_long_msg_url: ByteArray = EMPTY_BYTE_ARRAY,
@@ -212,7 +212,7 @@ data class LolaMsg(
 ): Protobuf<LolaMsg>
 
 @Serializable
-data class SourceMsg(
+internal data class SourceMsg(
     @ProtoNumber(1) @JvmField var uint32_orig_seqs: List<Int>? = null,
     @ProtoNumber(2) @JvmField var uint64_sender_uin: ULong = 0u,
     @ProtoNumber(3) @JvmField var uint32_time: ULong = 0u,
@@ -227,18 +227,18 @@ data class SourceMsg(
 ): Protobuf<SourceMsg>
 
 @Serializable
-data class BlessingMessage(
+internal data class BlessingMessage(
     @ProtoNumber(1) @JvmField var uint32_msg_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_ex_flag: UInt = 0u,
 ): Protobuf<BlessingMessage>
 
 @Serializable
-data class GroupPubAccountInfo(
+internal data class GroupPubAccountInfo(
     @ProtoNumber(1) @JvmField var uint64_pub_account: ULong = 0u,
 ): Protobuf<GroupPubAccountInfo>
 
 @Serializable
-data class ApolloActMsg(
+internal data class ApolloActMsg(
     @ProtoNumber(1) @JvmField var uint32_action_id: UInt = 0u,
     @ProtoNumber(2) @JvmField var bytes_action_name: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_action_text: ByteArray = EMPTY_BYTE_ARRAY,
@@ -255,17 +255,17 @@ data class ApolloActMsg(
 ): Protobuf<ApolloActMsg>
 
 @Serializable
-data class OpenQQData(
+internal data class OpenQQData(
     @ProtoNumber(1) @JvmField var bytes_car_qq_data: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<OpenQQData>
 
 @Serializable
-data class BitAppMsg(
+internal data class BitAppMsg(
     @ProtoNumber(1) @JvmField var bytes_buf: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<BitAppMsg>
 
 @Serializable
-data class DeliverGiftMsg(
+internal data class DeliverGiftMsg(
     @ProtoNumber(1) @JvmField var bytes_gray_tip_content: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint32_animation_package_id: UInt = 0u,
     @ProtoNumber(3) @JvmField var bytes_animation_package_url_a: ByteArray = EMPTY_BYTE_ARRAY,
@@ -291,7 +291,7 @@ data class DeliverGiftMsg(
 ): Protobuf<DeliverGiftMsg>
 
 @Serializable
-data class GeneralFlags(
+internal data class GeneralFlags(
     @ProtoNumber(1) @JvmField var uint32_bubble_diy_text_id: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_group_flag_new: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint64_uin: ULong = 0u,
@@ -314,7 +314,7 @@ data class GeneralFlags(
 ): Protobuf<GeneralFlags>
 
 @Serializable
-data class ArkAppElem(
+internal data class ArkAppElem(
     @ProtoNumber(1) @JvmField var app_name: String = "",
     @ProtoNumber(2) @JvmField var min_version: String = "",
     @ProtoNumber(3) @JvmField var xml_template: String = "",
@@ -322,18 +322,18 @@ data class ArkAppElem(
 ): Protobuf<ArkAppElem>
 
 @Serializable
-data class FSJMessageElem(
+internal data class FSJMessageElem(
     @ProtoNumber(1) @JvmField var uint32_msg_type: UInt = 0u,
 ): Protobuf<FSJMessageElem>
 
 @Serializable
-data class SmallEmoji(
+internal data class SmallEmoji(
     @ProtoNumber(1) @JvmField var packIdSum: UInt = 0u,
     @ProtoNumber(2) @JvmField var imageType: UInt = 0u,
 ): Protobuf<SmallEmoji>
 
 @Serializable
-data class PubAccInfo(
+internal data class PubAccInfo(
     @ProtoNumber(1) @JvmField var uint32_is_inter_num: UInt = 0u,
     @ProtoNumber(2) @JvmField var string_msg_template_id: String = "",
     @ProtoNumber(3) @JvmField var string_long_msg_url: String = "",
@@ -341,14 +341,14 @@ data class PubAccInfo(
 ): Protobuf<PubAccInfo>
 
 @Serializable
-data class LocationInfo(
+internal data class LocationInfo(
     @ProtoNumber(1) @JvmField var double_longitude: Double = 0.0,
     @ProtoNumber(2) @JvmField var double_latitude: Double = 0.0,
     @ProtoNumber(3) @JvmField var bytes_desc: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<LocationInfo>
 
 @Serializable
-data class CustomElem(
+internal data class CustomElem(
     @ProtoNumber(1) @JvmField var bytes_desc: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_data: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var enum_type: Int = 0,
@@ -357,13 +357,13 @@ data class CustomElem(
 ): Protobuf<CustomElem>
 
 @Serializable
-data class NearByMessageType(
+internal data class NearByMessageType(
     @ProtoNumber(1) @JvmField var uint32_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_identify_type: UInt = 0u,
 ): Protobuf<NearByMessageType>
 
 @Serializable
-data class LowVersionTips(
+internal data class LowVersionTips(
     @ProtoNumber(1) @JvmField var uint32_business_id: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_session_type: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint64_session_uin: ULong = 0u,
@@ -372,19 +372,19 @@ data class LowVersionTips(
 ): Protobuf<LowVersionTips>
 
 @Serializable
-data class RedBagInfo(
+internal data class RedBagInfo(
     @ProtoNumber(1) @JvmField var redbag_type: UInt = 0u,
 ): Protobuf<RedBagInfo>
 
 @Serializable
-data class ConferenceTipsInfo(
+internal data class ConferenceTipsInfo(
     @ProtoNumber(1) @JvmField var uint32_session_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint64_session_uin: ULong = 0u,
     @ProtoNumber(3) @JvmField var str_text: String = "",
 ): Protobuf<ConferenceTipsInfo>
 
 @Serializable
-data class CrmElem(
+internal data class CrmElem(
     @ProtoNumber(1) @JvmField var crm_buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_msg_resid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var uint32_qidian_flag: UInt = 0u,
@@ -393,12 +393,12 @@ data class CrmElem(
 ): Protobuf<CrmElem>
 
 @Serializable
-data class QQWalletMsg(
+internal data class QQWalletMsg(
     @ProtoNumber(1) @JvmField var aio_body: QQWalletAioBody? = null,
 ): Protobuf<QQWalletMsg>
 
 @Serializable
-data class QQWalletAioBody(
+internal data class QQWalletAioBody(
     @ProtoNumber(1) @JvmField var uint64_senduin: ULong = 0u,
     @ProtoNumber(2) @JvmField var sender: QQWalletAioElem? = null,
     @ProtoNumber(3) @JvmField var receiver: QQWalletAioElem? = null,
@@ -423,7 +423,7 @@ data class QQWalletAioBody(
 ): Protobuf<QQWalletAioBody>
 
 @Serializable
-data class QQWalletAioElem(
+internal data class QQWalletAioElem(
     @ProtoNumber(1) @JvmField var uint32_background: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_icon: UInt = 0u,
     @ProtoNumber(3) @JvmField var bytes_title: ByteArray = EMPTY_BYTE_ARRAY,
@@ -448,7 +448,7 @@ data class QQWalletAioElem(
 ): Protobuf<QQWalletAioElem>
 
 @Serializable
-data class LifeOnlineAccount(
+internal data class LifeOnlineAccount(
     @ProtoNumber(1) @JvmField var uint64_unique_id: ULong = 0u,
     @ProtoNumber(2) @JvmField var uint32_op: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint32_show_time: UInt = 0u,
@@ -461,7 +461,7 @@ data class LifeOnlineAccount(
 ): Protobuf<LifeOnlineAccount>
 
 @Serializable
-data class QQLiveOld(
+internal data class QQLiveOld(
     @ProtoNumber(1) @JvmField var uint32_sub_cmd: UInt = 0u,
     @ProtoNumber(2) @JvmField var str_show_text: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var str_param: ByteArray = EMPTY_BYTE_ARRAY,
@@ -469,7 +469,7 @@ data class QQLiveOld(
 ): Protobuf<QQLiveOld>
 
 @Serializable
-data class AnonymousGroupMsg(
+internal data class AnonymousGroupMsg(
     @ProtoNumber(1) @JvmField var uint32_flags: UInt = 0u,
     @ProtoNumber(2) @JvmField var str_anon_id: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var str_anon_nick: ByteArray = EMPTY_BYTE_ARRAY,
@@ -480,12 +480,12 @@ data class AnonymousGroupMsg(
 ): Protobuf<AnonymousGroupMsg>
 
 @Serializable
-data class TipsInfo(
+internal data class TipsInfo(
     @ProtoNumber(1) @JvmField var text: String = "",
 ): Protobuf<TipsInfo>
 
 @Serializable
-data class VideoFile(
+internal data class VideoFile(
     @ProtoNumber(1) @JvmField var bytes_file_uuid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_file_md5: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_file_name: ByteArray = EMPTY_BYTE_ARRAY,
@@ -513,20 +513,20 @@ data class VideoFile(
 ): Protobuf<VideoFile>
 
 @Serializable
-data class PubAccount(
+internal data class PubAccount(
     @ProtoNumber(1) @JvmField var bytes_buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint64_pub_account_uin: ULong = 0u,
 ): Protobuf<PubAccount>
 
 @Serializable
-data class ShakeWindow(
+internal data class ShakeWindow(
     @ProtoNumber(1) @JvmField var uint32_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_reserve: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint64_uin: ULong = 0u,
 ): Protobuf<ShakeWindow>
 
 @Serializable
-data class ExtraInfo(
+internal data class ExtraInfo(
     @ProtoNumber(1) @JvmField var bytes_nick: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_group_card: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var uint32_level: UInt = 0u,
@@ -542,7 +542,7 @@ data class ExtraInfo(
 ): Protobuf<ExtraInfo>
 
 @Serializable
-data class MarketTrans(
+internal data class MarketTrans(
     @ProtoNumber(1) @JvmField var int32_flag: Int = 0,
     @ProtoNumber(2) @JvmField var bytes_xml: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var bytes_msg_resid: ByteArray = EMPTY_BYTE_ARRAY,
@@ -551,7 +551,7 @@ data class MarketTrans(
 ): Protobuf<MarketTrans>
 
 @Serializable
-data class PubGroup(
+internal data class PubGroup(
     @ProtoNumber(1) @JvmField var bytes_nickname: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint32_gender: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint32_age: UInt = 0u,
@@ -559,7 +559,7 @@ data class PubGroup(
 ): Protobuf<PubGroup>
 
 @Serializable
-data class GroupFile(
+internal data class GroupFile(
     @ProtoNumber(1) @JvmField var bytes_filename: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint64_file_size: ULong = 0u,
     @ProtoNumber(3) @JvmField var bytes_file_id: ByteArray = EMPTY_BYTE_ARRAY,
@@ -573,7 +573,7 @@ data class GroupFile(
 ): Protobuf<GroupFile>
 
 @Serializable
-data class RichMsg(
+internal data class RichMsg(
     @ProtoNumber(1) @JvmField var bytes_template_1: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint32_service_id: UInt = 0u,
     @ProtoNumber(3) @JvmField var bytes_msg_resid: ByteArray = EMPTY_BYTE_ARRAY,
@@ -583,7 +583,7 @@ data class RichMsg(
 ): Protobuf<RichMsg>
 
 @Serializable
-data class SecretFileMsg(
+internal data class SecretFileMsg(
     @ProtoNumber(1) @JvmField var bytes_file_key: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint64_from_uin: ULong = 0u,
     @ProtoNumber(3) @JvmField var uint64_to_uin: ULong = 0u,
@@ -602,25 +602,25 @@ data class SecretFileMsg(
 ): Protobuf<SecretFileMsg>
 
 @Serializable
-data class FunFace(
+internal data class FunFace(
     @ProtoNumber(1) @JvmField var msg_turntable: Turntable? = null,
     @ProtoNumber(2) @JvmField var msg_bomb: Bomb? = null,
 ): Protobuf<FunFace>
 
 @Serializable
-data class Bomb(
+internal data class Bomb(
     @ProtoNumber(1) @JvmField var bool_burst: Boolean = false,
 ): Protobuf<Bomb>
 
 @Serializable
-data class Turntable(
+internal data class Turntable(
     @ProtoNumber(1) @JvmField var rpt_uint64_uin_list: List<Long>? = null,
     @ProtoNumber(2) @JvmField var uint64_hit_uin: ULong = 0u,
     @ProtoNumber(3) @JvmField var str_hit_uin_nick: String = "",
 ): Protobuf<Turntable>
 
 @Serializable
-data class ElemFlags2(
+internal data class ElemFlags2(
     @ProtoNumber(1) @JvmField var uint32_color_text_id: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint64_msg_id: ULong = 0u,
     @ProtoNumber(3) @JvmField var uint32_whisper_session_id: UInt = 0u,
@@ -638,13 +638,13 @@ data class ElemFlags2(
 ): Protobuf<ElemFlags2>
 
 @Serializable
-data class Inst(
+internal data class Inst(
     @ProtoNumber(1) @JvmField var uint32_app_id: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_inst_id: UInt = 0u,
 ): Protobuf<Inst>
 
 @Serializable
-data class PcSupportDef(
+internal data class PcSupportDef(
     @ProtoNumber(1) @JvmField var uint32_pc_ptl_begin: UInt = 0u,
     @ProtoNumber(2) @JvmField var uint32_pc_ptl_end: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint32_mac_ptl_begin: UInt = 0u,
@@ -654,7 +654,7 @@ data class PcSupportDef(
 ): Protobuf<PcSupportDef>
 
 @Serializable
-data class CustomFace(
+internal data class CustomFace(
     @ProtoNumber(1) @JvmField var bytes_guid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var str_file_path: String = "",
     @ProtoNumber(3) @JvmField var str_shortcut: String = "",
@@ -692,13 +692,13 @@ data class CustomFace(
 ): Protobuf<CustomFace>
 
 @Serializable
-data class ElemFlags(
+internal data class ElemFlags(
     @ProtoNumber(1) @JvmField var bytes_flags1: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var bytes_business_data: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<ElemFlags>
 
 @Serializable
-data class MarketFace(
+internal data class MarketFace(
     @ProtoNumber(1) @JvmField var bytes_face_name: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var uint32_item_type: UInt = 0u,
     @ProtoNumber(3) @JvmField var uint32_face_info: UInt = 0u,
@@ -715,13 +715,13 @@ data class MarketFace(
 ): Protobuf<MarketFace>
 
 @Serializable
-data class TransElem(
+internal data class TransElem(
     @ProtoNumber(1) @JvmField var elem_type: UInt = 0u,
     @ProtoNumber(2) @JvmField var elem_value: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<TransElem>
 
 @Serializable
-data class NotOnlineImage(
+internal data class NotOnlineImage(
     @ProtoNumber(1) @JvmField var file_path: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var file_len: UInt = 0u,
     @ProtoNumber(3) @JvmField var download_path: ByteArray = EMPTY_BYTE_ARRAY,
@@ -754,21 +754,21 @@ data class NotOnlineImage(
 ): Protobuf<NotOnlineImage>
 
 @Serializable
-data class OnlineImage(
+internal data class OnlineImage(
     @ProtoNumber(1) @JvmField var guid: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var file_path: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var old_ver_send_file: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<OnlineImage>
 
 @Serializable
-data class Face(
+internal data class Face(
     @ProtoNumber(1) @JvmField var index: UInt = 0u,
     @ProtoNumber(2) @JvmField var old: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(11) @JvmField var buf: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<Face>
 
 @Serializable
-data class Text(
+internal data class Text(
     @ProtoNumber(1) @JvmField var str: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(2) @JvmField var link: String = "",
     @ProtoNumber(3) @JvmField var attr_6_buf: ByteArray = EMPTY_BYTE_ARRAY,
@@ -778,7 +778,7 @@ data class Text(
 ): Protobuf<Text>
 
 @Serializable
-data class Attr(
+internal data class Attr(
     @ProtoNumber(1) @JvmField var code_page: Int = 0,
     @ProtoNumber(2) @JvmField var time: UInt = 0u,
     @ProtoNumber(3) @JvmField var random: UInt = 0u,

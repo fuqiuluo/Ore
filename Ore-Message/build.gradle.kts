@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     java
+    kotlin("plugin.serialization")
 }
 
 group = "moe.ore.msg"

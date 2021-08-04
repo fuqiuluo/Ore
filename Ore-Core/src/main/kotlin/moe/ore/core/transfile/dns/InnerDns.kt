@@ -1,5 +1,6 @@
 package moe.ore.core.transfile.dns
 
+import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.protocol.pb.configpush.DomainIp
 
 class InnerDns private constructor() {
@@ -15,7 +16,7 @@ class InnerDns private constructor() {
     }
 
     fun updateDomainServerList(data: ByteArray) {
-        DomainIp.NameRspBody().from(data).subCmdNameRsp?.let { rsp ->
+        ProtoBuf.decodeFromByteArray(DomainIp.NameRspBody.serializer(), data).subCmdNameRsp?.let { rsp ->
             rsp.ipListInfo.forEach { info ->
                 if(info.result == 0) {
                     val domain = DomainData(info.domainName)

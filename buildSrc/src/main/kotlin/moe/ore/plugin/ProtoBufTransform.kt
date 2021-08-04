@@ -2,7 +2,6 @@ package moe.ore.plugin
 
 import moe.ore.plugin.full.ClassFuller
 import moe.ore.plugin.full.CodeBuilder
-import moe.ore.plugin.util.FileUtil
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import java.io.File
@@ -24,7 +23,9 @@ class ProtoBufTransform (
             // ====== save to file
             val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
             clz.accept(cw)
-            FileUtil.saveFile(clzFile.absolutePath, cw.toByteArray())
+
+            clzFile.writeBytes(cw.toByteArray())
+            // FileUtil.saveFile(clzFile.absolutePath, cw.toByteArray())
         }
     }
 

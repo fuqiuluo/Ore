@@ -15,7 +15,9 @@ Tencent Protocol Project [8.7.5]
  - **QQ群聊介绍界面的群号是GroupId(GroupCode)不是GroupUin**
 
 
+### 感谢项目
 
+ - [CatCode](https://github.com/ForteScarlet/CatCode) (ore码实现参考)
 
 
 

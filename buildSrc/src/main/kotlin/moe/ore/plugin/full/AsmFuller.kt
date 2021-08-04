@@ -7,6 +7,8 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
+import java.io.InputStream
+
 /**
  * ch: 贯彻kotlin写法的asm操作
  * en: Implement the asm operation of kotlin writing
@@ -42,6 +44,10 @@ class ClassFuller(api: Int = ASM9) : ClassNode(api) {
 
     inline fun from(classBytes : ByteArray, type: Int = ClassReader.EXPAND_FRAMES) {
         ClassReader(classBytes).accept(this, type)
+    }
+
+    inline fun from(input : InputStream, type: Int = ClassReader.EXPAND_FRAMES) {
+        ClassReader(input).accept(this, type)
     }
 }
 

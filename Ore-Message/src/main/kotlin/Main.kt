@@ -4,6 +4,7 @@ import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreManager
+import moe.ore.msg.messageCenter
 import java.io.File
 import java.util.*
 
@@ -21,6 +22,8 @@ fun main() {
 
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
+
+            val msgCenter = ore.messageCenter()
 
 
         }
@@ -62,3 +65,5 @@ fun main() {
     ore.login()
     // ore.tokenLogin()
 }
+
+
