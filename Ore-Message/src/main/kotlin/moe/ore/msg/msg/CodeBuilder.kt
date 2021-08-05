@@ -2,7 +2,7 @@ package moe.ore.msg.msg
 
 import java.util.*
 
-class CodeBuilder {
+internal class CodeBuilder {
     private val codes: ArrayList<Code> = arrayListOf()
 
     fun get() = codes
@@ -52,7 +52,7 @@ class CodeBuilder {
     }
 
     override fun toString(): String = codes.joinToString("") { code ->
-        if (code.key != MSG_TEXT) code.toString() else code.values["src"]!!
+        if (code.key != MSG_TEXT) code.toString() else OreMsg.encodeText( Text().also { it.from(code) }.src )
     }
 
     companion object {

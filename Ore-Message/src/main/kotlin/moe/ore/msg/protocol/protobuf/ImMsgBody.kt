@@ -8,7 +8,7 @@ import moe.ore.protobuf.Protobuf
 
 @Serializable
 internal data class MsgBody(
-    @ProtoNumber(1) @JvmField var richText: RichText? = null,
+    @ProtoNumber(1) @JvmField var richText: RichText,
     @ProtoNumber(2) @JvmField var msgContent: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(3) @JvmField var msgEncryptContent: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<MsgBody>
@@ -769,9 +769,9 @@ internal data class Face(
 
 @Serializable
 internal data class Text(
-    @ProtoNumber(1) @JvmField var str: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(1) @JvmField var str: String = "",
     @ProtoNumber(2) @JvmField var link: String = "",
-    @ProtoNumber(3) @JvmField var attr_6_buf: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(3) @JvmField var attr6Buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(4) @JvmField var attr_7_buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(11) @JvmField var buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(12) @JvmField var bytes_pb_reserve: ByteArray = EMPTY_BYTE_ARRAY,

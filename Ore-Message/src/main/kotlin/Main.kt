@@ -4,6 +4,7 @@ import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreManager
+import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.messageCenter
 import java.io.File
 import java.util.*
@@ -24,7 +25,19 @@ fun main() {
             println("登录结果：$result")
 
             val msgCenter = ore.messageCenter()
-
+            msgCenter.setTroopMsgEvent(object : TroopMsgEvent() {
+                override fun onTroopMsg(
+                    fromTroop: Long,
+                    fromUin: Long,
+                    troopName: String,
+                    uinName: String,
+                    msgTime: Long,
+                    msgId: Int,
+                    msg: String
+                ) {
+                    println(msg)
+                }
+            })
 
         }
 

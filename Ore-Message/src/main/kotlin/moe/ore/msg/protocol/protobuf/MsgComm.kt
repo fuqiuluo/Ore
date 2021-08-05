@@ -10,7 +10,7 @@ import moe.ore.protobuf.Protobuf
 internal data class Msg(
     @ProtoNumber(1) @JvmField var msgHead: MsgHead,
     @ProtoNumber(2) @JvmField var contentHead: ContentHead? = null, // 应用场景：一条消息用多个包的时候
-    @ProtoNumber(3) @JvmField var msgBody: MsgBody? = null,
+    @ProtoNumber(3) @JvmField var msgBody: MsgBody,
     @ProtoNumber(4) @JvmField var appShareInfo: AppShareInfo? = null,
 ): Protobuf<Msg>
 

@@ -6,6 +6,7 @@ import moe.ore.core.OreBot
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.LongHandler
 import moe.ore.msg.event.TroopMsgEvent
+import moe.ore.msg.msg.toMsg
 import moe.ore.msg.protocol.protobuf.PbPushMsg
 import moe.ore.protobuf.decodeProtobuf
 
@@ -25,11 +26,33 @@ class MessageCenter(
             override fun handle(from: FromService) {
                 val pushMsg = decodeProtobuf<PbPushMsg>(from.body)
 
+                val msg = pushMsg.msg
+                val msgHead = msg.msgHead
+
+                if(this@MessageCenter::troopMsgEvent.isInitialized) {
+                    msg.msgBody.richText.toMsg().let {
+                        if(it.isEmpty()) return@let
+                        val troopInfo = msgHead.groupInfo!!
+
+                        troopMsgEvent.onTroopMsg(
+                            troopInfo.groupCode.toLong(),
+                            msgHead.fromUin.toLong(),
+                            troopInfo.groupName,
+                            troopInfo.groupCard,
+                            msgHead.msgTime.toLong(),
+                            msgHead.msgSeq.toInt(),
+                            it
+                        )
+                    }
+                }
+
             }
         })
     }
 
-
+    fun setTroopMsgEvent(event: TroopMsgEvent) {
+        this.troopMsgEvent = event
+    }
 
 }
 

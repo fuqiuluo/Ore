@@ -11,3 +11,5 @@ const val CODE_KV = "="
 
 /** message type **/
 const val MSG_TEXT = "text"
+
+const val MSG_AT = "at"
