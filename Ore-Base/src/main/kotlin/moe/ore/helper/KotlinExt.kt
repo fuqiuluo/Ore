@@ -71,3 +71,10 @@ fun Closeable.closeQuietly() {
         close()
     }.onFailure { it.printStackTrace() }
 }
+
+fun <T> T?.ifNotNull(block: (T) -> Unit) {
+    if(this != null) {
+        block.invoke(this)
+    }
+    // block.invoke(this)
+}

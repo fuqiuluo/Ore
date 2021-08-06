@@ -1,7 +1,10 @@
 package moe.ore.helper.cache
 
 import moe.ore.helper.currentTimeSeconds
+import moe.ore.protobuf.Protobuf
+import moe.ore.protobuf.decodeProtobuf
 import moe.ore.tars.TarsBase
+import moe.ore.tars.TarsInputStream
 import java.io.File
 import java.io.RandomAccessFile
 
@@ -31,29 +34,39 @@ class FileCache(
         }
     }
 
-    init {
-        if (!cacheFile.exists() || !cacheFile.canRead() || !cacheFile.canWrite()) error("without permission")
-        initValues()
+    inline fun <reified T: Protobuf<T>> getPb(): T {
+        return decodeProtobuf(get())
     }
 
-    private fun initValues() {
-        val accessFile = RandomAccessFile(cacheFile, "r")
-        if (accessFile.readInt() + accessFile.readInt() > currentTimeSeconds()) {
+    fun <T: TarsBase> getTars(src: T): T {
+        src.readFrom(TarsInputStream(get()))
+        return src
+    }
+
+    init {
+        if(cacheFile.exists()) {
+            if (!cacheFile.canRead() || !cacheFile.canWrite()) {
+                error("without permission")
+            } else initValues()
+        }
+    }
+
+    private fun initValues() = RandomAccessFile(cacheFile, "r").use {
+        if (it.readInt() + it.readInt() > currentTimeSeconds()) {
             isExpired = false
         }
     }
 
-    fun put(data: ByteArray) {
-        val accessFile = RandomAccessFile(cacheFile, "r")
-        accessFile.setLength(0)
-        accessFile.seek(0)
-        accessFile.writeInt(currentTimeSeconds())
-        accessFile.writeInt(shelfLife)
-        accessFile.writeInt(data.size)
-        accessFile.write(data)
+    fun put(data: ByteArray) = RandomAccessFile(cacheFile, "rw").use {
+        it.setLength(0)
+        it.seek(0)
+        it.writeInt(currentTimeSeconds())
+        it.writeInt(shelfLife)
+        it.writeInt(data.size)
+        it.write(data)
     }
 
-    fun put(tars: TarsBase) {
-        put(tars.toByteArray())
-    }
+    fun put(pb: Protobuf<*>) = put(pb.toByteArray())
+
+    fun put(tars: TarsBase) = put(tars.toByteArray())
 }

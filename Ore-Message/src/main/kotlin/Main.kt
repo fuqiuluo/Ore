@@ -4,7 +4,9 @@ import moe.ore.api.listener.CaptchaChannel
 import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreManager
-import moe.ore.group.troopManager
+import moe.ore.msg.event.TroopMsgEvent
+import moe.ore.msg.messageCenter
+import moe.ore.msg.msg.MessageBuilder
 import java.io.File
 import java.util.*
 
@@ -23,10 +25,30 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
+            val msgCenter = ore.messageCenter()
+            msgCenter.setTroopMsgEvent(object : TroopMsgEvent() {
+                override fun onTroopMsg(
+                    fromTroop: Long,
+                    fromUin: Long,
+                    troopName: String,
+                    uinName: String,
+                    msgTime: Long,
+                    msgId: Int,
+                    msg: String
+                ) {
+                    val builder = MessageBuilder(ore)
+                    builder.addMsg("收到：$msg")
+                    println(builder
+                        .build()
+                        .sendToTroop(fromTroop))
 
-            val manager = ore.troopManager()
-            // manager.getTroopList()
-
+                    val builder2 = MessageBuilder(ore)
+                    builder2.text("收到：$msg")
+                    println(builder2
+                        .build()
+                        .sendToTroop(fromTroop))
+                }
+            })
 
         }
 
@@ -67,3 +89,5 @@ fun main() {
     ore.login()
     // ore.tokenLogin()
 }
+
+

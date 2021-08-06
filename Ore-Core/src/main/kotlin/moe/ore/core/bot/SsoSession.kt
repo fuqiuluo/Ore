@@ -69,11 +69,12 @@ class SsoSession : TarsBase() {
     // from t167
     var imgType = 1
 
-    private val seqFactory = AtomicInteger(Random().nextInt(100000) + 60000)
 
     var t104: ByteArray? = null
 
     var t174: ByteArray? = null
+
+    private val seqFactory = AtomicInteger(Random().nextInt(100000) + 60000)
 
     @Synchronized
     fun nextSeqId(): Int {
@@ -96,6 +97,20 @@ class SsoSession : TarsBase() {
             id = requestIdFactory.addAndGet(2)
             if (id > 1000000) {
                 requestIdFactory.set(Random().nextInt(100000) + 60000)
+            }
+        }
+        return id
+    }
+
+    private val msgSeqFactory = AtomicInteger(Random().nextInt(100000) + 60000)
+
+    @Synchronized
+    fun nextMsgSeq(): Int {
+        var id: Int
+        synchronized(this) {
+            id = msgSeqFactory.addAndGet(2)
+            if (id > 1000000) {
+                msgSeqFactory.set(Random().nextInt(100000) + 60000)
             }
         }
         return id

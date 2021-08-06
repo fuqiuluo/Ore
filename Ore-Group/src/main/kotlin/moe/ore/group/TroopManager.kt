@@ -1,36 +1,40 @@
 package moe.ore.group
 
+import kotlinx.io.core.readBytes
+import moe.ore.api.IPacketServlet
 import moe.ore.api.Ore
-import moe.ore.core.bot.PacketServlet
-import moe.ore.group.tars.*
+import moe.ore.core.helper.DataManager
+import moe.ore.group.protobuf.MemberInfo
+import moe.ore.group.request.GetMultiTroopInfo
+import moe.ore.group.request.GetTroopList
+import moe.ore.group.request.GetTroopMember
+import moe.ore.group.request.GroupMemberInfo
+import moe.ore.group.tars.GetTroopListRespV2
+import moe.ore.group.tars.TroopInfoV2
+import moe.ore.group.tars.TroopMemberInfo
+import moe.ore.helper.newBuilder
+import moe.ore.helper.toByteArray
+import moe.ore.helper.toByteReadPacket
+import moe.ore.helper.writeBytesWithIntLen
 import moe.ore.tars.TarsInputStream
 
-const val TAG_TROOP_MANAGER = "TroopManager"
+const val TAG_TROOP_MANAGER = "TROOP_MANAGER"
 
 const val FRIEND_LIST_SERVANT = "mqq.IMService.FriendListServiceServantObj"
 
-class TroopManager(ore: Ore) : PacketServlet(ore) {
+class TroopManager(private val ore: Ore): IPacketServlet() {
+    private val manager = DataManager.manager(ore.uin)
+    private val diskCache = manager.diskCache
+
     /**
      * 获取群简略资料
      * ps：仅可获取已添加的群
      */
     fun getMultiTroopInfo(vararg groupCode: Long): Result<List<TroopInfoV2>> {
-        // require(groupCode.isNotEmpty()) { "getMultiTroopInfo.groupCode size must more than 0" }
-        // delete require
-        sendJceAndParse("friendlist.GetMultiTroopInfoReq", GetMultiTroopInfoReq().apply {
-            this.uin = ore.uin
-            groupCode.forEach {
-                this.groupCode.add(it)
-            }
-            this.richInfo = 1
-        }, GetMultiTroopInfoResp()) { isSuccess, resp, error ->
-            return if (isSuccess && resp != null) {
-                if (resp.result == 0) {
-                    Result.success(resp.troopInfo!!)
-                } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
-            } else {
-                Result.failure(error!!)
-            }
+        GetMultiTroopInfo(ore).onSuccess {
+            return Result.success(it.troopInfo!!)
+        }.onFailure {
+            return Result.failure(it)
         }
         return Result.failure(UnknownError())
     }
@@ -41,33 +45,81 @@ class TroopManager(ore: Ore) : PacketServlet(ore) {
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
         val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
-        if (cache && disketteCache.isExpired) {
-            return Result.success(GetTroopListRespV2().apply { readFrom(TarsInputStream(disketteCache.get())) })
-        }
-        sendJceAndParse("friendlist.GetTroopListReqV2", GetTroopListReqV2Simplify().apply {
-            this.uin = ore.uin
-            this.groupFlagExt = 1
-            this.version = 9
-            this.versionNum = 1
-            this.getLongGroupName = 1
-        }, GetTroopListRespV2()) { isSuccess, resp, error ->
-            return if (isSuccess && resp != null) {
-                if (resp.result == 0) {
-                    Result.success(resp.also { disketteCache.put(it) })
-                } else Result.failure(RuntimeException("replyCode is ${resp.result}"))
-            } else {
-                // error?.printStackTrace()
-                Result.failure(error!!)
-            }
+        if (cache && !disketteCache.isExpired) return Result.success(disketteCache.getTars(GetTroopListRespV2()))
+        GetTroopList(ore).onSuccess {
+            disketteCache.put(it)
+            return Result.success(it)
+        }.onFailure {
+            return Result.failure(it)
         }
         return Result.failure(UnknownError())
     }
 
+    /**
+     * 获取群成员列表
+     */
+    fun getTroopMemberList(groupCode: Long, cache: Boolean = true): Result<ArrayList<TroopMemberInfo>> {
+        val disketteCache = manager.diskCache.load("troop_member_$groupCode", 3 * 60 * 60)
+        if (cache && !disketteCache.isExpired) {
+            return Result.success(disketteCache.get().let {
+                val ret: ArrayList<TroopMemberInfo> = arrayListOf()
+                val reader = it.toByteReadPacket()
+
+                repeat(reader.readInt()) {
+                    val size = reader.readInt()
+                    val data = reader.readBytes(size)
+                    ret.add(TroopMemberInfo().apply { readFrom(TarsInputStream(data)) })
+                }
+
+                return@let ret
+            })
+        }
+        val ret: ArrayList<TroopMemberInfo> = arrayListOf()
+        var nextUin = 0L
+        while (true) {
+            GetTroopMember(ore, groupCode, nextUin).onSuccess {
+                if(it.result == 0) {
+                    ret.addAll(it.troopMember!!)
+                    // if(it.nextUin != 0L) getTroopMember(groupCode, nextUin, ret)
+                    nextUin = it.nextUin
+                    if(nextUin == 0L) {
+                        disketteCache.put(newBuilder().also { builder ->
+                            builder.writeInt(ret.size)
+                            ret.forEachIndexed { _, any ->
+                                builder.writeBytesWithIntLen(any.toByteArray())
+                            }
+                        }.toByteArray()) // save to cache
+
+                        return Result.success(ret)
+                    }
+                } else {
+                    return Result.failure(RuntimeException("replyCode is ${it.result}")) // 1 -> 没有添加这个群
+                }
+            }.onFailure {
+                return Result.failure(it)
+            }
+        }
+    }
+
+    /**
+     * 获取群成员资料
+     */
+    fun getTroopMemberInfo(groupCode: Long, uin: Long, cache: Boolean = true): Result<MemberInfo> {
+        val disketteCache = manager.diskCache.load("troop_mem_info_$groupCode-$uin", 5 * 60)
+        if (cache && !disketteCache.isExpired) return Result.success(disketteCache.getPb())
+        GroupMemberInfo(ore, groupCode, uin).onSuccess {
+            disketteCache.put(it)
+            return Result.success(it)
+        }.onFailure {
+            return Result.failure(it)
+        }
+        return Result.failure(UnknownError())
+    }
 
 }
 
 fun Ore.troopManager(): TroopManager {
-    return (this.servletMap.getOrPut(TAG_TROOP_MANAGER) { TroopManager(this) }) as TroopManager
+    return getServletOrPut(TAG_TROOP_MANAGER) { TroopManager(this) }
 }
 
 /**

@@ -4,7 +4,6 @@ import moe.ore.plugin.full.ClassFuller
 import moe.ore.plugin.util.AsmUtil.getAnnotation
 import moe.ore.plugin.util.AsmUtil.hasAnnotation
 import moe.ore.plugin.util.AsmUtil.hasMethod
-import moe.ore.plugin.util.FileUtil
 import moe.ore.plugin.util.TarsUtil
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
@@ -72,7 +71,8 @@ class TarsTransform(
         val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
         this.accept(cw)
 
-        FileUtil.saveFile(clzFile.absolutePath, cw.toByteArray())
+        clzFile.writeBytes(cw.toByteArray())
+        // FileUtil.saveFile(clzFile.absolutePath, )
     }
 
     private fun doFirst() : ClassFuller? {
