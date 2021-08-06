@@ -1,58 +1,40 @@
-package moe.ore.msg.msg
+package moe.ore.msg.code.util
 
+import moe.ore.msg.code.*
 import java.util.*
 
-internal class CodeBuilder {
-    private val codes: ArrayList<Code> = arrayListOf()
+class CodeParser(private val codeMsg: String) {
+    private val codeBlock: List<String> by lazy { splitCode(codeMsg) }
 
-    fun get() = codes
-
-    fun add(code: Code) {
-        codes.add(code)
-    }
-
-    fun add(msg: Msg) {
-        codes.add(msg.toCode())
-    }
-
-    fun add(key: String, values: Map<String, String>) {
-        codes.add(Code(key, values))
-    }
-
-    fun add(msg: String) {
-        val vs = splitCode(msg)
-        vs.forEach {
-            if(it.startsWith("[") && it.endsWith("]")) {
-                val kv = getKV(it)
-                val key = kv.first()
-                val valueMap = hashMapOf<String, String>()
-                kv.forEachIndexed { index, s ->
-                    if (index != 0) parseKV(s).apply { valueMap[first] = second }
-                }
-                add(key, valueMap)
+    /**
+     * 解析多个
+     */
+    fun toCodes(): OreCode {
+        val code = OreCode()
+        codeBlock.forEach { msg ->
+            if(msg.startsWith(CODE_START) && msg.endsWith(CODE_END)) {
+                code.add(parseCode(msg))
             } else {
-                add(Text(src = OreMsg.decodeText(it)))
+                code.add(
+                    Text(
+                    OreCode.decodeText(msg)
+                )
+                )
             }
         }
+        return code
     }
 
     /**
-    fun add(key: String, values: String) {
-    val valueMap = hashMapOf<String, String>()
-    }**/
+     * 解析单个
+     */
+    private fun parseCode(codeMsg: String): BaseCode {
+        val kvs = getKV(codeMsg)
 
-    fun size() = codes.size
+        val name = kvs.first()
+        val kv = kvs.slice(1 until kvs.size).associate { parseKV(it) }
 
-    fun merge(builder: CodeBuilder) {
-        codes.addAll(builder.codes)
-    }
-
-    fun clear() {
-        codes.clear()
-    }
-
-    override fun toString(): String = codes.joinToString("") { code ->
-        if (code.key != MSG_TEXT) code.toString() else OreMsg.encodeText( Text().also { it.from(code) }.src )
+        return (MSG_CODE_PARSERS[name] ?: error("not support type: $name"))(kv)
     }
 
     companion object {
@@ -60,7 +42,7 @@ internal class CodeBuilder {
         private fun parseKV(kv: String): Pair<String, String> {
             val kvs = kv.split(CODE_KV)
             if(kvs.size == 2) {
-                return kvs[0] to OreMsg.decodeParams(kvs[1])
+                return kvs[0] to OreCode.decodeParams(kvs[1])
             }
             error("wrong code, because kvs")
         }
@@ -79,11 +61,11 @@ internal class CodeBuilder {
             val list = arrayListOf<String>()
             var isInCode = false
             var builder = StringBuilder()
-            for (c in msg.toCharArray()) {
+            msg.forEach { c ->
                 when (c) {
-                    '[' -> {
+                    CODE_START[0] -> {
                         if(isInCode) {
-                            error("wrong ore code.")
+                            error("found code_start, but found another code_start")
                         } else {
                             list.add(builder.toString())
                             builder = StringBuilder()
@@ -91,14 +73,14 @@ internal class CodeBuilder {
                             builder.append(c)
                         }
                     }
-                    ']' -> {
+                    CODE_END[0] -> {
                         if(isInCode) {
                             isInCode = false
                             builder.append(c)
                             list.add(builder.toString())
                             builder = StringBuilder()
                         } else {
-                            error("wrong ore code.")
+                            error("not found code_start, but found code_end")
                         }
                     }
                     else -> {
@@ -106,7 +88,7 @@ internal class CodeBuilder {
                     }
                 }
             }
-            if(isInCode) error("wrong ore code.") else list.add(builder.toString())
+            if(isInCode) error("not found code_end") else list.add(builder.toString())
             return list.filter { it.isNotEmpty() }
         }
     }

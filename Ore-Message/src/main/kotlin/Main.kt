@@ -6,6 +6,7 @@ import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreManager
 import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.messageCenter
+import moe.ore.msg.msg.MessageBuilder
 import java.io.File
 import java.util.*
 
@@ -35,7 +36,11 @@ fun main() {
                     msgId: Int,
                     msg: String
                 ) {
-                    println(msg)
+                    val builder = MessageBuilder(ore)
+                    builder.text("收到：$msg")
+                    println(builder
+                        .build()
+                        .sendToTroop(fromTroop))
                 }
             })
 

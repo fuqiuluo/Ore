@@ -99,7 +99,7 @@ internal data class NotOnlineFile(
 
 @Serializable
 internal data class Elem(
-    @ProtoNumber(1) @JvmField var text: Text? = null,
+    @ProtoNumber(1) @JvmField var text: TextMsg? = null,
     @ProtoNumber(2) @JvmField var face: Face? = null,
     @ProtoNumber(3) @JvmField var online_image: OnlineImage? = null,
     @ProtoNumber(4) @JvmField var not_online_image: NotOnlineImage? = null,
@@ -135,7 +135,9 @@ internal data class Elem(
     @ProtoNumber(34) @JvmField var small_emoji: SmallEmoji? = null,
     @ProtoNumber(35) @JvmField var fsj_msg_elem: FSJMessageElem? = null,
     @ProtoNumber(36) @JvmField var ark_app: ArkAppElem? = null,
-    @ProtoNumber(37) @JvmField var general_flags: GeneralFlags? = null,
+
+    @ProtoNumber(37) @JvmField var generalFlags: GeneralFlags? = null,
+
     @ProtoNumber(38) @JvmField var hc_flash_pic: CustomFace? = null,
     @ProtoNumber(39) @JvmField var deliver_gift_msg: DeliverGiftMsg? = null,
     @ProtoNumber(40) @JvmField var bitapp_msg: BitAppMsg? = null,
@@ -308,10 +310,92 @@ internal data class GeneralFlags(
     @ProtoNumber(14) @JvmField var babyq_guide_msg_cookie: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(15) @JvmField var uin32_expert_flag: UInt = 0u,
     @ProtoNumber(16) @JvmField var uint32_bubble_sub_id: UInt = 0u,
-    @ProtoNumber(17) @JvmField var uint64_pendant_id: ULong = 0u,
+    @ProtoNumber(17) @JvmField var pendantId: ULong = 0u,
     @ProtoNumber(18) @JvmField var bytes_rp_index: ByteArray = EMPTY_BYTE_ARRAY,
-    @ProtoNumber(19) @JvmField var bytes_pb_reserve: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(19) @JvmField var reserve: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<GeneralFlags>
+
+@Serializable
+internal class GeneralFlagsReserveAttr(
+    @ProtoNumber(1) @JvmField var uint32_global_group_level: UInt = 0u,
+    @ProtoNumber(2) @JvmField var uint32_nearby_charm_level: UInt = 0u,
+    @ProtoNumber(3) @JvmField var redbag_msg_sender_uin: ULong = 0u,
+    @ProtoNumber(4) @JvmField var uint32_title_id: UInt = 0u,
+    @ProtoNumber(5) @JvmField var uint32_robot_msg_flag: UInt = 0u,
+    @ProtoNumber(6) @JvmField var want_gift_sender_uin: ULong = 0u,
+    @ProtoNumber(7) @JvmField var float_sticker_x: Float = 0f,
+    @ProtoNumber(8) @JvmField var float_sticker_y: Float = 0f,
+    @ProtoNumber(9) @JvmField var float_sticker_width: Float = 0f,
+    @ProtoNumber(10) @JvmField var float_sticker_height: Float = 0f,
+    @ProtoNumber(11) @JvmField var uint32_sticker_rotate: UInt = 0u,
+    @ProtoNumber(12) @JvmField var uint64_sticker_host_msgseq: ULong = 0u,
+    @ProtoNumber(13) @JvmField var uint64_sticker_host_msguid: ULong = 0u,
+    @ProtoNumber(14) @JvmField var uint64_sticker_host_time: ULong = 0u,
+    @ProtoNumber(15) @JvmField var mobileCustomFont: UInt = 0u,
+    @ProtoNumber(16) @JvmField var uint32_tail_key: UInt = 0u,
+    @ProtoNumber(17) @JvmField var uint32_show_tail_flag: UInt = 0u,
+    @ProtoNumber(18) @JvmField var uint32_doutu_msg_type: UInt = 0u,
+    @ProtoNumber(19) @JvmField var uint32_doutu_combo: UInt = 0u,
+    @ProtoNumber(20) @JvmField var uint32_custom_featureid: UInt = 0u,
+    @ProtoNumber(21) @JvmField var uint32_golden_msg_type: UInt = 0u,
+    @ProtoNumber(22) @JvmField var bytes_golden_msg_info: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(23) @JvmField var uint32_bot_message_class_id: UInt = 0u,
+    @ProtoNumber(24) @JvmField var bytes_subscription_url: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(25) @JvmField var uint32_pendant_diy_id: UInt = 0u,
+    @ProtoNumber(26) @JvmField var uint32_timed_message: UInt = 0u,
+    @ProtoNumber(27) @JvmField var uint32_holiday_flag: UInt = 0u,
+    @ProtoNumber(29) @JvmField var bytes_kpl_info: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(30) @JvmField var uint32_face_id: UInt = 0u,
+    @ProtoNumber(31) @JvmField var diyFontTimestamp: UInt = 0u,
+    @ProtoNumber(32) @JvmField var uint32_red_envelope_type: UInt = 0u,
+    @ProtoNumber(33) @JvmField var bytes_shortVideoId: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(34) @JvmField var uint32_req_font_effect_id: UInt = 0u,
+    @ProtoNumber(35) @JvmField var uint32_love_language_flag: UInt = 0u,
+    @ProtoNumber(36) @JvmField var uint32_aio_sync_to_story_flag: UInt = 0u,
+    @ProtoNumber(37) @JvmField var uint32_upload_image_to_qzone_flag: UInt = 0u,
+    @ProtoNumber(39) @JvmField var bytes_upload_image_to_qzone_param: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(40) @JvmField var bytes_group_confess_sig: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(41) @JvmField var subFontId: ULong = 0u,
+    @ProtoNumber(42) @JvmField var uint32_msg_flag_type: UInt = 0u,
+    @ProtoNumber(43) @JvmField var rpt_uint32_custom_featureid: List<Int>? = null,
+    @ProtoNumber(44) @JvmField var uint32_rich_card_name_ver: UInt = 0u,
+    @ProtoNumber(47) @JvmField var uint32_msg_info_flag: UInt = 0u,
+    @ProtoNumber(48) @JvmField var uint32_service_msg_type: UInt = 0u,
+    @ProtoNumber(49) @JvmField var uint32_service_msg_remind_type: UInt = 0u,
+    @ProtoNumber(50) @JvmField var bytes_service_msg_name: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(51) @JvmField var uint32_vip_type: UInt = 0u,
+    @ProtoNumber(52) @JvmField var uint32_vip_level: UInt = 0u,
+    @ProtoNumber(53) @JvmField var bytes_pb_ptt_waveform: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(54) @JvmField var uint32_user_bigclub_level: UInt = 0u,
+    @ProtoNumber(55) @JvmField var uint32_user_bigclub_flag: UInt = 0u,
+    @ProtoNumber(56) @JvmField var uint32_nameplate: UInt = 0u,
+    @ProtoNumber(57) @JvmField var uint32_auto_reply: UInt = 0u,
+    @ProtoNumber(58) @JvmField var uint32_req_is_bigclub_hidden: UInt = 0u,
+    @ProtoNumber(59) @JvmField var uint32_show_in_msg_list: UInt = 0u,
+    @ProtoNumber(60) @JvmField var bytes_oac_msg_extend: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(61) @JvmField var uint32_group_member_flag_ex2: UInt = 0u,
+    @ProtoNumber(62) @JvmField var uint32_group_ringtone_id: UInt = 0u,
+    @ProtoNumber(63) @JvmField var bytes_robot_general_trans: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(64) @JvmField var uint32_troop_pobing_template: UInt = 0u,
+    @ProtoNumber(65) @JvmField var bytes_hudong_mark: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(66) @JvmField var uint32_group_info_flag_ex3: UInt = 0u,
+    @ProtoNumber(67) @JvmField var uint32_comment_flag: UInt = 0u,
+    @ProtoNumber(68) @JvmField var uint64_comment_location: ULong = 0u,
+    @ProtoNumber(69) @JvmField var bytes_pass_through: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(70) @JvmField var uint32_group_savedb_flag: UInt = 0u,
+    @ProtoNumber(71) @JvmField var uint32_nameplate_vip_type: UInt = 0u,
+    @ProtoNumber(72) @JvmField var uint32_gray_name_plate: UInt = 0u,
+    @ProtoNumber(73) @JvmField var bytes_user_vip_info: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(74) @JvmField var uint32_important_msg_type: UInt = 0u,
+    @ProtoNumber(75) @JvmField var uint32_important_msg_enum: UInt = 0u,
+    @ProtoNumber(76) @JvmField var uint32_device_type: UInt = 0u,
+    @ProtoNumber(77) @JvmField var uint32_unsafe_msg_flag: UInt = 0u,
+    @ProtoNumber(78) @JvmField var bytes_group_msg_busi_buf: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(79) @JvmField var uint32_group_info_flag_ex4: UInt = 0u,
+    @ProtoNumber(80) @JvmField var uint32_kings_honor_level: UInt = 0u,
+    @ProtoNumber(81) @JvmField var uint32_group_rich_flag: UInt = 0u,
+    @ProtoNumber(82) @JvmField var bytes_yuheng_task_msg_buf: ByteArray = EMPTY_BYTE_ARRAY,
+): Protobuf<GeneralFlagsReserveAttr>
 
 @Serializable
 internal data class ArkAppElem(
@@ -768,14 +852,14 @@ internal data class Face(
 ): Protobuf<Face>
 
 @Serializable
-internal data class Text(
+internal data class TextMsg(
     @ProtoNumber(1) @JvmField var str: String = "",
     @ProtoNumber(2) @JvmField var link: String = "",
     @ProtoNumber(3) @JvmField var attr6Buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(4) @JvmField var attr_7_buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(11) @JvmField var buf: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(12) @JvmField var bytes_pb_reserve: ByteArray = EMPTY_BYTE_ARRAY,
-): Protobuf<Text>
+): Protobuf<TextMsg>
 
 @Serializable
 internal data class Attr(

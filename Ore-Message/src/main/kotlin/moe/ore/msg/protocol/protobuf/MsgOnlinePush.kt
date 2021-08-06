@@ -1,5 +1,4 @@
 @file:Suppress("PLUGIN_IS_NOT_ENABLED", "EXPERIMENTAL_API_USAGE", "ArrayInDataClass")
-
 package moe.ore.msg.protocol.protobuf
 
 import kotlinx.serialization.Serializable

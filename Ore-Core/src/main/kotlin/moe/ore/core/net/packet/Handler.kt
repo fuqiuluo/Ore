@@ -32,7 +32,6 @@ abstract class LongHandler(commandName: String) : Handler(0, commandName) {
         handle(from)
         return false
     }
-
 }
 
 open class SingleHandler(seq: Int, commandName: String) : Handler(seq, commandName) {

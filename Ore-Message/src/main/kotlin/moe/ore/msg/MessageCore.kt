@@ -29,9 +29,11 @@ class MessageCenter(
                 val msg = pushMsg.msg
                 val msgHead = msg.msgHead
 
-                if(this@MessageCenter::troopMsgEvent.isInitialized) {
-                    msg.msgBody.richText.toMsg().let {
-                        if(it.isEmpty()) return@let
+                if(this@MessageCenter::troopMsgEvent.isInitialized && msgHead.fromUin != ore.uin.toULong()) { // 自己的消息不处理
+
+                    val codeMsg = msg.msgBody.richText.toMsg()
+
+                    if(codeMsg.isNotEmpty()) {
                         val troopInfo = msgHead.groupInfo!!
 
                         troopMsgEvent.onTroopMsg(
@@ -41,11 +43,10 @@ class MessageCenter(
                             troopInfo.groupCard,
                             msgHead.msgTime.toLong(),
                             msgHead.msgSeq.toInt(),
-                            it
+                            codeMsg
                         )
                     }
                 }
-
             }
         })
     }
