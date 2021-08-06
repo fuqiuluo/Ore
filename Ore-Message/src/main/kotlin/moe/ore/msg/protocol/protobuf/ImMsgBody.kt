@@ -100,7 +100,7 @@ internal data class NotOnlineFile(
 @Serializable
 internal data class Elem(
     @ProtoNumber(1) @JvmField var text: TextMsg? = null,
-    @ProtoNumber(2) @JvmField var face: Face? = null,
+    @ProtoNumber(2) @JvmField var face: FaceMsg? = null,
     @ProtoNumber(3) @JvmField var online_image: OnlineImage? = null,
     @ProtoNumber(4) @JvmField var not_online_image: NotOnlineImage? = null,
     @ProtoNumber(5) @JvmField var trans_elem_info: TransElem? = null,
@@ -845,11 +845,11 @@ internal data class OnlineImage(
 ): Protobuf<OnlineImage>
 
 @Serializable
-internal data class Face(
+internal data class FaceMsg(
     @ProtoNumber(1) @JvmField var index: UInt = 0u,
     @ProtoNumber(2) @JvmField var old: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(11) @JvmField var buf: ByteArray = EMPTY_BYTE_ARRAY,
-): Protobuf<Face>
+): Protobuf<FaceMsg>
 
 @Serializable
 internal data class TextMsg(

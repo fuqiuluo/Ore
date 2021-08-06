@@ -8,10 +8,7 @@ import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
 import moe.ore.helper.ifNotNull
 import moe.ore.helper.toByteReadPacket
-import moe.ore.msg.code.At
-import moe.ore.msg.code.BaseCode
-import moe.ore.msg.code.OreCode
-import moe.ore.msg.code.Text
+import moe.ore.msg.code.*
 import moe.ore.msg.protocol.protobuf.Grp
 import moe.ore.msg.protocol.protobuf.PbSendMsgResp
 import moe.ore.msg.protocol.protobuf.RichText
@@ -74,6 +71,9 @@ internal fun RichText.toMsg(): String {
             } else {
                 builder.add(Text(it.str))
             }
+        }
+        elem.face.ifNotNull {
+            builder.add(Face(it.index.toInt()))
         }
 
 

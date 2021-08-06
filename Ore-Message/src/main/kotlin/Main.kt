@@ -41,6 +41,12 @@ fun main() {
                     println(builder
                         .build()
                         .sendToTroop(fromTroop))
+
+                    val builder2 = MessageBuilder(ore)
+                    builder2.text("收到：$msg")
+                    println(builder2
+                        .build()
+                        .sendToTroop(fromTroop))
                 }
             })
 
