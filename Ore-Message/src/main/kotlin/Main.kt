@@ -37,7 +37,7 @@ fun main() {
                     msg: String
                 ) {
                     val builder = MessageBuilder(ore)
-                    builder.text("收到：$msg")
+                    builder.addMsg("收到：$msg")
                     println(builder
                         .build()
                         .sendToTroop(fromTroop))

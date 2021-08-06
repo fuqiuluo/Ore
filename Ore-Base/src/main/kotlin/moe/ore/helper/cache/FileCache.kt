@@ -1,6 +1,8 @@
 package moe.ore.helper.cache
 
 import moe.ore.helper.currentTimeSeconds
+import moe.ore.protobuf.Protobuf
+import moe.ore.protobuf.decodeProtobuf
 import moe.ore.tars.TarsBase
 import moe.ore.tars.TarsInputStream
 import java.io.File
@@ -32,6 +34,10 @@ class FileCache(
         }
     }
 
+    inline fun <reified T: Protobuf<T>> getPb(): T {
+        return decodeProtobuf(get())
+    }
+
     fun <T: TarsBase> getTars(src: T): T {
         src.readFrom(TarsInputStream(get()))
         return src
@@ -59,6 +65,8 @@ class FileCache(
         it.writeInt(data.size)
         it.write(data)
     }
+
+    fun put(pb: Protobuf<*>) = put(pb.toByteArray())
 
     fun put(tars: TarsBase) = put(tars.toByteArray())
 }

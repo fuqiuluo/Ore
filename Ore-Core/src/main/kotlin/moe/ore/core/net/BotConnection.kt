@@ -135,7 +135,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 //                        val executorGroup = DefaultEventExecutorGroup(16)
 
                     // 注意添加顺序决定执行的先后
-                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 3, baseIdleTime.toLong(), baseIdleTime.toLong() + (3 * 2), TimeUnit.SECONDS))
+                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 2, baseIdleTime.toLong(), baseIdleTime.toLong() + (2 * 2), TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
                         socketChannel.pipeline().addLast("handler", usefulListener)
@@ -151,11 +151,11 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
      */
     fun setNewIdleStateHandlerTime(newBaseIdleTime: Int) {
         println("change heartbeat time to $newBaseIdleTime")
-        this.baseIdleTime = newBaseIdleTime
+        this.baseIdleTime = newBaseIdleTime - 30
         val socketChannel = channelFuture.channel()
         runCatching {
             socketChannel.pipeline().remove("ping")
         }
-        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime.toLong() + 3, baseIdleTime.toLong(), baseIdleTime.toLong() + (3 * 2), TimeUnit.SECONDS))
+        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime.toLong() + 2, baseIdleTime.toLong(), baseIdleTime.toLong() + (2 * 2), TimeUnit.SECONDS))
     }
 }

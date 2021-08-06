@@ -17,4 +17,5 @@ dependencies {
     implementation(project(":Ore-Core"))
     implementation(project(":Ore-Base"))
     implementation(project(":Ore-Api"))
+    implementation(project(":Ore-Group"))
 }

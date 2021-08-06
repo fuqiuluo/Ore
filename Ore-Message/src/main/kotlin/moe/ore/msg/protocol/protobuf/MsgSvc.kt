@@ -9,7 +9,7 @@ import moe.ore.protobuf.Protobuf
 @Serializable
 data class PbSendMsgResp(
     @ProtoNumber(1) @JvmField var result: UInt = 0u,
-    @ProtoNumber(2) @JvmField var errMsg: String = "",
+    // @ProtoNumber(2) @JvmField var errMsg: String = "", 根本没有东西
     @ProtoNumber(3) @JvmField var sendTime: UInt = 0u,
     // @ProtoNumber(4) @JvmField var uint32_svrbusy_wait_time: UInt = 0u,
     // @ProtoNumber(5) @JvmField var msg_send_info: MsgSendInfo? = null,

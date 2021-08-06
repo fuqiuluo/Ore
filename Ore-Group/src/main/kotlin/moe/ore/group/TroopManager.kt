@@ -4,9 +4,11 @@ import kotlinx.io.core.readBytes
 import moe.ore.api.IPacketServlet
 import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
+import moe.ore.group.protobuf.MemberInfo
 import moe.ore.group.request.GetMultiTroopInfo
 import moe.ore.group.request.GetTroopList
 import moe.ore.group.request.GetTroopMember
+import moe.ore.group.request.GroupMemberInfo
 import moe.ore.group.tars.GetTroopListRespV2
 import moe.ore.group.tars.TroopInfoV2
 import moe.ore.group.tars.TroopMemberInfo
@@ -99,7 +101,20 @@ class TroopManager(private val ore: Ore): IPacketServlet() {
         }
     }
 
-
+    /**
+     * 获取群成员资料
+     */
+    fun getTroopMemberInfo(groupCode: Long, uin: Long, cache: Boolean = true): Result<MemberInfo> {
+        val disketteCache = manager.diskCache.load("troop_mem_info_$groupCode-$uin", 5 * 60)
+        if (cache && !disketteCache.isExpired) return Result.success(disketteCache.getPb())
+        GroupMemberInfo(ore, groupCode, uin).onSuccess {
+            disketteCache.put(it)
+            return Result.success(it)
+        }.onFailure {
+            return Result.failure(it)
+        }
+        return Result.failure(UnknownError())
+    }
 
 }
 
