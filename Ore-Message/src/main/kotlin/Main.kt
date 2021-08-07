@@ -25,6 +25,7 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
+
             val msgCenter = ore.messageCenter()
             msgCenter.setTroopMsgEvent(object : TroopMsgEvent() {
                 override fun onTroopMsg(
@@ -49,6 +50,8 @@ fun main() {
                         .sendToTroop(fromTroop))
                 }
             })
+
+
 
         }
 

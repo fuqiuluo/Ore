@@ -72,7 +72,7 @@ fun Closeable.closeQuietly() {
     }.onFailure { it.printStackTrace() }
 }
 
-fun <T> T?.ifNotNull(block: (T) -> Unit) {
+inline fun <T> T?.ifNotNull(block: (T) -> Unit) {
     if(this != null) {
         block.invoke(this)
     }

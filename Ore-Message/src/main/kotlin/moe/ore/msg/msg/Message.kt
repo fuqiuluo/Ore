@@ -9,11 +9,9 @@ import moe.ore.core.helper.DataManager
 import moe.ore.helper.ifNotNull
 import moe.ore.helper.toByteReadPacket
 import moe.ore.msg.code.*
-import moe.ore.msg.protocol.protobuf.Grp
-import moe.ore.msg.protocol.protobuf.PbSendMsgResp
-import moe.ore.msg.protocol.protobuf.RichText
-import moe.ore.msg.protocol.protobuf.RoutingHead
+import moe.ore.msg.protocol.protobuf.*
 import moe.ore.msg.request.SendMsg
+import moe.ore.protobuf.decodeProtobuf
 
 class MessageBuilder(private val ore: Ore): OreCode() {
     fun addMsg(msg: String) {
@@ -72,11 +70,18 @@ internal fun RichText.toMsg(): String {
                 builder.add(Text(it.str))
             }
         }
-        elem.face.ifNotNull {
-            builder.add(Face(it.index.toInt()))
+        elem.face.ifNotNull { builder.add(Face(it.index.toInt())) }
+        elem.commonElem.ifNotNull {
+            if(it.serviceType == 33u && it.businessType == 1u) {
+                val type33 = decodeProtobuf<MsgElemInfoServiceType33>(it.elem)
+                builder.add(SuperFace(
+                    id = type33.index.toInt(),
+                    name = type33.text
+                ))
+            }
+
+
         }
-
-
     }
     return builder.toString()
 }
