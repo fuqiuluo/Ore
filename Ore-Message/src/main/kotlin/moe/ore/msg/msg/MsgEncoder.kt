@@ -6,10 +6,7 @@ import moe.ore.helper.newBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeLongToBuf32
 import moe.ore.helper.writeShort
-import moe.ore.msg.code.At
-import moe.ore.msg.code.BaseCode
-import moe.ore.msg.code.Face
-import moe.ore.msg.code.Text
+import moe.ore.msg.code.*
 import moe.ore.msg.protocol.protobuf.*
 
 internal class MsgEncoder(
@@ -33,16 +30,16 @@ internal class MsgEncoder(
                             elems.add(at("全体成员", 0))
                             elems.add(text(" "))
                         } else {
-                            ore.troopManager().getTroopMemberInfo(groupCode!!, msg.code).onSuccess {
+                            ore.troopManager().getTroopMemberInfo(groupCode!!, msg.qq).onSuccess {
                                 val nick = if(it.card.isNotEmpty()) String(it.card) else String(it.nick)
-                                elems.add(at(nick, msg.code))
+                                elems.add(at(nick, msg.qq))
                                 elems.add(text(" "))
                             }
                         }
                     }
                 }
                 is Face -> elems.add(face(msg.id))
-
+                is SuperFace -> elems.add(sface(msg.id, msg.name))
 
             }
         }
@@ -52,6 +49,18 @@ internal class MsgEncoder(
     }
 
     /** create protobuf message **/
+    private fun sface(id: Int, name: String): Elem = Elem(
+        commonElem = CommonElem(
+            serviceType = 33u,
+            elem = MsgElemInfoServiceType33(
+                index = id.toUInt(),
+                text = name,
+                compat = name
+            ).toByteArray(),
+            businessType = 1u
+        )
+    )
+
     private fun face(id: Int): Elem = Elem(
         face = FaceMsg(index = id.toUInt())
     )

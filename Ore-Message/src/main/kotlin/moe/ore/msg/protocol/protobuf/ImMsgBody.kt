@@ -153,14 +153,14 @@ internal data class Elem(
     @ProtoNumber(50) @JvmField var group_post_elem: GroupPostElem? = null,
     @ProtoNumber(51) @JvmField var light_app: LightAppElem? = null,
     @ProtoNumber(52) @JvmField var eim_info: EIMInfo? = null,
-    @ProtoNumber(53) @JvmField var common_elem: CommonElem? = null,
+    @ProtoNumber(53) @JvmField var commonElem: CommonElem? = null,
 ): Protobuf<Elem>
 
 @Serializable
 internal data class CommonElem(
-    @ProtoNumber(1) @JvmField var uint32_service_type: UInt = 0u,
-    @ProtoNumber(2) @JvmField var bytes_pb_elem: ByteArray = EMPTY_BYTE_ARRAY,
-    @ProtoNumber(3) @JvmField var uint32_business_type: UInt = 0u,
+    @ProtoNumber(1) @JvmField var serviceType: UInt = 0u,
+    @ProtoNumber(2) @JvmField var elem: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(3) @JvmField var businessType: UInt = 0u,
 ): Protobuf<CommonElem>
 
 @Serializable

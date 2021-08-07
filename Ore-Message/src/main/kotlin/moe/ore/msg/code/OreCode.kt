@@ -3,6 +3,11 @@ package moe.ore.msg.code
 import moe.ore.msg.code.util.CodeParser
 
 open class OreCode: ArrayList<BaseCode>() {
+    fun sface(id: Int, name: String): OreCode {
+        add(SuperFace(id, name))
+        return this
+    }
+
     fun face(id: Int): OreCode {
         add(Face(id))
         return this
