@@ -99,8 +99,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         // println("Send: " + bytes.toHexString())
         // println("a1")
         channelFuture.channel().also {
-            it.write(Unpooled.copiedBuffer(bytes))
-            it.flush()
+            it.writeAndFlush(Unpooled.copiedBuffer(bytes))
         }
         // println("a2")
     }

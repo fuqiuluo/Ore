@@ -117,6 +117,7 @@ class QRLoginHelper(
                                 sleepQuietly(500)
                                 handle(checkQRCode())
                             }
+                            54->listener?.onQRCancel()
                             else -> error("unknown qr type : $status")
                         }
                     }
