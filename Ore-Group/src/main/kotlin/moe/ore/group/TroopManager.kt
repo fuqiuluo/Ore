@@ -22,7 +22,7 @@ const val TAG_TROOP_MANAGER = "TROOP_MANAGER"
 
 const val FRIEND_LIST_SERVANT = "mqq.IMService.FriendListServiceServantObj"
 
-class TroopManager(private val ore: Ore): IPacketServlet() {
+class TroopManager(private val ore: Ore): IPacketServlet {
     private val manager = DataManager.manager(ore.uin)
     private val diskCache = manager.diskCache
 
@@ -44,7 +44,7 @@ class TroopManager(private val ore: Ore): IPacketServlet() {
      * cache 是否获取缓存内的数据
      */
     fun getTroopList(cache: Boolean = true): Result<GetTroopListRespV2> {
-        val disketteCache = manager.diskCache.load("troop_list", 3 * 60 * 60)
+        val disketteCache = diskCache.load("troop_list", 3 * 60 * 60)
         if (cache && !disketteCache.isExpired) return Result.success(disketteCache.getTars(GetTroopListRespV2()))
         GetTroopList(ore).onSuccess {
             disketteCache.put(it)
@@ -59,7 +59,7 @@ class TroopManager(private val ore: Ore): IPacketServlet() {
      * 获取群成员列表
      */
     fun getTroopMemberList(groupCode: Long, cache: Boolean = true): Result<ArrayList<TroopMemberInfo>> {
-        val disketteCache = manager.diskCache.load("troop_member_$groupCode", 3 * 60 * 60)
+        val disketteCache = diskCache.load("troop_member_$groupCode", 3 * 60 * 60)
         if (cache && !disketteCache.isExpired) {
             return Result.success(disketteCache.get().let {
                 val ret: ArrayList<TroopMemberInfo> = arrayListOf()
@@ -105,7 +105,7 @@ class TroopManager(private val ore: Ore): IPacketServlet() {
      * 获取群成员资料
      */
     fun getTroopMemberInfo(groupCode: Long, uin: Long, cache: Boolean = true): Result<MemberInfo> {
-        val disketteCache = manager.diskCache.load("troop_mem_info_$groupCode-$uin", 5 * 60)
+        val disketteCache = diskCache.load("troop_mem_info_$groupCode-$uin", 5 * 60)
         if (cache && !disketteCache.isExpired) return Result.success(disketteCache.getPb())
         GroupMemberInfo(ore, groupCode, uin).onSuccess {
             disketteCache.put(it)

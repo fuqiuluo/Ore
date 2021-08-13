@@ -2,12 +2,13 @@ package moe.ore.msg.msg
 
 import moe.ore.api.Ore
 import moe.ore.group.troopManager
-import moe.ore.helper.newBuilder
-import moe.ore.helper.toByteArray
-import moe.ore.helper.writeLongToBuf32
-import moe.ore.helper.writeShort
+import moe.ore.helper.*
+import moe.ore.highway.highway
+import moe.ore.msg.cache.ImageCache
 import moe.ore.msg.code.*
 import moe.ore.msg.protocol.protobuf.*
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 internal class MsgEncoder(
     val ore: Ore,
@@ -40,7 +41,27 @@ internal class MsgEncoder(
                 }
                 is Face -> elems.add(face(msg.id))
                 is SuperFace -> elems.add(sface(msg.id, msg.name))
+                is Image -> {
+                    val file = ImageCache.getImage(ore.uin, msg.file)
+                    val fileMd5: ByteArray = msg.file.replace("[{}\\-]".toRegex(), "").split("\\.".toRegex())[0].hex2ByteArray()
 
+                    var fileId: ULong = 0u
+                    var upServer = 3070484794 to 80
+
+                    if(file.exists()) {
+                        ore.highway().tryUpTroopImage(troopCode = groupCode!!, file).onSuccess {
+                            val rsp = it.msgTryUpImgRsp!![0]
+                            val index = Random.nextInt(0 until rsp.upIp!!.size)
+                            upServer = rsp.upIp!![index] to rsp.upPort!![index]
+                            if(rsp.fileExist) {
+                                fileId = rsp.fileId
+                            } else {
+
+                            }
+                        }
+                    }
+                    elems.add(image(fileMd5, fileId, upServer))
+                }
             }
         }
         elems.add(generalFlags())
@@ -49,6 +70,20 @@ internal class MsgEncoder(
     }
 
     /** create protobuf message **/
+    private fun image(md5: ByteArray, fileId: ULong, upServer: Pair<Long, Int>): Elem = Elem(
+        customFace = CustomFace(
+            md5 = md5,
+            filePath = md5.toHexString() + ".ore",
+            fileId = fileId.toUInt(),
+            serverIp = upServer.first.toUInt(),
+            serverPort = upServer.second.toUInt(),
+            filetType = 66u,
+            useful = 1u,
+            imageType = 1003u,
+            height = 200u, width = 200u, source = 200u,
+        )
+    )
+
     private fun sface(id: Int, name: String): Elem = Elem(
         commonElem = CommonElem(
             serviceType = 33u,

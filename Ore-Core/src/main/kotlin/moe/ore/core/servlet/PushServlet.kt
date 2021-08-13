@@ -10,7 +10,7 @@ import moe.ore.core.protocol.tars.configpush.SsoListPush
 import moe.ore.core.transfile.dns.InnerDns
 import moe.ore.tars.TarsInputStream
 
-class PushServlet(val uin: Long): MSFServlet(arrayOf(
+internal class PushServlet(val uin: Long): MSFServlet(arrayOf(
     "ConfigPushSvc.PushDomain",
     "ConfigPushSvc.PushReq"
 )) {
@@ -43,6 +43,7 @@ class PushServlet(val uin: Long): MSFServlet(arrayOf(
                         if(rsp.data != null && rsp.data!!.isNotEmpty()) {
                             val fsSvcList = FileStoragePushFSSvcList().apply { readFrom(TarsInputStream(rsp.data)) }
                             manager.uploadServerList.addAll(fsSvcList.uploadList)
+                            manager.troopPicServerList.addAll(fsSvcList.gPicDownloadList)
                         }
                     }
                     3 -> {

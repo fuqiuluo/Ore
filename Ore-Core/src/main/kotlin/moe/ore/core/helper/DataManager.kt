@@ -67,8 +67,7 @@ class DataManager private constructor(
      */
     @JvmField
     @Transient
-    var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
-
+    var dataPath: String = path + "/" + MD5.toMD5(uin.toString())
 
     var session = SsoSession()
 
@@ -77,6 +76,7 @@ class DataManager private constructor(
     val ecdh: PiratedEcdh by lazy { PiratedEcdh() }
 
     val uploadServerList = arrayListOf<FileStorageServerListInfo>()
+    val troopPicServerList = arrayListOf<FileStorageServerListInfo>()
 
     /**
      * 保存各种Token
@@ -97,7 +97,9 @@ class DataManager private constructor(
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
-                readFrom(TarsInputStream(FileUtil.readFileBytes(dataPath)))
+                readFrom(
+                    TarsInputStream(File("$dataPath.ore").readBytes())
+                )
             }
         }
     }
@@ -120,7 +122,7 @@ class DataManager private constructor(
     }
 
     fun flush() {
-        FileUtil.saveFile(dataPath, toByteArray())
+        File("$dataPath.ore").writeBytes(toByteArray())
     }
 
     companion object {
