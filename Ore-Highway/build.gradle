@@ -1,0 +1,23 @@
+plugins {
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'java'
+}
+
+group 'moe.ore'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":Ore-Core"))
+    implementation(project(":Ore-Base"))
+    implementation(project(":Ore-Api"))
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,7 +1,7 @@
 plugins {
+    kotlin("plugin.serialization")
     kotlin("jvm")
     java
-    kotlin("plugin.serialization")
 }
 
 group = "moe.ore.msg"
@@ -18,4 +18,6 @@ dependencies {
     implementation(project(":Ore-Base"))
     implementation(project(":Ore-Api"))
     implementation(project(":Ore-Group"))
+    implementation(project(":Ore-Highway"))
+
 }

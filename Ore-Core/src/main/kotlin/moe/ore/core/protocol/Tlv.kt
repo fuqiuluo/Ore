@@ -22,13 +22,11 @@
 package moe.ore.core.protocol
 
 import kotlinx.io.core.BytePacketBuilder
-import kotlinx.io.core.toByteArray
 import kotlinx.io.core.writeFully
 import moe.ore.core.bot.BotAccount
 import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.bot.LoginExtraData
 import moe.ore.core.bot.SsoSession
-import moe.ore.core.protocol.pb.DeviceReport
 import moe.ore.helper.*
 import moe.ore.util.MD5
 import kotlin.experimental.or
@@ -242,7 +240,7 @@ class Tlv(
     fun t177() = buildTlv(0x177) {
         writeBoolean(true)
         writeInt(protocolInfo.buildTime)
-        writeStringWithShortLen(protocolInfo.buildVersion)
+        writeStringWithShortLen(protocolInfo.oicqBuildVersion)
     }
 
     fun t17a() = buildTlv(0x17a) {

@@ -2,16 +2,14 @@
 
 package moe.ore.msg.msg
 
-import kotlinx.io.core.discardExact
-import kotlinx.io.core.readUInt
 import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
-import moe.ore.helper.ifNotNull
-import moe.ore.helper.toByteReadPacket
-import moe.ore.msg.code.*
-import moe.ore.msg.protocol.protobuf.*
+import moe.ore.msg.code.BaseCode
+import moe.ore.msg.code.OreCode
+import moe.ore.msg.protocol.protobuf.Grp
+import moe.ore.msg.protocol.protobuf.PbSendMsgResp
+import moe.ore.msg.protocol.protobuf.RoutingHead
 import moe.ore.msg.request.SendMsg
-import moe.ore.protobuf.decodeProtobuf
 
 class MessageBuilder(private val ore: Ore): OreCode() {
     fun addMsg(msg: String) {
@@ -37,8 +35,6 @@ class MessageSender(
         return send(routingHead, MsgType.TROOP)
     }
 
-
-
     private fun send(routingHead: RoutingHead, msgType: MsgType): Result<PbSendMsgResp> {
         return SendMsg(
             ore,
@@ -49,39 +45,3 @@ class MessageSender(
     }
 }
 
-internal fun RichText.toMsg(): String {
-    val builder = OreCode()
-    if(ptt != null) {
-        TODO("voice message not support")
-    }
-    for (elem in this.elems!!) {
-        elem.text.ifNotNull {
-            if(it.attr6Buf.isNotEmpty()) {
-                it.attr6Buf.toByteReadPacket().use { pat ->
-                    pat.discardExact(2) // version
-                    pat.discardExact(2) // startPos
-                    pat.discardExact(2) // textLen
-                    pat.discardExact(1) // flag
-                    val uin = pat.readUInt().toLong()
-                    // pat.discardExact(2) // 0
-                    builder.add(At(uin))
-                }
-            } else {
-                builder.add(Text(it.str))
-            }
-        }
-        elem.face.ifNotNull { builder.add(Face(it.index.toInt())) }
-        elem.commonElem.ifNotNull {
-            if(it.serviceType == 33u && it.businessType == 1u) {
-                val type33 = decodeProtobuf<MsgElemInfoServiceType33>(it.elem)
-                builder.add(SuperFace(
-                    id = type33.index.toInt(),
-                    name = type33.text
-                ))
-            }
-
-
-        }
-    }
-    return builder.toString()
-}

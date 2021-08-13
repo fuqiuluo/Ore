@@ -564,9 +564,12 @@ internal fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
     val map = hashMapOf<Int, ByteArray>()
     repeat(size) {
         val ver = bs.readUShort().toInt()
+
         val tSize = bs.readUShort().toInt()
         val content = bs.readBytes(tSize)
         map[ver] = content
+
+        // println("TLV${ver.toHexString()} ${String(content)}")
 
         // println("tlv[${ver.toHexString()}]: " + content.toHexString())
     }
