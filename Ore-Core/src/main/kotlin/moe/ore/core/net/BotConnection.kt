@@ -127,13 +127,12 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 .channel(NioSocketChannel::class.java as Class<out Channel>)
                 .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
                 .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
-                .handler(LoggingHandler(LogLevel.INFO))
                 .handler(object : ChannelInitializer<SocketChannel>() {
                     public override fun initChannel(socketChannel: SocketChannel) {
 //                        val eventLoopGroup: EventLoopGroup = NioEventLoopGroup()
 //                        val executorGroup = DefaultEventExecutorGroup(16)
-
-                    // 注意添加顺序决定执行的先后
+                        // 注意添加顺序决定执行的先后
+//                        socketChannel.pipeline().addLast("log", LoggingHandler(LogLevel.INFO))
                         socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 2, baseIdleTime.toLong(), baseIdleTime.toLong() + (2 * 2), TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())

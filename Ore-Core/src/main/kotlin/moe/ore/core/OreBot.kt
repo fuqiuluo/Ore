@@ -153,7 +153,7 @@ class OreBot(uin: Long) : Ore(uin) {
                 WloginHelper(uin, client).refreshSt()
             }
             // 检查是否过期 并刷新
-            if (manager.session.sKey.isExpired()) {
+            if (manager.userSigInfo.sKey.isExpired()) {
                 WloginHelper(uin, client).refreshSig()
             }
         }

@@ -191,7 +191,7 @@ class WloginHelper(val uin: Long,
 
                 map[0x120]?.let {
                     // println("input skey")
-                    session.sKey = strTicket(String(it))
+                    userStInfo.sKey = strTicket(String(it))
                 }
 
                 map[0x106]?.let {
@@ -213,7 +213,7 @@ class WloginHelper(val uin: Long,
                         val domain = readString(readUShort().toInt())
                         val pskey = readString(readUShort().toInt())
                         val p4token = readString(readUShort().toInt())
-                        session.pSKeyMap[domain] = hashMapOf(
+                        userStInfo.pSKeyMap[domain] = hashMapOf(
                                 "pskey" to strTicket(pskey),
                                 "p4token" to strTicket(p4token)
                         )
@@ -290,7 +290,7 @@ class WloginHelper(val uin: Long,
                     val version = readShort()
                     val time = readUInt().toLong()
                     // val ipAddr = readUInt().toLong()
-                    session.clientIp = readBytes(4)
+                    device.clientIp = readBytes(4)
                 }
 
                 map[0x133]?.let {
@@ -345,7 +345,7 @@ class WloginHelper(val uin: Long,
                                 userStInfo.webSig.shelfLife = time
                             }
                             0x120 -> {
-                                session.sKey.shelfLife = time
+                                userStInfo.sKey.shelfLife = time
                             }
                             0x136 -> {
 

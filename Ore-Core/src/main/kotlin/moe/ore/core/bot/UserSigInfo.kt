@@ -25,6 +25,7 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsBase
 import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
+import java.util.HashMap
 
 @TarsClass(requireRead = true, requireWrite = true)
 class UserSigInfo : TarsBase() {
@@ -97,6 +98,15 @@ class UserSigInfo : TarsBase() {
 
     @TarsField(id = 23)
     var t528: ByteArray = EMPTY_BYTE_ARRAY
+
+    // 1 days
+    lateinit var sKey: StringTicket
+
+    /**
+     * T511内的域名的pskey这里都有
+     */
+    val pSKeyMap = hashMapOf<String, HashMap<String, StringTicket>>()
+
 }
 
 open class BytesTicket(value: ByteArray, createTime: Long, shelfLife: Long = 0) : Ticket(value, createTime, shelfLife) {

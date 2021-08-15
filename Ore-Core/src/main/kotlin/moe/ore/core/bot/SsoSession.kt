@@ -45,16 +45,13 @@ class SsoSession : TarsBase() {
         "1234567890123456"
     }.toByteArray()
 
-    // expamel 1, 0, 0, 127 是倒过来的哦！
-    var clientIp = byteArrayOf(0, 0, 0, 0)
-
     // 1 days
-    lateinit var sKey: StringTicket
+//    lateinit var sKey: StringTicket
 
-    /**
-     * T511内的域名的pskey这里都有
-     */
-    val pSKeyMap = hashMapOf<String, HashMap<String, StringTicket>>()
+//    /**
+//     * T511内的域名的pskey这里都有
+//     */
+//    val pSKeyMap = hashMapOf<String, HashMap<String, StringTicket>>()
 
     /**
      * 图片下载器Appid

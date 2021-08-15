@@ -28,8 +28,11 @@ class DeviceInfo : TarsBase() {
         OTHER(0),
     }
 
+    @TarsField(id = 0)
+    var qimei: String = "a6d47134f4bdecfa18e8f02f10001e515311"
+
     @TarsField(id = 1)
-    var imei: String = " 867109044454073"
+    var imei: String = "867109044454073"
 
     // 53f156a0b5b89966【真的】  53f256a0aaff9966【假的】
     @TarsField(id = 2)
