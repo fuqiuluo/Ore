@@ -7,4 +7,5 @@ include 'Ore-All'
 include 'Ore-Pay'
 include 'Ore-Group'
 include 'Ore-Message'
+include 'Ore-Highway'
 

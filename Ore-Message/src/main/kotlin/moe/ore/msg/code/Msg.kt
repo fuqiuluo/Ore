@@ -4,9 +4,14 @@ internal val MSG_CODE_PARSERS = mapOf(
     MSG_TEXT to MsgCodeParser { Text(it["src"]!!) },
     MSG_AT to MsgCodeParser { At( if(it.containsKey("all") && it["all"].toBoolean()) 0 else (it["qq"] ?: it["code"])!!.toLong() ) },
     MSG_FACE to MsgCodeParser { Face(it["id"]!!.toInt()) },
-    MSG_SUPER_FACE to MsgCodeParser { SuperFace(it["id"]!!.toInt(), it["name"]!!) },
+    MSG_SUPER_FACE to MsgCodeParser { SuperFace(it["id"]!!.toInt(), it.getOrDefault("name", "")) },
+    MSG_IMAGE to MsgCodeParser { Image(it["file"]!!) },
 
 )
+
+class Image(
+    val file: String
+): BaseCode(MSG_IMAGE, mapOf("file" to file))
 
 class Face(
     val id: Int

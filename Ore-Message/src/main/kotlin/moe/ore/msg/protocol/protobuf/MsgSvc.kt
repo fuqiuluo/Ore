@@ -33,7 +33,7 @@ internal class PbSendMsgReq(
     @ProtoNumber(9) @JvmField var data_statist: UInt = 0u,
     @ProtoNumber(10) @JvmField var multi_msg_assist: MultiMsgAssist? = null,
     @ProtoNumber(11) @JvmField var input_notify_info: PbInputNotifyInfo? = null,
-    @ProtoNumber(12) @JvmField var msg_ctrl: MsgCtrl? = null,
+    @ProtoNumber(12) @JvmField var msgCtrl: MsgCtrl? = null,
     @ProtoNumber(13) @JvmField var receipt_req: ReceiptReq? = null,
     @ProtoNumber(14) @JvmField var multi_send_seq: UInt = 0u,
 ): Protobuf<PbSendMsgReq>

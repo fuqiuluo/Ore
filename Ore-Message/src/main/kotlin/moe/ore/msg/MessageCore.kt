@@ -1,37 +1,53 @@
 package moe.ore.msg
 
-import moe.ore.api.IPacketServlet
+import kotlinx.io.core.discardExact
+import kotlinx.io.core.readUInt
 import moe.ore.api.Ore
 import moe.ore.core.OreBot
+import moe.ore.core.helper.DataManager
 import moe.ore.core.net.packet.FromService
-import moe.ore.core.net.packet.LongHandler
+import moe.ore.core.servlet.MSFServlet
+import moe.ore.helper.ifNotNull
+import moe.ore.helper.toByteReadPacket
+import moe.ore.msg.cache.ImageCache
+import moe.ore.msg.code.*
 import moe.ore.msg.event.TroopMsgEvent
-import moe.ore.msg.msg.toMsg
+import moe.ore.msg.msg.MsgType
+import moe.ore.msg.msg.MsgType.C2C
+import moe.ore.msg.msg.MsgType.TROOP
+import moe.ore.msg.protocol.protobuf.MsgElemInfoServiceType33
 import moe.ore.msg.protocol.protobuf.PbPushMsg
+import moe.ore.msg.protocol.protobuf.RichText
 import moe.ore.protobuf.decodeProtobuf
-
 
 const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 
 class MessageCenter(
     private val ore: OreBot
-): IPacketServlet() {
+): MSFServlet(arrayOf(
+    "OnlinePush.PbPushGroupMsg"
+    // OnlinePush.PbPushGroupMsg || OnlinePush.PbPushDisMsg || OnlinePush.PbC2CMsgSync || OnlinePush.PbPushC2CMsg || OnlinePush.PbPushBindUinMsg
+)) {
     private val config: CoreConfig = CoreConfig()
-
-    private lateinit var troopMsgEvent: TroopMsgEvent
+    private val manager = DataManager.manager(ore.uin)
 
     init {
-        // OnlinePush.PbPushGroupMsg || OnlinePush.PbPushDisMsg || OnlinePush.PbC2CMsgSync || OnlinePush.PbPushC2CMsg || OnlinePush.PbPushBindUinMsg
-        ore.client.registerSpecialHandler(object: LongHandler("OnlinePush.PbPushGroupMsg") {
-            override fun handle(from: FromService) {
-                val pushMsg = decodeProtobuf<PbPushMsg>(from.body)
+        super.init(ore.client)
+        ImageCache.init(ore.uin, manager.dataPath)
+    }
 
+    /** event **/
+    private lateinit var troopMsgEvent: TroopMsgEvent
+
+    override fun onReceive(from: FromService) {
+        when(from.commandName) {
+            "OnlinePush.PbPushGroupMsg" -> {
+                val pushMsg = decodeProtobuf<PbPushMsg>(from.body)
                 val msg = pushMsg.msg
                 val msgHead = msg.msgHead
-
                 if(this@MessageCenter::troopMsgEvent.isInitialized && msgHead.fromUin != ore.uin.toULong()) { // 自己的消息不处理
 
-                    val codeMsg = msg.msgBody.richText.toMsg()
+                    val codeMsg = msg.msgBody.richText.toMsg(TROOP)
 
                     if(codeMsg.isNotEmpty()) {
                         val troopInfo = msgHead.groupInfo!!
@@ -48,13 +64,60 @@ class MessageCenter(
                     }
                 }
             }
-        })
+
+        }
     }
 
     fun setTroopMsgEvent(event: TroopMsgEvent) {
         this.troopMsgEvent = event
     }
 
+    private fun RichText.toMsg(msgType: MsgType): String {
+        val builder = OreCode()
+        if(ptt != null) {
+            TODO("voice message not support")
+        }
+        for (elem in this.elems!!) {
+            elem.text.ifNotNull {
+                if(it.attr6Buf.isNotEmpty()) {
+                    it.attr6Buf.toByteReadPacket().use { pat ->
+                        pat.discardExact(2) // version
+                        pat.discardExact(2) // startPos
+                        pat.discardExact(2) // textLen
+                        pat.discardExact(1) // flag
+                        val uin = pat.readUInt().toLong()
+                        // pat.discardExact(2) // 0
+                        builder.add(At(uin))
+                    }
+                } else {
+                    builder.add(Text(it.str))
+                }
+            }
+            elem.face.ifNotNull { builder.add(Face(it.index.toInt())) }
+
+            elem.customFace.ifNotNull {
+                val filePath = it.filePath.replace("[{}\\-]".toRegex(), "")
+                when(msgType) {
+                    TROOP -> {
+                        ImageCache.saveTroopImage(ore.uin, filePath, it.origUrl)
+                    }
+                    C2C -> TODO("not support c2c image")
+                }
+                builder.add(Image(file = filePath))
+            }
+
+            elem.commonElem.ifNotNull {
+                if(it.serviceType == 33u && it.businessType == 1u) {
+                    val type33 = decodeProtobuf<MsgElemInfoServiceType33>(it.elem)
+                    builder.add(SuperFace(
+                        id = type33.index.toInt(),
+                        name = type33.text
+                    ))
+                }
+            }
+        }
+        return builder.toString()
+    }
 }
 
 fun Ore.messageCenter(): MessageCenter {

@@ -10,6 +10,8 @@ abstract class BaseCode(
 
     override fun toString() = StringJoiner(CODE_PS, CODE_START, CODE_END).apply {
         add("$CODE_HEAD:$type")
-        values.forEach { (t, u) -> add(t + CODE_KV + OreCode.encodeParams(u)) }
+        values.forEach { (t, u) ->
+            if(u.isNotEmpty()) add(t + CODE_KV + OreCode.encodeParams(u))
+        }
     }.toString()
 }
