@@ -54,6 +54,7 @@ class OreBot(uin: Long) : Ore(uin) {
                 when (this@OreBot.status()) {
                     OreStatus.NoLogin -> {
                         // 登录
+                        oreListener?.onLoginStart()
                         WloginHelper(uin, this@apply, oreListener).loginByPassword()
                     }
 
@@ -66,6 +67,7 @@ class OreBot(uin: Long) : Ore(uin) {
                         WloginHelper(uin, this@apply, oreListener).loginByToken()
                     }
                     OreStatus.QRLogin -> {
+                        oreListener?.onLoginStart()
                         WloginHelper(uin, this@apply, oreListener).loginByQrToken()
                     }
                     else -> runtimeError("未知的错误操作")
@@ -119,18 +121,13 @@ class OreBot(uin: Long) : Ore(uin) {
 
     override fun login() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
-            oreListener?.onLoginStart()
-        }
         // 连接到服务器会自动发送登录包
         client.connect()
     }
 
     override fun tokenLogin() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
-            oreListener?.onLoginStart()
-        }
+        oreListener?.onLoginStart()
         this.status = OreStatus.Reconnecting
         // 连接到服务器会自动发送登录包
         client.connect()
@@ -139,9 +136,6 @@ class OreBot(uin: Long) : Ore(uin) {
     @Deprecated("二维码登录的入口不在这里哦！")
     override fun qrLogin() {
         // 登录开始传递登录开始事件
-        threadManager.addTask {
-            oreListener?.onLoginStart()
-        }
         this.status = OreStatus.QRLogin
         // 连接到服务器会自动发送登录包
         client.connect()

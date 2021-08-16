@@ -97,11 +97,9 @@ object QQUtil {
     }
 
     @JvmStatic
-    fun getOicqServer(appId: Long = 0x200300b9): Pair<String, Int>? {
+    fun getOicqServer(appId: Long = 0x200300b9, isWifi: Boolean = true): Pair<String, Int>? {
         //  env
         val isUseDebugSo = false
-        val isWifi = true
-
         try {
             val uniPacket = UniPacket()
             uniPacket.servantName = "ConfigHttp"
@@ -116,7 +114,7 @@ object QQUtil {
                 this.timeStamp = 0
                 this.imei = "867109044454073"
                 this.gsmCid = 0
-                this.netType = if(isWifi) 100 else 1
+                this.netType = if (isWifi) 100 else 1
                 this.checkType = 1 // 1 or 0
                 this.activeNetIp = 0
                 this.ipAddress = 0
