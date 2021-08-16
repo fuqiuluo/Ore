@@ -407,7 +407,7 @@ class WloginHelper(val uin: Long,
             }!!
             tlvMap[0x104]?.let { session.t104 = it }
             tlvMap[0x403]?.let { session.randSeed = it }
-            helper.handle(WtLoginDevicePass(helper.uin, t402, session.randSeed).sendTo(client))
+            helper.handle(WtLoginDevicePass(helper.uin, t402).sendTo(client))
         }
 
         fun onRollback(t161: ByteArray?) {
