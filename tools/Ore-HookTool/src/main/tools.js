@@ -260,9 +260,9 @@ function hookNativeFun(callback, funName, moduleName) {
     }
 }
 
-const Class = Java.use("java.lang.Class");
 
 function inspectObject(obj) {
+    const Class = Java.use("java.lang.Class");
     const obj_class = Java.cast(obj.getClass(), Class);
     const fields = obj_class.getDeclaredFields();
     console.log("Inspecting " + obj.getClass().toString()+" {");
