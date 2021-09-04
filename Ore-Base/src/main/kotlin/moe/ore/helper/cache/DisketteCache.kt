@@ -2,6 +2,7 @@ package moe.ore.helper.cache
 
 import java.io.File
 
+// 模仿腾讯qq的磁盘缓存器 （ 确实垃圾
 class DisketteCache {
     // private val cacheMap = hashMapOf<String, Cache>()
     private lateinit var cacheDir: File

@@ -25,7 +25,6 @@ fun main() {
         override fun onLoginFinish(result: LoginResult) {
             println("登录结果：$result")
 
-
             val msgCenter = ore.messageCenter()
             msgCenter.setTroopMsgEvent(object : TroopMsgEvent() {
                 override fun onTroopMsg(
@@ -37,6 +36,15 @@ fun main() {
                     msgId: Int,
                     msg: String
                 ) {
+                    if(msg == "img") {
+                        val builder = MessageBuilder(ore)
+                        builder.image(File("C:\\Users\\13723\\Desktop\\9.jpg"))
+                        println(builder
+                            .build()
+                            .sendToTroop(fromTroop))
+                        return
+                    }
+
                     val builder = MessageBuilder(ore)
                     builder.addMsg("收到：$msg")
                     println(builder

@@ -69,7 +69,7 @@ class DeviceInfo : TarsBase() {
     var ksid: ByteArray = "31008c9064e89b48f20765fd739edd1f".hex2ByteArray()
 
     // %4;7t>;28<fc.5*6
-    var guid: ByteArray = MD5.toMD5Byte(androidId + macAddress)
+    var guid: ByteArray = MD5.toMD5Byte(androidId.ifEmpty { imei } + macAddress)
 
     // 实际上在逆向8.7.5时 并没有出现md5(macAddr) 而是随机了一个16字节的东西
     // 不保存 懒加载在线合成
@@ -79,5 +79,5 @@ class DeviceInfo : TarsBase() {
     @TarsField(id = 18)
     var clientIp = byteArrayOf(0, 0, 0, 0)
     
-    var deviceReport = DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = androidId.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())
+    var deviceReport = DeviceReport(bootloader = "unknown".toByteArray(), version = "Linux version 4.19.113-perf-gb3dd08fa2aaa (builder@c5-miui-ota-bd143.bj) (clang version 8.0.12 for Android NDK) #1 SMP PREEMPT Thu Feb 4 04:37:10 CST 2021;".toByteArray(), codename = "REL".toByteArray(), incremental = "20.8.13".toByteArray(), fingerprint = "Xiaomi/vangogh/vangogh:11/RKQ1.200826.002/21.2.4:user/release-keys".toByteArray(), bootId = "".toByteArray(), androidId = androidId.ifEmpty { imei }.toByteArray(), baseband = "".toByteArray(), innerVer = "21.2.4".toByteArray())
 }

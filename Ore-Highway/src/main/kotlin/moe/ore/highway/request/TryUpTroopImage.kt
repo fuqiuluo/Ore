@@ -2,7 +2,7 @@ package moe.ore.highway.request
 
 import moe.ore.api.Ore
 import moe.ore.core.bot.ContractPbPacketFactory
-import moe.ore.highway.protobuf.oidb.Cmd0x388
+import moe.ore.highway.protobuf.Cmd0x388
 
 internal object TryUpTroopImage: ContractPbPacketFactory<Cmd0x388.RspBody>("ImgStore.GroupPicUp") {
     override fun handle(data: ByteArray, seq: Int): Cmd0x388.RspBody {
@@ -17,23 +17,31 @@ internal object TryUpTroopImage: ContractPbPacketFactory<Cmd0x388.RspBody>("ImgS
         val apkBuildVer = args[4] as String
 
         return Cmd0x388.ReqBody(
+            /**
+             * nettype有加密
+             *
+             * wifi 3
+             * wap 5
+             * 未知 6
+             */
             netType = 3u,
             subCmd = 1u,
             msgTryUpImg = arrayListOf(Cmd0x388.TryUpImgReq(
-                groupCode = troopCode.toULong(),
-                srcUin = uin.toULong(),
-                fileId = 0u,
+                groupCode = troopCode,
+                srcUin = uin,
+                fileId = 0,
                 fileMd5 = fileMd5,
-                fileSize = fileSize.toULong(),
+                fileSize = fileSize,
                 fileName = fileName,
-                srcTerm = 5u,
-                platformType = 9u,
-                buType = 1u,
-                200u, 200u,
-                picType = 1003u,
-                buildVer = apkBuildVer,
-                appPicType = 1052u,
-                srvUpload = 0u
+                srcTerm = 5,
+                platformType = 9,
+                buType = 1,
+                1920, 890,
+                picType = 1000,
+                buildVer = apkBuildVer, // can use 'unkownVersion'
+                appPicType = 1052,
+                srvUpload = 0,
+                originalPic = 1,
             ))
         )
     }

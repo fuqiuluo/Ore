@@ -3,7 +3,7 @@ package moe.ore.helper.logger
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+// 日志器嘛，咕咕咕 2021.9.5
 class OLog(
     private val tag : String,
     private val dataPath : String

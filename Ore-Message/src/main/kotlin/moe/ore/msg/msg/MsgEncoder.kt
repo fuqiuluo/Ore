@@ -3,12 +3,10 @@ package moe.ore.msg.msg
 import moe.ore.api.Ore
 import moe.ore.group.troopManager
 import moe.ore.helper.*
-import moe.ore.highway.highway
+import moe.ore.highway.bdh
 import moe.ore.msg.cache.ImageCache
 import moe.ore.msg.code.*
 import moe.ore.msg.protocol.protobuf.*
-import kotlin.random.Random
-import kotlin.random.nextInt
 
 internal class MsgEncoder(
     val ore: Ore,
@@ -49,15 +47,14 @@ internal class MsgEncoder(
                     var upServer = 3070484794 to 80
 
                     if(file.exists()) {
-                        ore.highway().tryUpTroopImage(troopCode = groupCode!!, file).onSuccess {
-                            val rsp = it.msgTryUpImgRsp!![0]
-                            val index = Random.nextInt(0 until rsp.upIp!!.size)
-                            upServer = rsp.upIp!![index] to rsp.upPort!![index]
-                            if(rsp.fileExist) {
-                                fileId = rsp.fileId
-                            } else {
+                        val bdh = ore.bdh()
+                        bdh.trySendTroopImage(groupCode!!, file).let {
+                            fileId = it.fileId
+                            upServer = it.upServer
 
-                            }
+                            // println("图片是否存在：${it.exits}, id: $fileId, md51: ${it.fileMd5.toHexString()}, md52: ${file.md5().toHexString()}")
+
+                            if(!it.exits) bdh.tryUpTroopImage(it)
                         }
                     }
                     elems.add(image(fileMd5, fileId, upServer))
@@ -79,7 +76,8 @@ internal class MsgEncoder(
             serverPort = upServer.second.toUInt(),
             filetType = 66u,
             useful = 1u,
-            imageType = 1003u,
+            imageType = 1000u,
+            bizType = 0u, origin = 1u,
             height = 200u, width = 200u, source = 200u,
         )
     )

@@ -1,6 +1,9 @@
 package moe.ore.helper.coroutine
 
 /*
+协程的库，但是经过讨论，放弃了
+因为太大了
+
 import kotlinx.coroutines.*
 import java.util.*
 

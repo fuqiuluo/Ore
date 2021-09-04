@@ -144,7 +144,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                             writeInt(it.size + 4)
                             writeBytes(it)
                         }
-                        deviceInfo.androidId.let {
+                        deviceInfo.androidId.ifEmpty { deviceInfo.imei }.let {
                             writeInt(it.length + 4)
                             writeString(it)
                         }

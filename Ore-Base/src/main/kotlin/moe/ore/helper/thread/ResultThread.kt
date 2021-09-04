@@ -1,13 +1,12 @@
 package moe.ore.helper.thread
 
 import java.util.concurrent.BlockingQueue
-import kotlin.random.Random
 
 /**
  * @author luoluo
  * @date 2020/10/2 0:48
  */
-abstract class ResultThread<T>(name: String = "ResultThread[${Random.nextInt()}]") : Thread(name), IResultThread<T> {
+abstract class ResultThread<T> : Thread() {
     init {
         isDaemon = true
     }
@@ -28,10 +27,5 @@ abstract class ResultThread<T>(name: String = "ResultThread[${Random.nextInt()}]
     }
 
     @Throws(Throwable::class)
-    abstract override fun on(): T
-}
-
-interface IResultThread<T> {
-    @Throws(Throwable::class)
-    fun on(): T
+    abstract fun on(): T
 }

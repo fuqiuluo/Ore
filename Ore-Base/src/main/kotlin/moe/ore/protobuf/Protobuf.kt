@@ -20,6 +20,7 @@ interface Protobuf<T : Protobuf<T>> {
 }
 
 inline fun <reified T: Protobuf<T>> encodeProtobuf(value: T): ByteArray {
+
     return ProtoBuf.encodeToByteArray(value)
 }
 

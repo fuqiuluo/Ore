@@ -70,6 +70,9 @@ interface OreListener {
 }
 
 abstract class CaptchaChannel(val url : String) {
+    /**
+     * 为了兼容java 被迫使用
+     */
     abstract fun submitTicket(ticket : String)
 }
 

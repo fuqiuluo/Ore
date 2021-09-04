@@ -22,6 +22,7 @@
 package moe.ore.util;
 
 public class TeaUtil {
+    // 加解密tea 没什么奇怪的
     public static byte[] encrypt(byte[] data, byte[] key) {
         Cryptor cryptor = new Cryptor();
         return cryptor.encrypt(data, key);

@@ -3,7 +3,7 @@ package moe.ore.pay
 import com.google.gson.Gson
 import moe.ore.core.helper.DataManager
 import moe.ore.core.protocol.ProtocolInternal
-import moe.ore.helper.*
+import moe.ore.helper.toHexString
 import moe.ore.pay.QPayUtil.decryptToJsonStr
 import moe.ore.pay.QPayUtil.encryptToReqText
 import moe.ore.pay.QPayUtil.getMsgno
@@ -14,7 +14,8 @@ import moe.ore.pay.data.QPayHbGate
 import moe.ore.pay.data.QPayHbPack
 import moe.ore.pay.data.QPayWallet
 import moe.ore.pay.util.HbRSA
-import moe.ore.util.*
+import moe.ore.util.MD5
+import moe.ore.util.OkhttpUtil
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -48,9 +49,9 @@ class QPay(val uin: Long, var payWord: String) : IQPay {
                             "h_net_type" to "WIFI",
                             "h_model" to "android_mqq",
                             "h_edition" to "20",
-                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                            "h_location" to "${MD5.hexDigest(device.androidId.ifEmpty { device.imei })}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
                                 MD5.hexDigest(
-                                    device.androidId + device.macAddress
+                                    device.androidId.ifEmpty { device.imei } + device.macAddress
                                 )
                             }|7C9809E2D6C9B9277643C6088BCD181C|${
                                 // 这个0代表支付环境是否有root
@@ -236,9 +237,9 @@ class QPay(val uin: Long, var payWord: String) : IQPay {
                         "h_net_type" to "WIFI",
                         "h_model" to "android_mqq",
                         "h_edition" to "74",
-                        "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                        "h_location" to "${MD5.hexDigest(device.androidId.ifEmpty { device.imei })}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
                             MD5.hexDigest(
-                                device.androidId + device.macAddress
+                                device.androidId.ifEmpty { device.imei } + device.macAddress
                             )
                         }|7C9809E2D6C9B9277643C6088BCD181C|${
                             // 这个0代表支付环境是否有root
@@ -288,9 +289,9 @@ class QPay(val uin: Long, var payWord: String) : IQPay {
                             "h_net_type" to "WIFI",
                             "h_model" to "android_mqq",
                             "h_edition" to "74",
-                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                            "h_location" to "${MD5.hexDigest(device.androidId.ifEmpty { device.imei })}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
                                 MD5.hexDigest(
-                                    device.androidId + device.macAddress
+                                    device.androidId.ifEmpty { device.imei } + device.macAddress
                                 )
                             }|7C9809E2D6C9B9277643C6088BCD181C|${
                                 // 这个0代表支付环境是否有root
@@ -341,9 +342,9 @@ class QPay(val uin: Long, var payWord: String) : IQPay {
                             "h_net_type" to "WIFI",
                             "h_model" to "android_mqq",
                             "h_edition" to "74",
-                            "h_location" to "${MD5.hexDigest(device.androidId)}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
+                            "h_location" to "${MD5.hexDigest(device.androidId.ifEmpty { device.imei })}||${device.model}|${device.androidVersion},sdk${device.androidSdkVersion}|${
                                 MD5.hexDigest(
-                                    device.androidId + device.macAddress
+                                    device.androidId.ifEmpty { device.imei } + device.macAddress
                                 )
                             }|7C9809E2D6C9B9277643C6088BCD181C|${
                                 // 这个0代表支付环境是否有root

@@ -30,12 +30,13 @@ import kotlin.properties.Delegates
 abstract class Ore(val uin : Long) {
     private val servletMap = hashMapOf<String, IPacketServlet>() // 保存服务的map哦
 
-    // lateinit var client: Any
+    // lateinit var client: Any 还想吧client放这里来着
 
     /**
      * 机器人状态
      */
     protected var status : OreStatus by Delegates.observable(OreStatus.NoLogin) { _, _, new: OreStatus ->
+        // 监听status改变 kotln yyds
         oreListener?.onStatusChanged(new)
     }
 
@@ -46,6 +47,8 @@ abstract class Ore(val uin : Long) {
 
     /**
      * 登录
+     *
+     * 什么鸡巴东西，写了一堆登录，结果只有二维码登录好用
      */
     abstract fun login()
     abstract fun tokenLogin()
@@ -53,7 +56,6 @@ abstract class Ore(val uin : Long) {
 
     /**
      * 获取机器人状态
-     * @return OreStatus
      */
     fun status() : OreStatus = status
 
