@@ -30,6 +30,7 @@ import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
+import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.helper.cache.DisketteCache
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
@@ -75,6 +76,7 @@ class DataManager private constructor(
 
     val ecdh: PiratedEcdh by lazy { PiratedEcdh() }
 
+    var bigDataUpKey: ByteArray = EMPTY_BYTE_ARRAY // 长消息上传key
     val uploadServerList = arrayListOf<FileStorageServerListInfo>()
     val troopPicServerList = arrayListOf<FileStorageServerListInfo>()
 

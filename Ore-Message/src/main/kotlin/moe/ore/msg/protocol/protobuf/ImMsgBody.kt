@@ -755,7 +755,7 @@ internal data class CustomFace(
     @ProtoNumber(14) @JvmField var str_thumb_url: String = "",
     @ProtoNumber(15) @JvmField var str_big_url: String = "",
     @ProtoNumber(16) @JvmField var origUrl: String = "",
-    @ProtoNumber(17) @JvmField var bizType: UInt = 0u,
+    @ProtoNumber(17) @JvmField var bizType: UInt? = null,
     @ProtoNumber(18) @JvmField var repeat_index: UInt = 0u,
     @ProtoNumber(19) @JvmField var repeat_image: UInt = 0u,
     @ProtoNumber(20) @JvmField var imageType: UInt = 0u,

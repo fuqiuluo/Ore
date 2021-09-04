@@ -2,6 +2,10 @@
 package moe.ore.msg.cache
 
 import moe.ore.core.helper.DataManager
+import moe.ore.helper.md5
+import moe.ore.helper.toHexString
+import moe.ore.highway.util.ImageType
+import moe.ore.highway.util.ImageUtil
 import moe.ore.util.FileUtil
 import moe.ore.util.OkhttpUtil
 import java.io.File
@@ -15,14 +19,32 @@ internal object ImageCache {
         }.absolutePath
     }
 
+    fun saveTroopImage(uin: Long, file: File) = kotlin.runCatching {
+        val md5 = file.md5()
+        val fileName = md5.toHexString() + when(ImageUtil.getImageType(file)) {
+            ImageType.PNG -> ".png"
+            ImageType.JPG -> ".jpg"
+            ImageType.GIF -> ".gif"
+            else -> ".ore"
+        }
+        val dataPath = dataPaths[uin]!!
+        if(!getImage(uin, fileName).exists()) {
+            FileUtil.saveFile("$dataPath/troop/$fileName", file.inputStream())
+        }
+        return@runCatching getImage(uin, fileName)
+    }
+
     fun saveTroopImage(uin: Long, fileName: String, originUrl: String) = kotlin.runCatching {
         val manager = DataManager.manager(uin)
         val dataPath = dataPaths[uin]!!
         if(!getImage(uin, fileName).exists()) {
             val http = OkhttpUtil()
             val server = manager.troopPicServerList.random()
+            // println("cache image downlo9ad url: " + "http://" + server.ip + ":" + server.port + originUrl)
             http.get("http://" + server.ip + ":" + server.port + originUrl).use { res ->
-                res.body?.let { FileUtil.saveFile("$dataPath/troop/$fileName", it.bytes()) }
+                res.body?.let {
+                    FileUtil.saveFile("$dataPath/troop/$fileName", it.byteStream())
+                }
             }
         }
         return@runCatching getImage(uin, fileName)

@@ -44,6 +44,9 @@ internal class PushServlet(val uin: Long): MSFServlet(arrayOf(
                             val fsSvcList = FileStoragePushFSSvcList().apply { readFrom(TarsInputStream(rsp.data)) }
                             manager.uploadServerList.addAll(fsSvcList.uploadList)
                             manager.troopPicServerList.addAll(fsSvcList.gPicDownloadList)
+                            fsSvcList.bigDataChannel?.bigDataSigSession?.let {
+                                manager.bigDataUpKey = it
+                            }
                         }
                     }
                     3 -> {

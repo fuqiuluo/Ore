@@ -2,7 +2,12 @@ package moe.ore.msg.code
 
 import moe.ore.msg.code.util.CodeParser
 
-open class OreCode: ArrayList<BaseCode>() {
+open class OreCode(): ArrayList<BaseCode>() {
+    fun image(file: String): OreCode {
+        add(Image(file))
+        return this
+    }
+
     fun sface(id: Int, name: String): OreCode {
         add(SuperFace(id, name))
         return this

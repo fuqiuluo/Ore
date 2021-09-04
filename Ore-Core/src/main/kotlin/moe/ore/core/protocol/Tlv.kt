@@ -122,7 +122,7 @@ class Tlv(
     }
 
     private fun t109() = buildTlv(0x109) {
-        writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
+        writeBytes(MD5.toMD5Byte(deviceInfo.androidId.ifEmpty { deviceInfo.imei }))
     }
 
     fun t112() = buildTlv(0x112) {
@@ -264,7 +264,7 @@ class Tlv(
     }
 
     fun t188() = buildTlv(0x188) {
-        writeBytes(MD5.toMD5Byte(deviceInfo.androidId))
+        writeBytes(MD5.toMD5Byte(deviceInfo.androidId.ifEmpty { deviceInfo.imei }))
     }
 
     fun t191() = buildTlv(0x191) {

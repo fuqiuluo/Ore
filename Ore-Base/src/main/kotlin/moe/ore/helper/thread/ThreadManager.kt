@@ -24,7 +24,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
         corePoolSize,
         (maxCachePoolSize + corePoolSize),
         // 线程池最大线程数
-        keepAliveTime.toLong(),
+        keepAliveTime,
         TimeUnit.MILLISECONDS,
         linkedBlockingQueue,
         handler

@@ -100,7 +100,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
                     writeBytes(EMPTY_BYTE_ARRAY)
                 }
                 writeBlockWithIntLen({ it + 4 }) {
-                    writeString(manager.deviceInfo.androidId)
+                    writeString(manager.deviceInfo.androidId.ifEmpty { manager.deviceInfo.imei })
                 }
                 writeBlockWithIntLen({ it + 4 }) {
                     writeBytes(manager.deviceInfo.ksid)

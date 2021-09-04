@@ -41,20 +41,6 @@ public class MD5 {
         return new String(cArr2);
     }
 
-    public static String hexDigest(byte[] bArr) {
-        if (bArr == null) {
-            return "";
-        }
-        char[] cArr = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-        try {
-            MessageDigest instance = MessageDigest.getInstance("MD5");
-            instance.update(bArr);
-            return cha(cArr, instance);
-        } catch (Exception unused) {
-            return null;
-        }
-    }
-
     public byte[] getMD5(byte[] bArr) {
         md5Init();
         md5Update(new ByteArrayInputStream(bArr), bArr.length);
@@ -62,9 +48,9 @@ public class MD5 {
         return this.digest;
     }
 
-    public byte[] getMD5(InputStream inputStream, long j) {
+    public byte[] getMD5(InputStream inputStream, long len) {
         md5Init();
-        if (!md5Update(inputStream, j)) {
+        if (!md5Update(inputStream, len)) {
             return new byte[16];
         }
         md5Final();
