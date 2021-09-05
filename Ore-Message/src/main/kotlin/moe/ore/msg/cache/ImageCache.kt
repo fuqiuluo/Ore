@@ -29,21 +29,21 @@ internal object ImageCache {
         }
         val dataPath = dataPaths[uin]!!
         if(!getImage(uin, fileName).exists()) {
-            FileUtil.saveFile("$dataPath/troop/$fileName", file.inputStream())
+            FileUtil.saveFile("$dataPath/$fileName", file.inputStream())
         }
         return@runCatching getImage(uin, fileName)
     }
 
-    fun saveTroopImage(uin: Long, fileName: String, originUrl: String) = kotlin.runCatching {
+    fun saveTroopImage(uin: Long, fileName: String, md5: ByteArray) = kotlin.runCatching {
         val manager = DataManager.manager(uin)
         val dataPath = dataPaths[uin]!!
         if(!getImage(uin, fileName).exists()) {
             val http = OkhttpUtil()
             val server = manager.troopPicServerList.random()
             // println("cache image downlo9ad url: " + "http://" + server.ip + ":" + server.port + originUrl)
-            http.get("http://" + server.ip + ":" + server.port + originUrl).use { res ->
+            http.get("http://" + server.ip + ":" + server.port + "/gchatpic_new/0/0-0-${md5.toHexString()}/0?term=2").use { res ->
                 res.body?.let {
-                    FileUtil.saveFile("$dataPath/troop/$fileName", it.byteStream())
+                    FileUtil.saveFile("$dataPath/$fileName", it.byteStream())
                 }
             }
         }
@@ -52,7 +52,7 @@ internal object ImageCache {
 
     fun getImage(uin: Long, fileName: String): File {
         val dataPath = dataPaths[uin]!!
-        return File("$dataPath/troop/$fileName")
+        return File("$dataPath/$fileName")
     }
 
 }

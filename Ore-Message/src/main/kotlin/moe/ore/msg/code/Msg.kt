@@ -6,8 +6,12 @@ internal val MSG_CODE_PARSERS = mapOf(
     MSG_FACE to MsgCodeParser { Face(it["id"]!!.toInt()) },
     MSG_SUPER_FACE to MsgCodeParser { SuperFace(it["id"]!!.toInt(), it.getOrDefault("name", "")) },
     MSG_IMAGE to MsgCodeParser { Image(it["file"]!!) },
-
+    MSG_FLASH_IMAGE to MsgCodeParser { FlashImage(it["file"]!!) }
 )
+
+class FlashImage(
+    val file: String
+): BaseCode(MSG_FLASH_IMAGE, mapOf("file" to file))
 
 class Image(
     val file: String

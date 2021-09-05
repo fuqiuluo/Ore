@@ -13,3 +13,9 @@ internal data class MsgElemInfoServiceType33(
     @ProtoNumber(3) @JvmField var compat: String = "",
     @ProtoNumber(4) @JvmField var buf: ByteArray = EMPTY_BYTE_ARRAY,
 ): Protobuf<MsgElemInfoServiceType33>
+
+@Serializable
+internal data class MsgElemInfoServiceType3(
+    @ProtoNumber(1) @JvmField var flashTroopPic: CustomFace? = null,
+    @ProtoNumber(2) @JvmField var flashC2cPic: NotOnlineImage? = null,
+): Protobuf<MsgElemInfoServiceType3>
