@@ -15,6 +15,7 @@ import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.msg.MsgType
 import moe.ore.msg.msg.MsgType.C2C
 import moe.ore.msg.msg.MsgType.TROOP
+import moe.ore.msg.protocol.protobuf.MsgElemInfoServiceType3
 import moe.ore.msg.protocol.protobuf.MsgElemInfoServiceType33
 import moe.ore.msg.protocol.protobuf.PbPushMsg
 import moe.ore.msg.protocol.protobuf.RichText
@@ -22,6 +23,7 @@ import moe.ore.protobuf.decodeProtobuf
 
 const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 
+@ExperimentalUnsignedTypes
 class MessageCenter(
     private val ore: OreBot
 ): MSFServlet(arrayOf(
@@ -77,7 +79,14 @@ class MessageCenter(
         if(ptt != null) {
             TODO("voice message not support")
         }
+
+        var ignoreNextMsg = false
         for (elem in this.elems!!) {
+            if (ignoreNextMsg) {
+                ignoreNextMsg = false
+                continue
+            }
+
             elem.text.ifNotNull {
                 if(it.attr6Buf.isNotEmpty()) {
                     it.attr6Buf.toByteReadPacket().use { pat ->
@@ -96,30 +105,54 @@ class MessageCenter(
             elem.face.ifNotNull { builder.add(Face(it.index.toInt())) }
 
             elem.customFace.ifNotNull {
-                val filePath = it.filePath.replace("[{}\\-]".toRegex(), "")
+                val fileName = it.filePath.replace("[{}\\-]".toRegex(), "")
                 when(msgType) {
                     TROOP -> {
-                        ImageCache.saveTroopImage(ore.uin, filePath, it.origUrl)
+                        saveImage(ore.uin, fileName, it.md5)
                     }
                     C2C -> TODO("not support c2c image")
                 }
-                builder.add(Image(file = filePath))
+                builder.add(Image(file = fileName))
             }
 
-            elem.commonElem.ifNotNull {
-                if(it.serviceType == 33u && it.businessType == 1u) {
-                    val type33 = decodeProtobuf<MsgElemInfoServiceType33>(it.elem)
+            elem.commonElem.ifNotNull { comm ->
+                if(comm.serviceType == 33u && comm.businessType == 1u) {
+                    val type33 = decodeProtobuf<MsgElemInfoServiceType33>(comm.elem)
                     builder.add(SuperFace(
                         id = type33.index.toInt(),
                         name = type33.text
                     ))
                 }
+                else if(comm.serviceType == 3u) { // 闪图啊
+                    ignoreNextMsg = true // 忽略接下来的那个狗屎消息
+                    val type3 = decodeProtobuf<MsgElemInfoServiceType3>(comm.elem)
+                    type3.flashC2cPic?.let {
+                        TODO("c2c flash image")
+                    }
+                    type3.flashTroopPic?.let {
+                        val fileName = it.filePath.replace("[{}\\-]".toRegex(), "")
+                        when(msgType) {
+                            TROOP -> {
+                                saveImage(ore.uin, fileName, it.md5)
+                            }
+                            C2C -> TODO("not support c2c image")
+                        }
+                        builder.add(FlashImage(file = fileName))
+                    }
+                }
+
+
             }
         }
         return builder.toString()
     }
+
+    private fun saveImage(uin: Long, name: String, md5: ByteArray) {
+        ImageCache.saveTroopImage(uin, name, md5)
+    }
 }
 
+@ExperimentalUnsignedTypes
 fun Ore.messageCenter(): MessageCenter {
     return getServletOrPut(TAG_MESSAGE_CENTER) { MessageCenter(this as OreBot) }
 }
