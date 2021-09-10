@@ -1,5 +1,6 @@
 package moe.ore.msg
 
+import com.google.gson.JsonObject
 import kotlinx.io.core.discardExact
 import kotlinx.io.core.readUInt
 import moe.ore.api.Ore
@@ -15,11 +16,10 @@ import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.msg.MsgType
 import moe.ore.msg.msg.MsgType.C2C
 import moe.ore.msg.msg.MsgType.TROOP
-import moe.ore.msg.protocol.protobuf.MsgElemInfoServiceType3
-import moe.ore.msg.protocol.protobuf.MsgElemInfoServiceType33
-import moe.ore.msg.protocol.protobuf.PbPushMsg
-import moe.ore.msg.protocol.protobuf.RichText
+import moe.ore.msg.protocol.protobuf.*
 import moe.ore.protobuf.decodeProtobuf
+import moe.ore.util.JsonUtil
+import moe.ore.util.ZipUtil
 
 const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 
@@ -80,12 +80,14 @@ class MessageCenter(
             TODO("voice message not support")
         }
 
-        var ignoreNextMsg = false
+        //var ignoreNextMsg = false
+        var actionMsg = false
+
         for (elem in this.elems!!) {
-            if (ignoreNextMsg) {
-                ignoreNextMsg = false
-                continue
-            }
+            //if (ignoreNextMsg) {
+            //    ignoreNextMsg = false
+            //    continue
+            //}
 
             elem.text.ifNotNull {
                 if(it.attr6Buf.isNotEmpty()) {
@@ -115,6 +117,8 @@ class MessageCenter(
                 builder.add(Image(file = fileName))
             }
 
+
+
             elem.commonElem.ifNotNull { comm ->
                 if(comm.serviceType == 33u && comm.businessType == 1u) {
                     val type33 = decodeProtobuf<MsgElemInfoServiceType33>(comm.elem)
@@ -124,7 +128,8 @@ class MessageCenter(
                     ))
                 }
                 else if(comm.serviceType == 3u) { // 闪图啊
-                    ignoreNextMsg = true // 忽略接下来的那个狗屎消息
+                    // ignoreNextMsg = true // 忽略接下来的那个狗屎消息
+                    actionMsg = true // 行为消息，不会出现与其它消息同时显示
                     val type3 = decodeProtobuf<MsgElemInfoServiceType3>(comm.elem)
                     type3.flashC2cPic?.let {
                         TODO("c2c flash image")
@@ -139,16 +144,31 @@ class MessageCenter(
                         }
                         builder.add(FlashImage(file = fileName))
                     }
+                } else if(comm.serviceType == 14u) { // 闪字
+                    actionMsg = true
+                    val type14 = decodeProtobuf<MsgElemInfoServiceType14>(comm.elem)
+                    val json = JsonUtil.from(unzipOrSourceInfo(type14.reserveInfo)) as JsonObject
+                    builder.add(FlashText(src = json["prompt"].asString, id = type14.id ))
                 }
-
 
             }
         }
+
+        if (actionMsg) // 移除非行为消息的附带消息
+            builder.removeAll { !it.isActionMsg() }
+
         return builder.toString()
     }
 
     private fun saveImage(uin: Long, name: String, md5: ByteArray) {
         ImageCache.saveTroopImage(uin, name, md5)
+    }
+
+    private fun unzipOrSourceInfo(bs: ByteArray): String {
+        val outBs = if(bs.first() == 1.toByte()) {
+            ZipUtil.unCompress(bs.slice(1 until bs.size).toByteArray())
+        } else bs
+        return String(outBs)
     }
 }
 

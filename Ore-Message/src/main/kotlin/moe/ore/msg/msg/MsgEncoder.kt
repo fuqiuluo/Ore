@@ -1,5 +1,6 @@
 package moe.ore.msg.msg
 
+import com.google.gson.JsonObject
 import moe.ore.api.Ore
 import moe.ore.group.troopManager
 import moe.ore.helper.*
@@ -8,6 +9,7 @@ import moe.ore.highway.data.FileMsg
 import moe.ore.msg.cache.ImageCache
 import moe.ore.msg.code.*
 import moe.ore.msg.protocol.protobuf.*
+import moe.ore.util.ZipUtil
 import java.io.File
 
 internal class MsgEncoder(
@@ -75,10 +77,16 @@ internal class MsgEncoder(
                             }
 
                             elems.add(fimage(fileMd5, fileId, upServer))
-                            elems.add(text("[闪照]请使用新版手机QQ查看闪照。"))
+                            elems.add(text("[闪照]请使用新版手机QQ查看闪照。")) // 这个文字居然还要我来发送
                         }
                         MsgType.C2C -> TODO("send c2c img")
                     }
+
+
+                }
+                is FlashText -> {
+                    elems.add(text(msg.src))
+                    elems.add(ftext(msg.src, msg.id))
                 }
             }
         }
@@ -101,6 +109,27 @@ internal class MsgEncoder(
     }
 
     /** create protobuf message **/
+    private fun ftext(text: String, id: Int): Elem = Elem(
+        commonElem = CommonElem(
+            serviceType = 14u,
+            elem = MsgElemInfoServiceType14().also {
+                it.id = id
+                it.reserveInfo = newBuilder().also { builder ->
+                    builder.writeByte(1)
+                    builder.writeBytes(ZipUtil.compress(JsonObject().apply {
+                        addProperty("a", "com.tencent.randomwords")
+                        addProperty("desc", "随机字")
+                        addProperty("resid", id)
+                        addProperty("m", "main")
+                        addProperty("v", "1.0.0.16")
+                        addProperty("prompt", text)
+                    }.toString().toByteArray()))
+                }.toByteArray()
+            }.toByteArray(),
+            businessType = 0u
+        )
+    )
+
     private fun fimage(md5: ByteArray, fileId: ULong, upServer: Pair<Long, Int>): Elem = Elem(
         commonElem = CommonElem(
             serviceType = 3u,
