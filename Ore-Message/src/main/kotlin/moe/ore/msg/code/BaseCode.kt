@@ -8,6 +8,8 @@ abstract class BaseCode(
 ) {
     // internal abstract fun toElemMsg(): Elem
 
+    internal open fun isActionMsg() = false
+
     override fun toString() = StringJoiner(CODE_PS, CODE_START, CODE_END).apply {
         add("$CODE_HEAD:$type")
         values.forEach { (t, u) ->

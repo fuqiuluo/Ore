@@ -160,7 +160,7 @@ internal data class Elem(
 internal data class CommonElem(
     @ProtoNumber(1) @JvmField var serviceType: UInt = 0u,
     @ProtoNumber(2) @JvmField var elem: ByteArray = EMPTY_BYTE_ARRAY,
-    @ProtoNumber(3) @JvmField var businessType: UInt = 0u,
+    @ProtoNumber(3) @JvmField var businessType: UInt? = null,
 ): Protobuf<CommonElem>
 
 @Serializable

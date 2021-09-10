@@ -29,7 +29,7 @@ import java.util.zip.Inflater
 object ZipUtil {
     @JvmStatic
     fun unCompress(inputByte: ByteArray?): ByteArray {
-        var len = 0
+        var len: Int
         val infill = Inflater()
         infill.setInput(inputByte)
         val bos = ByteArrayOutputStream()
@@ -57,7 +57,7 @@ object ZipUtil {
 
     @JvmStatic
     fun compress(inputByte: ByteArray?): ByteArray {
-        var len = 0
+        var len: Int
         val defile = Deflater()
         defile.setInput(inputByte)
         defile.finish()
