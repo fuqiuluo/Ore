@@ -66,7 +66,7 @@ class BotClient(val uin: Long) {
             listener?.onFailConnect()
         }
 
-        override fun messageReceived(ctx: ChannelHandlerContext?, msg: PacketResponse) {
+        override fun channelRead0(ctx: ChannelHandlerContext?, msg: PacketResponse) {
 //            println("--------"+Thread.currentThread().name)
 //            Thread.sleep(3000)
             ThreadManager[uin].addTask {
