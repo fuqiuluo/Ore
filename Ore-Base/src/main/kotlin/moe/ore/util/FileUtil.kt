@@ -23,14 +23,14 @@ package moe.ore.util
 
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
+import java.io.InputStream
 
 object FileUtil {
     @JvmStatic
     fun has(filePath: String) = File(filePath).exists()
 
     @JvmStatic
-    fun readFileBytes(f: File): ByteArray = Files.readAllBytes(f.toPath())
+    fun readFileBytes(f: File): ByteArray = f.readBytes()
 
     @JvmStatic
     fun readFileBytes(filePath: String) = readFileBytes(File(filePath).also { f ->
@@ -55,10 +55,33 @@ object FileUtil {
             }
             if (!file.createNewFile()) return
         }
-        val fileOutputStream = FileOutputStream(file)
-        fileOutputStream.write(content)
-        fileOutputStream.flush()
-        fileOutputStream.close()
+        file.writeBytes(content)
+    }
+
+    @JvmStatic
+    fun saveFile(path: String, content: InputStream) {
+        val file = File(path)
+        if (!file.exists()) {
+            checkFileExists(file.parentFile) { exists ->
+                if(!exists) mkdirs()
+            }
+            if (!file.createNewFile()) return
+        }
+        FileOutputStream(file).use { out ->
+            content.use {
+                var len: Int
+                val bytes = ByteArray(1024)
+                while (true) {
+                    len = it.read(bytes)
+                    if(len != -1) {
+                        out.write(bytes, 0, len)
+                    } else {
+                        break
+                    }
+                }
+                out.flush()
+            }
+        }
     }
 
     @JvmStatic

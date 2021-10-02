@@ -58,6 +58,8 @@ constructor(
 
     @TarsField(17) var appPrivilegeFlag: Long = 0,
 
+    @TarsField(18) var subScriptingUin: Long = 0,
+
     @TarsField(19) var memberNum: Long = 0,
 
     @TarsField(20) var memberNumSeq: Long = 0,

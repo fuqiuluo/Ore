@@ -24,7 +24,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
         corePoolSize,
         (maxCachePoolSize + corePoolSize),
         // 线程池最大线程数
-        keepAliveTime.toLong(),
+        keepAliveTime,
         TimeUnit.MILLISECONDS,
         linkedBlockingQueue,
         handler
@@ -44,7 +44,7 @@ class ThreadManager private constructor(val uin: Long = 0) {
      * 向线程池中添加任务方法
      */
     fun addTask(task: Runnable): Runnable {
-        if (task is Thread) task.isDaemon = true
+        // if (task is Thread) task.isDaemon = true
         threadPool.execute(task)
         return task
     }
@@ -159,9 +159,5 @@ class ThreadManager private constructor(val uin: Long = 0) {
             //任务调度周期
             TimeUnit.NANOSECONDS
         )
-    }
-
-    override fun toString(): String {
-        return "[ThreadPool]{ $uin }"
     }
 }

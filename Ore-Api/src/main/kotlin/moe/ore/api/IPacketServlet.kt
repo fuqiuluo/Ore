@@ -1,3 +1,6 @@
 package moe.ore.api
 
-interface IPacketServlet {}
+interface IPacketServlet {
+
+
+}

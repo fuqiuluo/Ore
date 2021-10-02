@@ -34,4 +34,5 @@ interface QRLoginListener {
      * 有设备扫描了二维码，但没有确认登录
      */
     fun onScanCode()
+    fun onQRCancel()
 }

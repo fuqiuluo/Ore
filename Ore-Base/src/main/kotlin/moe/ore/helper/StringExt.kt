@@ -32,4 +32,4 @@ fun String.hex2ByteArray(): ByteArray {
     return bs
 }
 
-fun String.ipToLong() : Int = IpUtil.ip_to_int(this)
+fun String.ipToLong(reverse: Boolean = false) : Long = if(reverse) IpUtil.ip_to_int(this).toLong() else IpUtil.getIpConvertNum(this)

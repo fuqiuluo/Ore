@@ -2,8 +2,8 @@ package moe.ore.tars
 
 @Target(AnnotationTarget.CLASS)
 annotation class TarsClass(
-    val requireRead: Boolean = false,
-    val requireWrite : Boolean = false,
+    val requireRead: Boolean = true,
+    val requireWrite : Boolean = true,
     val servantName : String = "",
     val funcName : String = "",
     val reqName : String = "",

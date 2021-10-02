@@ -1,10 +1,10 @@
 package moe.ore.plugin
 
+import moe.ore.plugin.full.ClassFuller
+import moe.ore.plugin.util.FileUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import moe.ore.plugin.util.FileUtil
 import java.io.File
-import moe.ore.plugin.full.ClassFuller
 
 class OrePlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -18,19 +18,17 @@ class OrePlugin : Plugin<Project> {
                 // 必须是last
                 // first时还没有生成文件
                 task.doLast {
-                    println("start build tars")
                     val buildDir = thisProject.buildDir.absolutePath
                     println("buildDir : $buildDir")
-                    if(FileUtil.has(buildDir + File.separator + "classes")) {
+                    if(File(buildDir + File.separator + "classes").exists()) {
                         FileUtil.traverseFile(buildDir + File.separator + "classes") { _, classFile ->
                             if(classFile.name.endsWith(".class")) {
                                 val fuller = ClassFuller()
-                                fuller.from(FileUtil.readFile(classFile))
+                                fuller.from(classFile.inputStream())
                                 TarsTransform(classFile, fuller).transform()
                                 ProtoBufTransform(classFile, fuller).transform()
                             }
                         }
-                        println("finish build tars file")
                     } else {
                         println("not have classes dir, not to build tars")
                     }

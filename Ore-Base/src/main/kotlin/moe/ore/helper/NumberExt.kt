@@ -11,6 +11,6 @@ fun Long.toByteArray(): ByteArray = BytesUtil.int64ToBuf(this)
 
 fun Int.toHexString(): String = Integer.toHexString(this)
 
-fun Int.intToIp(): String = IpUtil.int_to_ip(this.toLong())
+fun Int.intToIp(reverse: Boolean = false): String = if(reverse) IpUtil.int_to_ip(this.toLong()) else IpUtil.getNumConvertIp(this.toLong())
 
-fun Long.longToIp(): String = IpUtil.int_to_ip(this)
+fun Long.longToIp(reverse: Boolean = false): String = if(reverse) IpUtil.int_to_ip(this) else IpUtil.getNumConvertIp(this)

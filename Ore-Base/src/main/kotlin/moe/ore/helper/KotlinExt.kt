@@ -19,6 +19,8 @@
  *
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package moe.ore.helper
 
 import java.io.Closeable
@@ -34,7 +36,7 @@ val EMPTY_BYTE_ARRAY = ByteArray(0)
 inline fun runtimeError(msg: String = "", th: Throwable? = null): Nothing =
     throw if (th == null) RuntimeException(msg) else RuntimeException(msg, th)
 
-@OptIn(ExperimentalContracts::class)
+@ExperimentalContracts
 inline fun <C : Closeable, R> C.withUse(block: C.() -> R): R {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -66,8 +68,15 @@ inline fun <C, R> C.fastTry(block: C.() -> R): Result<R> {
     }
 }
 
-fun Closeable.closeQuietly() {
+inline fun Closeable.closeQuietly() {
     kotlin.runCatching {
         close()
     }.onFailure { it.printStackTrace() }
+}
+
+inline fun <T> T?.ifNotNull(block: (T) -> Unit) {
+    if(this != null) {
+        block.invoke(this)
+    }
+    // block.invoke(this)
 }
