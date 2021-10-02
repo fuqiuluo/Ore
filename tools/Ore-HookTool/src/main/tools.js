@@ -143,3 +143,140 @@ function getAndroidContext() {
     return Java.use("android.app.ActivityThread").currentApplication();
 
 }
+
+function hookAllOverloads(targetClass, targetMethod) {
+    Java.perform(function () {
+        var targetClassMethod = targetClass + '.' + targetMethod;
+        var hook = Java.use(targetClass);
+        var overloadCount = hook[targetMethod].overloads.length;
+        for (var i = 0; i < overloadCount; i++) {
+            hook[targetMethod].overloads[i].implementation = function () {
+                var retval = this[targetMethod].apply(this, arguments);
+                //这里可以打印结果和参数
+                return retval;
+            }
+        }
+    });
+}
+
+function jobj2Str(jobject) {
+    var ret = JSON.stringify(jobject);
+    return ret;
+}
+
+function enumMethods(targetClass) {
+    var ret;
+    Java.perform(function () {
+        var hook = Java.use(targetClass);
+        var ret = hook.class.getDeclaredMethods();
+        ret.forEach(function (s) {
+            console.log(s);
+        })
+    })
+    return ret;
+}
+
+function getMethodName() {
+    var ret;
+    Java.perform(function () {
+        var Thread = Java.use("java.lang.Thread")
+        ret = Thread.currentThread().getStackTrace()[2].getMethodName();
+    });
+    return ret;
+}
+
+function bytes2Hex(arr) {
+    var str = "[";
+    for (var i = 0; i < arr.length; i++) {
+        var z = parseInt(arr[i]);
+        if (z < 0) z = 255 + z;
+        var tmp = z.toString(16);
+        if (tmp.length == 1) {
+            tmp = "0" + tmp;
+        }
+        str = str + " " + tmp;
+    }
+    return (str + " ]").toUpperCase();
+}
+
+function jstring2Str(jstring) {
+    var ret;
+    Java.perform(function () {
+        var String = Java.use("java.lang.String");
+        ret = Java.cast(jstring, String);
+    });
+    return ret;
+}
+
+function jbyteArray2Array(jbyteArray) {
+    var ret;
+    Java.perform(function () {
+        var b = Java.use('[B');
+        var buffer = Java.cast(jbyteArray, b);
+        ret = Java.array('byte', buffer);
+    });
+    return ret;
+}
+
+function dumpAddr(address, length) {
+    length = length || 1024;
+    console.log(hexdump(address, {
+        offset: 0,
+        length: length,
+        header: true,
+        ansi: false
+    }));
+}
+
+function ab2Hex(buffer) {
+    var arr = Array.prototype.map.call(new Uint8Array(buffer), function (x) {
+        return ('00' + x.toString(16)).slice(-2)
+    }).join(" ").toUpperCase();
+    return "[" + arr + "]";
+}
+
+function ab2Str(buffer) {
+    return String.fromCharCode.apply(null, new Uint8Array(buffer));
+}
+
+function getParamType(obj) {
+    return obj == null ? String(obj) : Object.prototype.toString.call(obj).replace(/\[object\s+(\w+)\]/i, "$1") || "object";
+}
+
+function hookNativeFun(callback, funName, moduleName) {
+    var time = 1000;
+    moduleName = moduleName || null;
+    if (!(callback && callback.onEnter && callback.onLeave)) {
+        console.log("callback error");
+        return
+    }
+    var address = Module.findExportByName(moduleName, funName);
+    if (address == null) {
+        setTimeout(hookNativeFun, time, callback, funName, moduleName);
+    } else {
+        console.log(funName + " hook ok")
+        var nativePointer = new NativePointer(address);
+        Interceptor.attach(nativePointer, callback);
+    }
+}
+
+
+function inspectObject(obj) {
+    const Class = Java.use("java.lang.Class");
+    const obj_class = Java.cast(obj.getClass(), Class);
+    const fields = obj_class.getDeclaredFields();
+    console.log("Inspecting " + obj.getClass().toString()+" {");
+    console.log("\tFields:");
+    for (let i in fields) {
+        if (fields[i].toString().startsWith("[")) break;
+
+        if (fields[i].getType().getSimpleName() == "byte[]") {
+            console.log("\t\t" + fields[i].toString() + " -> " + bytes2Hex(fields[i].get(obj)));
+        }else {
+            console.log("\t\t" + fields[i].toString() + " -> " + fields[i].get(obj));
+        }
+    }
+    console.log("}")
+    console.log("----------------------------------------------------------")
+
+}

@@ -28,6 +28,8 @@ import moe.ore.core.net.BotClient
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.util.QQUtil
 import moe.ore.helper.*
+import moe.ore.helper.logger.Level
+import moe.ore.helper.logger.OLog
 import moe.ore.util.TeaUtil
 import java.util.*
 
@@ -144,7 +146,7 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                             writeInt(it.size + 4)
                             writeBytes(it)
                         }
-                        deviceInfo.androidId.let {
+                        deviceInfo.androidId.ifEmpty { deviceInfo.imei }.let {
                             writeInt(it.length + 4)
                             writeString(it)
                         }
@@ -222,7 +224,7 @@ open class PacketSender (
     }
 
     private fun send() {
-        println("F = Packet[cmd = $commandName, seq = $seq,body = ${body.toHexString()}]")
+        OLog.log(Level.DEBUG,"T = Packet[cmd = $commandName, seq = $seq,body = ${body.toHexString()}]")
         this.client.send(body)
     }
 

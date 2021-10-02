@@ -83,7 +83,7 @@ inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, Fro
                     else -> runtimeError("unknown encode type.")
                 }.let {
                     // msfSSoSeq , commandName, uinStr, it (body)
-                    val from = FromService(msfSSoSeq, commandName, body)
+                    val from = FromService(msfSSoSeq, commandName, it)
                     from.msgCookie = sessionId
                     block(uinStr, from)
                 }

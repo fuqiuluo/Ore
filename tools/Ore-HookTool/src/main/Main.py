@@ -17,7 +17,7 @@ def read_file(filepath):
 
 rdev = frida.get_usb_device()
 # 附加到的包名 如果包没有运行会报错
-session = rdev.attach("com.tencent.mobileqq")
+session = rdev.attach("QQ")
 # js文件 txt方式拼接 不要怀疑人生
 text = read_file("tools.js") + \
        read_file("simpleHookTest.js")

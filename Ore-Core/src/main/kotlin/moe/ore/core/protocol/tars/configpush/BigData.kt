@@ -9,7 +9,7 @@ import moe.ore.tars.TarsField
 internal class BigDataChannel: TarsBase() {
     @TarsField(id = 0) var bigDataIpList = arrayListOf<BigDataIpList>()
 
-    @TarsField(id = 1) var bigDataSigSession = EMPTY_BYTE_ARRAY
+    @TarsField(id = 1) var bigDataSigSession = EMPTY_BYTE_ARRAY // 上传的upkey
 
     @TarsField(id = 2) var bigDataSigKeySession = EMPTY_BYTE_ARRAY
 

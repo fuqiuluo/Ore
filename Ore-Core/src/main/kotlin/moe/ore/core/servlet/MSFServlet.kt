@@ -1,5 +1,6 @@
 package moe.ore.core.servlet
 
+import moe.ore.api.IPacketServlet
 import moe.ore.core.net.BotClient
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.net.packet.LongHandler
@@ -8,7 +9,7 @@ import moe.ore.util.TarsUtil
 
 abstract class MSFServlet(
     private val handleCmd : Array<String>
-) {
+): IPacketServlet {
     lateinit var client: BotClient
 
     fun init(client: BotClient) {

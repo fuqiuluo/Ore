@@ -34,11 +34,14 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.timeout.IdleStateHandler
+import moe.ore.core.bot.DeviceInfo
+import moe.ore.core.helper.DataManager
 import moe.ore.core.net.decoder.BotDecoder
 import moe.ore.core.net.listener.HeartBeatListener
 import moe.ore.core.net.listener.ReconnectionListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.util.QQUtil
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -89,7 +92,8 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     @Synchronized
     @Throws(InterruptedException::class)
     fun connect() {
-        val server = QQUtil.getOicqServer() ?: oicqServer[Random.nextInt(0, oicqServer.size - 1)]
+        val server1 = scheduler.submit(Callable<Pair<String, Int>> { QQUtil.getOicqServer(isWifi = DataManager.manager(uin).deviceInfo.netType == DeviceInfo.NetworkType.WIFI) }).get()
+        val server = server1 ?: oicqServer[Random.nextInt(0, oicqServer.size - 1)]
         // println("TencentServer: $server")
         // 手动解析域名
         this.connect(server.first, server.second)
@@ -99,8 +103,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
         // println("Send: " + bytes.toHexString())
         // println("a1")
         channelFuture.channel().also {
-            it.write(Unpooled.copiedBuffer(bytes))
-            it.flush()
+            it.writeAndFlush(Unpooled.copiedBuffer(bytes))
         }
         // println("a2")
     }
@@ -128,14 +131,13 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
                 .channel(NioSocketChannel::class.java as Class<out Channel>)
                 .option(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
                 .option(ChannelOption.AUTO_READ, java.lang.Boolean.TRUE)
-                .handler(LoggingHandler(LogLevel.INFO))
                 .handler(object : ChannelInitializer<SocketChannel>() {
                     public override fun initChannel(socketChannel: SocketChannel) {
 //                        val eventLoopGroup: EventLoopGroup = NioEventLoopGroup()
 //                        val executorGroup = DefaultEventExecutorGroup(16)
-
-                    // 注意添加顺序决定执行的先后
-                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 3, baseIdleTime.toLong(), baseIdleTime.toLong() + (3 * 2), TimeUnit.SECONDS))
+                        // 注意添加顺序决定执行的先后
+//                        socketChannel.pipeline().addLast("log", LoggingHandler(LogLevel.INFO))
+                        socketChannel.pipeline().addLast("ping", IdleStateHandler(baseIdleTime.toLong() + 2, baseIdleTime.toLong(), baseIdleTime.toLong() + (2 * 2), TimeUnit.SECONDS))
                         socketChannel.pipeline().addLast("heartbeat", heartBeatListener) // 注意心跳包要在IdleStateHandler后面注册 不然拦截不了事件分发
                         socketChannel.pipeline().addLast("decoder", BotDecoder())
                         socketChannel.pipeline().addLast("handler", usefulListener)
@@ -151,11 +153,11 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
      */
     fun setNewIdleStateHandlerTime(newBaseIdleTime: Int) {
         println("change heartbeat time to $newBaseIdleTime")
-        this.baseIdleTime = newBaseIdleTime
+        this.baseIdleTime = newBaseIdleTime - 30
         val socketChannel = channelFuture.channel()
         runCatching {
             socketChannel.pipeline().remove("ping")
         }
-        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime.toLong() + 3, baseIdleTime.toLong(), baseIdleTime.toLong() + (3 * 2), TimeUnit.SECONDS))
+        socketChannel.pipeline().addFirst("ping", IdleStateHandler(baseIdleTime.toLong() + 2, baseIdleTime.toLong(), baseIdleTime.toLong() + (2 * 2), TimeUnit.SECONDS))
     }
 }

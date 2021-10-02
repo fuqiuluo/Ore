@@ -1,12 +1,6 @@
 /.gradle/
 /.idea/
-/Ore-Api/build/
-/Ore-Base/build/
-/Ore-Core/build/
-/Ore-All/build/
-/Ore-Pay/build/
 /build/
-/Ore-Group/build/
 /*/build/
 /*/out/
 *.ore

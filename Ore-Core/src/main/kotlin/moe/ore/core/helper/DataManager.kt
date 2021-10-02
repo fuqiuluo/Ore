@@ -30,6 +30,8 @@ import moe.ore.core.protocol.PiratedEcdh
 import moe.ore.core.protocol.ProtocolInternal
 import moe.ore.core.protocol.tars.configpush.FileStorageServerListInfo
 import moe.ore.core.util.QQUtil.checkAccount
+import moe.ore.helper.EMPTY_BYTE_ARRAY
+import moe.ore.helper.cache.DisketteCache
 import moe.ore.helper.runtimeError
 import moe.ore.helper.thread.ThreadManager
 import moe.ore.tars.TarsBase
@@ -38,6 +40,7 @@ import moe.ore.tars.TarsField
 import moe.ore.tars.TarsInputStream
 import moe.ore.util.FileUtil
 import moe.ore.util.MD5
+import java.io.File
 
 @TarsClass(requireWrite = true, requireRead = true)
 class DataManager private constructor(
@@ -51,6 +54,11 @@ class DataManager private constructor(
 ) : TarsBase() {
 
     /**
+     * 缓存器
+     */
+    val diskCache: DisketteCache = DisketteCache().init(File(path + "/cache/" + MD5.toMD5(uin.toString())))
+
+    /**
      * 线程管理器
      */
     val threadManager = ThreadManager[uin]
@@ -60,7 +68,7 @@ class DataManager private constructor(
      */
     @JvmField
     @Transient
-    var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
+    var dataPath: String = path + "/" + MD5.toMD5(uin.toString())
 
     var session = SsoSession()
 
@@ -68,7 +76,9 @@ class DataManager private constructor(
 
     val ecdh: PiratedEcdh by lazy { PiratedEcdh() }
 
+    var bigDataUpKey: ByteArray = EMPTY_BYTE_ARRAY // 长消息上传key
     val uploadServerList = arrayListOf<FileStorageServerListInfo>()
+    val troopPicServerList = arrayListOf<FileStorageServerListInfo>()
 
     /**
      * 保存各种Token
@@ -81,6 +91,7 @@ class DataManager private constructor(
      */
     @TarsField(id = 4)
     var deviceInfo = DeviceInfo()
+
     @TarsField(id = 5, isEnum = true)
     var protocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
 
@@ -88,7 +99,9 @@ class DataManager private constructor(
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
-                readFrom(TarsInputStream(FileUtil.readFileBytes(dataPath)))
+                readFrom(
+                    TarsInputStream(File("$dataPath.ore").readBytes())
+                )
             }
         }
     }
@@ -102,16 +115,16 @@ class DataManager private constructor(
      * 销毁
      */
     @JvmOverloads
-    fun destroy(save : Boolean = true) {
+    fun destroy(save: Boolean = true) {
         threadManager.shutdown()
-        if(save) {
+        if (save) {
             this.flush()
         }
         managerMap.remove(uin, this)
     }
 
     fun flush() {
-        FileUtil.saveFile(dataPath, toByteArray())
+        File("$dataPath.ore").writeBytes(toByteArray())
     }
 
     companion object {
@@ -153,7 +166,7 @@ class DataManager private constructor(
          * 转移 而不会销毁原来的
          */
         @JvmStatic
-        fun copyTo(oldUin: Long, newUin : Long) : DataManager {
+        fun copyTo(oldUin: Long, newUin: Long): DataManager {
             val oldManager = manager(oldUin)
             val newManager = init(newUin, oldManager.dataPath)
             newManager.deviceInfo = oldManager.deviceInfo

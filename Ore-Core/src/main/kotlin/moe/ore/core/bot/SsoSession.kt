@@ -4,9 +4,9 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsBase
 import moe.ore.util.BytesUtil
 import java.security.SecureRandom
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
+import kotlin.random.Random
 
 class SsoSession : TarsBase() {
     /**
@@ -37,7 +37,7 @@ class SsoSession : TarsBase() {
     var pwd: ByteArray = try {
         val str = StringBuilder()
         for (b in SecureRandom.getSeed(16)) {
-            val abs = abs(b % 26) + if (Random().nextBoolean()) 97 else 65
+            val abs = abs(b % 26) + if (Random.nextBoolean()) 97 else 65
             str.append(abs.toChar())
         }
         str.toString()
@@ -45,16 +45,13 @@ class SsoSession : TarsBase() {
         "1234567890123456"
     }.toByteArray()
 
-    // expamel 1, 0, 0, 127 是倒过来的哦！
-    var clientIp = byteArrayOf(0, 0, 0, 0)
-
     // 1 days
-    lateinit var sKey: StringTicket
+//    lateinit var sKey: StringTicket
 
-    /**
-     * T511内的域名的pskey这里都有
-     */
-    val pSKeyMap = hashMapOf<String, HashMap<String, StringTicket>>()
+//    /**
+//     * T511内的域名的pskey这里都有
+//     */
+//    val pSKeyMap = hashMapOf<String, HashMap<String, StringTicket>>()
 
     /**
      * 图片下载器Appid
@@ -69,11 +66,12 @@ class SsoSession : TarsBase() {
     // from t167
     var imgType = 1
 
-    private val seqFactory = AtomicInteger(Random().nextInt(100000) + 60000)
 
     var t104: ByteArray? = null
 
     var t174: ByteArray? = null
+
+    private val seqFactory = AtomicInteger(Random.nextInt(100000) + 60000)
 
     @Synchronized
     fun nextSeqId(): Int {
@@ -81,13 +79,13 @@ class SsoSession : TarsBase() {
         synchronized(this) {
             id = seqFactory.addAndGet(2)
             if (id > 1000000) {
-                seqFactory.set(Random().nextInt(100000) + 60000)
+                seqFactory.set(Random.nextInt(100000) + 60000)
             }
         }
         return id
     }
 
-    private val requestIdFactory = AtomicInteger(Random().nextInt(100000) + 60000)
+    private val requestIdFactory = AtomicInteger(Random.nextInt(100000) + 60000)
 
     @Synchronized
     fun nextRequestId(): Int {
@@ -95,7 +93,35 @@ class SsoSession : TarsBase() {
         synchronized(this) {
             id = requestIdFactory.addAndGet(2)
             if (id > 1000000) {
-                requestIdFactory.set(Random().nextInt(100000) + 60000)
+                requestIdFactory.set(Random.nextInt(100000) + 60000)
+            }
+        }
+        return id
+    }
+
+    private val msgSeqFactory = AtomicInteger(Random.nextInt(100000) + 60000)
+
+    @Synchronized
+    fun nextMsgSeq(): Int {
+        var id: Int
+        synchronized(this) {
+            id = msgSeqFactory.addAndGet(2)
+            if (id > 1000000) {
+                msgSeqFactory.set(Random.nextInt(100000) + 60000)
+            }
+        }
+        return id
+    }
+
+    private val hwSeqFactory = AtomicInteger(Random.nextInt(100000))
+
+    @Synchronized
+    fun nextHwSeq(): Int {
+        var id: Int
+        synchronized(this) {
+            id = hwSeqFactory.addAndGet(1)
+            if (id > 1000000) {
+                hwSeqFactory.set(Random.nextInt(100000))
             }
         }
         return id

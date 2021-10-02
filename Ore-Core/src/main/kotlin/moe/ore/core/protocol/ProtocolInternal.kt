@@ -44,11 +44,12 @@ class ProtocolInternal(
     @JvmField var isGuidFromFileNull: Boolean = false, // 保存到文件的 GUID 是否为 null
     @JvmField var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
     @JvmField var isGuidChanged: Boolean = false, // GUID 是否有变动
-    @JvmField var buildVersion: String,
+    @JvmField var oicqBuildVersion: String,
     @JvmField var protocolDetail: String,
     @JvmField var packageName: String,
     @JvmField var packageVersion: String,
     @JvmField var tencentSdkMd5: ByteArray,
+    @JvmField var apkBuildVersion: String = "",
     ) {
 
     // TODO: 2021/6/6  待优化 这里静态有问题
@@ -83,12 +84,15 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                buildVersion = "6.0.0.2475",
+                oicqBuildVersion = "6.0.0.2475",
                 protocolDetail = "||A8.7.5.18f5bf29",
                 packageName = "com.tencent.mobileqq",
                 packageVersion = "8.7.5",
                 tencentSdkMd5 = "a6b745bf24a2c277527716f6f36eb68d".hex2ByteArray(),
+                apkBuildVersion = "8.7.5.1738"
             )
+
+            // qqhd apkBuildver = 5.9.2.374
 
             protocols[ProtocolType.IOS_IPAD] = ProtocolInternal(
                 openAppId = -1,
@@ -110,7 +114,7 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                buildVersion = "6.0.0.2475",
+                oicqBuildVersion = "6.0.0.2475",
                 protocolDetail = "||A8.7.5.18f5bf29",
                 packageName = "com.tencent.minihd.qq",
                 packageVersion = "5.8.9",
@@ -137,7 +141,7 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                buildVersion = "6.0.0.2475",
+                oicqBuildVersion = "6.0.0.2475",
                 protocolDetail = "||Atestreversion",
                 packageName = "com.tencent.qqwatch",
                 packageVersion = "2.0.8",

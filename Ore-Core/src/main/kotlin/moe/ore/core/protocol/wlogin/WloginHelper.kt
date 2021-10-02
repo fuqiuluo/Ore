@@ -73,10 +73,10 @@ class WloginHelper(val uin: Long,
                     40 -> eventHandler.onFreeze()
                     180 -> eventHandler.onRollback(tlvMap[0x161])
                     204 -> eventHandler.onDevicePass(tlvMap)
-                    9 -> throw Error("协议不合法")
-                    235 -> throw Error("协议版本过低")
+                    9 -> error("协议不合法")
+                    235 -> error("协议版本过低")
                     237 -> eventHandler.onNetEnvWrong()
-                    239 -> eventHandler.onDevicelock(tlvMap)
+                    160, 239 -> eventHandler.onDevicelock(tlvMap) // fix some bug
                     else -> {
                         tlvMap[0x146]?.let {
                             println(String(it))
@@ -191,7 +191,7 @@ class WloginHelper(val uin: Long,
 
                 map[0x120]?.let {
                     // println("input skey")
-                    session.sKey = strTicket(String(it))
+                    userStInfo.sKey = strTicket(String(it))
                 }
 
                 map[0x106]?.let {
@@ -213,7 +213,7 @@ class WloginHelper(val uin: Long,
                         val domain = readString(readUShort().toInt())
                         val pskey = readString(readUShort().toInt())
                         val p4token = readString(readUShort().toInt())
-                        session.pSKeyMap[domain] = hashMapOf(
+                        userStInfo.pSKeyMap[domain] = hashMapOf(
                                 "pskey" to strTicket(pskey),
                                 "p4token" to strTicket(p4token)
                         )
@@ -290,7 +290,7 @@ class WloginHelper(val uin: Long,
                     val version = readShort()
                     val time = readUInt().toLong()
                     // val ipAddr = readUInt().toLong()
-                    session.clientIp = readBytes(4)
+                    device.clientIp = readBytes(4)
                 }
 
                 map[0x133]?.let {
@@ -345,7 +345,7 @@ class WloginHelper(val uin: Long,
                                 userStInfo.webSig.shelfLife = time
                             }
                             0x120 -> {
-                                session.sKey.shelfLife = time
+                                userStInfo.sKey.shelfLife = time
                             }
                             0x136 -> {
 
@@ -365,7 +365,7 @@ class WloginHelper(val uin: Long,
                 }
 
 //                // 执行flush保存数据
-//                manager.flush()
+                manager.flush()
 
                 val ret = SvcRegisterHelper(uin = helper.uin).register()
 
@@ -407,7 +407,7 @@ class WloginHelper(val uin: Long,
             }!!
             tlvMap[0x104]?.let { session.t104 = it }
             tlvMap[0x403]?.let { session.randSeed = it }
-            helper.handle(WtLoginDevicePass(helper.uin, t402, session.randSeed).sendTo(client))
+            helper.handle(WtLoginDevicePass(helper.uin, t402).sendTo(client))
         }
 
         fun onRollback(t161: ByteArray?) {
@@ -564,9 +564,12 @@ internal fun decodeTlv(bs: ByteReadPacket): Map<Int, ByteArray> {
     val map = hashMapOf<Int, ByteArray>()
     repeat(size) {
         val ver = bs.readUShort().toInt()
+
         val tSize = bs.readUShort().toInt()
         val content = bs.readBytes(tSize)
         map[ver] = content
+
+        // println("TLV${ver.toHexString()} ${String(content)}")
 
         // println("tlv[${ver.toHexString()}]: " + content.toHexString())
     }

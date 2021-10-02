@@ -21,6 +21,7 @@
 
 package moe.ore.core.net.listener
 
+import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
@@ -39,7 +40,7 @@ import moe.ore.helper.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerAdapter() {
+class HeartBeatListener(private val connection: BotConnection) : ChannelDuplexHandler() {
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
@@ -100,7 +101,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelHandlerA
                     writeBytes(EMPTY_BYTE_ARRAY)
                 }
                 writeBlockWithIntLen({ it + 4 }) {
-                    writeString(manager.deviceInfo.androidId)
+                    writeString(manager.deviceInfo.androidId.ifEmpty { manager.deviceInfo.imei })
                 }
                 writeBlockWithIntLen({ it + 4 }) {
                     writeBytes(manager.deviceInfo.ksid)

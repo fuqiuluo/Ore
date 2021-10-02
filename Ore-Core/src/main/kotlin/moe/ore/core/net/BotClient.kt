@@ -29,7 +29,10 @@ import moe.ore.core.net.listener.ClientListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.net.packet.Handler
 import moe.ore.core.net.packet.SingleHandler
+import moe.ore.helper.logger.Level
+import moe.ore.helper.logger.OLog
 import moe.ore.helper.thread.ThreadManager
+import moe.ore.helper.toHexString
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -63,7 +66,7 @@ class BotClient(val uin: Long) {
             listener?.onFailConnect()
         }
 
-        override fun messageReceived(ctx: ChannelHandlerContext?, msg: PacketResponse) {
+        override fun channelRead0(ctx: ChannelHandlerContext?, msg: PacketResponse) {
 //            println("--------"+Thread.currentThread().name)
 //            Thread.sleep(3000)
             ThreadManager[uin].addTask {
@@ -73,7 +76,7 @@ class BotClient(val uin: Long) {
                     msg.body.readMsfSsoPacket(uin) { uinStr, from ->
                         check(uin.toString() == uinStr) { "QQ号和ClientQQ号不一致，请检查发包" }
                         val hash = from.hashCode()
-                        println("A = $from")
+                        OLog.log(Level.DEBUG, "F = Packet[cmd = ${from.commandName}, seq = ${from.seq},body = ${from.body.toHexString()}]")
                         if (commonHandler.containsKey(hash)) {
                             commonHandler[hash]!!.let {
                                 if (it.check(from)) {
