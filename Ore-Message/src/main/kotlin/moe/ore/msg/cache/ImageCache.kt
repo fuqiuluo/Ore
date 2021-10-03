@@ -25,7 +25,7 @@ internal object ImageCache {
             ImageType.PNG -> ".png"
             ImageType.JPG -> ".jpg"
             ImageType.GIF -> ".gif"
-            else -> ".ore"
+            else -> ".jpg"
         }
         val dataPath = dataPaths[uin]!!
         if(!getImage(uin, fileName).exists()) {

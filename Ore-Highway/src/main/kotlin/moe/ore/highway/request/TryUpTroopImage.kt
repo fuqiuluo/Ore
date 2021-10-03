@@ -40,8 +40,8 @@ internal object TryUpTroopImage: ContractPbPacketFactory<Cmd0x388.RspBody>("ImgS
                 picType = 1000,
                 buildVer = apkBuildVer, // can use 'unkownVersion'
                 appPicType = 1052,
-                srvUpload = 0,
                 originalPic = 1,
+                srvUpload = 0,
             ))
         )
     }

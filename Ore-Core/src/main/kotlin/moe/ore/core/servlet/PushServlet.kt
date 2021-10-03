@@ -50,6 +50,7 @@ internal class PushServlet(val uin: Long): MSFServlet(arrayOf(
                         }
                     }
                     3 -> {
+
                     }
                     else -> {
                         println("unknown push type: ${rsp.type}")

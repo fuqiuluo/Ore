@@ -73,6 +73,7 @@ enum class PacketType(val flag1: Int, val flag2: Byte) {
     WloginGetQRCode(0x8, 0x2)
 }
 
+// 自动合成包 业务逻辑区
 fun ToService.sendTo(client: BotClient) : PacketSender {
     val uin = client.uin
     val manager = DataManager.manager(uin)

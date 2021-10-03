@@ -1,7 +1,10 @@
 package moe.ore.highway.net
 
-import moe.ore.helper.closeQuietly
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
+import moe.ore.helper.*
 import moe.ore.highway.protobuf.highway.ReqDataHighwayHead
+import moe.ore.highway.protobuf.highway.RspDataHighwayHead
 import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -16,39 +19,55 @@ internal class TcpConnection: Closeable {
         client = Socket(host, port)
         client.keepAlive = true
         client.tcpNoDelay = true
-        client.sendBufferSize = 524288
+        // client.sendBufferSize = 524288
+
         writeChannel = DataOutputStream(client.getOutputStream())
         readChannel = DataInputStream(client.getInputStream())
     }
 
-    fun sendHw(head: ReqDataHighwayHead, body: ByteArray) {
-        if(this::writeChannel.isInitialized) {
-            writeChannel.writeBytes("(")
+    fun sendPacket(head: ReqDataHighwayHead, body: ByteArray) {
+        if(this::writeChannel.isInitialized && !client.isClosed) {
+
+            val builder = newBuilder()
+            builder.writeString("(")
+
             val headBody = head.toByteArray()
-            writeChannel.writeInt(headBody.size)
+            builder.writeInt(headBody.size)
             // println("head:" + headBody.toHexString())
-            writeChannel.writeInt(body.size)
-            writeChannel.write(headBody)
-            writeChannel.write(body)
-            writeChannel.writeBytes(")")
+            builder.writeInt(body.size)
+            builder.writeBytes(headBody)
+            builder.writeBytes(body)
+            builder.writeString(")")
+
+            val arr = builder.toByteArray()
+
+            writeChannel.write(arr)
+
+            // println("send: ${arr.toHexString()}")
+
             writeChannel.flush()
+
+            builder.closeQuietly()
         }
     }
 
-    fun readHw() {
-        if(this::readChannel.isInitialized) {
-            if(readChannel.readChar() == '(') {
+    fun readPacket(): Pair<RspDataHighwayHead, ByteArray>? {
+        if(this::readChannel.isInitialized && !client.isClosed) {
+            if(readChannel.readByte() == 0x28.toByte()) {
                 val headSize = readChannel.readInt()
                 val dataSize = readChannel.readInt()
+                val headBuf = ByteArray(headSize).also { readChannel.readFully(it) }
+                val dataBuf = ByteArray(dataSize).also { readChannel.readFully(it) }
+                readChannel.readByte() // 读取‘)’
 
-                val head = ByteArray(headSize).also { readChannel.readFully(it) }
-                val data = ByteArray(dataSize).also { readChannel.readFully(it) }
+                val head = ProtoBuf.decodeFromByteArray<RspDataHighwayHead>(headBuf)
 
-                if(readChannel.readChar() == ')') {
-
-                }
+                // println(head)
+                // println(String(dataBuf))
+                return head to dataBuf
             }
         }
+        return null
     }
 
     override fun close() {

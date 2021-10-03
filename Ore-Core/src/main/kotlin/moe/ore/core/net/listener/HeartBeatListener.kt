@@ -23,7 +23,6 @@ package moe.ore.core.net.listener
 
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
@@ -69,6 +68,7 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelDuplexHa
         }
     }
 
+    // 调用自动组包逻辑类太麻烦了，原地组心跳吧！！！
     private fun makeHeartBeatPacket(): ByteArray = newBuilder().apply {
         val ore = OreManager.getBot(connection.uin)!!
         val manager = DataManager.manager(connection.uin)

@@ -16,9 +16,9 @@ internal data class DataHighwayHead(
 	@ProtoNumber(6) @JvmField var appid: Int? = null,
 	@ProtoNumber(7) @JvmField var dataFlag: Int = 0,
 	@ProtoNumber(8) @JvmField var commandId: Int = 0,
-	@ProtoNumber(9) @JvmField var buildVer: String = "",
+	@ProtoNumber(9) @JvmField var buildVer: String? = null,
 	@ProtoNumber(10) @JvmField var localeId: Int = 0,
-	@ProtoNumber(11) @JvmField var envId: Int = 0,
+	@ProtoNumber(11) @JvmField var envId: Int? = null,
 ): Protobuf<DataHighwayHead>
 
 @Serializable
@@ -37,19 +37,20 @@ internal data class RspDataHighwayHead(
 
 @Serializable
 internal data class SegHead(
-	@ProtoNumber(1) @JvmField var serviceId: Int = 0,
+	@ProtoNumber(1) @JvmField var serviceId: Int? = null,
 	@ProtoNumber(2) @JvmField var fileSize: Long = 0,
 	@ProtoNumber(3) @JvmField var dataOffset: Long? = null,
 	@ProtoNumber(4) @JvmField var dataLength: Int = 0,
-	@ProtoNumber(5) @JvmField var rtcode: Int = 0,
+	@ProtoNumber(5) @JvmField var rtcode: Int? = null,
 	@ProtoNumber(6) @JvmField var serviceTicket: ByteArray = EMPTY_BYTE_ARRAY,
-	@ProtoNumber(7) @JvmField var flag: Int = 0,
+	@ProtoNumber(7) @JvmField var flag: Int? = null,
 	@ProtoNumber(8) @JvmField var md5: ByteArray = EMPTY_BYTE_ARRAY, // block md5
 	@ProtoNumber(9) @JvmField var fileMd5: ByteArray = EMPTY_BYTE_ARRAY,
 	@ProtoNumber(10) @JvmField var cacheAddress: Int? = null,
-	@ProtoNumber(11) @JvmField var queryTimes: Int = 0,
-	@ProtoNumber(12) @JvmField var updateCacheIp: Int = 0,
-): Protobuf<SegHead>
+	@ProtoNumber(11) @JvmField var queryTimes: Int? = null,
+	@ProtoNumber(12) @JvmField var updateCacheIp: Int? = null,
+	@ProtoNumber(13) @JvmField var unknown: Int? = null,
+	): Protobuf<SegHead>
 
 @Serializable
 internal data class ReqDataHighwayHead(
