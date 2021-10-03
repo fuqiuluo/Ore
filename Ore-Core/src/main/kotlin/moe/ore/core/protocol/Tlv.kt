@@ -434,8 +434,8 @@ class Tlv(
     }
 
     fun t544(subCmd: Int) = buildTlv(0x544) {
-        val randSeed = "\$hv2hDi3Ew".toByteArray() // $hv2hDi3Ew 10位随机种子（我固定了而已）
-        val hashKey = ByteDataHash.generateKey(randSeed)// https://blog.seeflower.dev/archives/54/
+        val randSeed = "Lhv2hDi3Ew".toByteArray() // $hv2hDi3Ew 10位随机种子（我固定了而已）
+        val hashKey = ByteDataHash.generateKey(randSeed) // https://blog.seeflower.dev/archives/54/
         val content = newBuilder().apply {
             writeLongToBuf32(account.uin) // 4 bytes
             writeBytesWithShortLen(deviceInfo.guid) // short len + body
@@ -537,335 +537,6 @@ class Tlv(
 
         writeBytes(data)
     }
-
-    // fuqiuluo: Woc!
-    // fbk: rubbish code...
-    internal object ByteDataHash {
-        fun encryptData(p0: ByteArray, p1: ByteArray): ByteArray {
-            val state = initState(p1)
-            var i1 = 0
-            var i2 = 0
-            val p01 = ByteArray(p0.size)
-            p0.forEachIndexed { index, byte ->
-                i1 = (i1 + 1) % 256
-                val tmp = state[i1]
-                i2 = (i2 + tmp) % 256
-                state[i1] = state[i2]
-                state[i2] = tmp
-                val ki = (state[i2] + state[i1]) and 0xff
-                p01[index] = byte.and(state[ki].inv()).or(state[ki].and(byte.inv()))
-            }
-            return p01
-        }
-
-        private fun initState(key: ByteArray): ByteArray {
-            var index = 0
-            val state = ByteArray(256) { it.toByte() }
-            var k = key.copyOf()
-            repeat(256 / key.size) { k += key }
-            k = k.sub(0, 256)!!
-            repeat(256) { i ->
-                index = (index + key[i] + state[i]) % 256
-                val tmp = state[i]
-                state[i] = state[index]
-                state[index] = tmp
-            }
-            return state
-        }
-
-        fun generateHash(p0: ByteArray, p1: ByteArray): ByteArray { // HMAC-SHA256
-            val v1 = ByteArray(64) { 0x36 }
-            val v2 = ByteArray(64) { 0x5c }
-            repeat(if (p0.size < v1.size) p0.size else v1.size) { v3 -> v1[v3] = p0[v3].xor(v1[v3]) }
-            repeat(if (p0.size < v2.size) p0.size else v2.size) { v3 ->
-                v2[v3] = ((p0[v3].and(0xe5) + p0[v3].inv().and(0x1a))
-                    .xor(v2[v3].and(0xe5) + v2[v3].inv().and(0x1a))).toByte()
-            }
-            return hash(v2 + hash(v1 + p1))
-        }
-
-        fun generateKey(p0: ByteArray): ByteArray {
-            val v1 = "4c3f286b54372a406124".hex2ByteArray()
-            val v2 = "4061392b3e365829264f".hex2ByteArray()
-            val v3 = if (p0.size < v2.size) p0.size else v2.size
-            val v4 = ByteArray(v3)
-            repeat(v3) { v5 -> v4[v5] = p0[v5].xor(v2[v5]) }
-            val v5 = v4.sub(0, 8)!!
-            val v6 = v4.sub(8, 2)!!
-            return v6 + v1 + v5 //such as: 4f274c3f286b54372a40612428095143565e3140
-        }
-
-        /**
-         * SHA-256
-         */
-        private val K = intArrayOf(
-            0x428a2f98, 0x71374491, -0x4a3f0431, -0x164a245b, 0x3956c25b, 0x59f111f1, -0x6dc07d5c, -0x54e3a12b,
-            -0x27f85568, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, -0x7f214e02, -0x6423f959, -0x3e640e8c,
-            -0x1b64963f, -0x1041b87a, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-            -0x67c1aeae, -0x57ce3993, -0x4ffcd838, -0x40a68039, -0x391ff40d, -0x2a586eb9, 0x06ca6351, 0x14292967,
-            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, -0x7e3d36d2, -0x6d8dd37b,
-            -0x5d40175f, -0x57e599b5, -0x3db47490, -0x3893ae5d, -0x2e6d17e7, -0x2966f9dc, -0xbf1ca7b, 0x106aa070,
-            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-            0x748f82ee, 0x78a5636f, -0x7b3787ec, -0x7338fdf8, -0x6f410006, -0x5baf9315, -0x41065c09, -0x398e870e
-        )
-        private val H0 = intArrayOf(0x6A09E669, "0xBB67AE87".toInt(), 0x3C6BF372, "0xA54FF53A".toInt(), "0x9B25688C".toInt(), 0x511E527F, 0x1F73D9AB, 0x5BD0CD19)
-        private val BLOCK_BITS = 512
-        private val BLOCK_BYTES = BLOCK_BITS / 8
-
-        // working arrays
-        private val W = IntArray(64)
-        private val H = IntArray(8)
-        private val TEMP = IntArray(8)
-
-        private fun hash(message: ByteArray): ByteArray {
-            // let H = H0
-            System.arraycopy(H0, 0, H, 0, H0.size)
-
-            // initialize all words
-            val words = pad(message)
-
-            // enumerate all blocks (each containing 16 words)
-            var i = 0
-            val n = words.size / 16
-            while (i < n) {
-
-
-                // initialize W from the block's words
-                System.arraycopy(words, i * 16, W, 0, 16)
-                for (t in 16 until W.size) {
-                    W[t] = smallSig1(W[t - 2]) + W[t - 7] + smallSig0(W[t - 15]) + W[t - 16]
-                }
-
-                // let TEMP = H
-                System.arraycopy(H, 0, TEMP, 0, H.size)
-
-                // operate on TEMP
-                for (t in W.indices) {
-                    val t1 = TEMP[7] + bigSig1(TEMP[4]) + ch(
-                        TEMP[4],
-                        TEMP[5], TEMP[6]
-                    ) + K[t] + W[t]
-                    val t2 = bigSig0(TEMP[0]) + maj(TEMP[0], TEMP[1], TEMP[2])
-                    System.arraycopy(TEMP, 0, TEMP, 1, TEMP.size - 1)
-                    TEMP[4] += t1
-                    TEMP[0] = t1 + t2
-                }
-
-                // add values in TEMP to values in H
-                for (t in H.indices) {
-                    H[t] += TEMP[t]
-                }
-                ++i
-            }
-            val buf: ByteBuffer = ByteBuffer.allocate(H.size * Integer.BYTES)
-            H.forEach { buf.putInt(it) }
-            return buf.array()
-        }
-
-        private fun pad(message: ByteArray): IntArray {
-            // new message length: original + 1-bit and padding + 8-byte length
-            // --> block count: whole blocks + (padding + length rounded up)
-            val finalBlockLength = message.size % BLOCK_BYTES
-            val blockCount = message.size / BLOCK_BYTES + if (finalBlockLength + 1 + 8 > BLOCK_BYTES) 2 else 1
-            val result = IntBuffer.allocate(blockCount * (BLOCK_BYTES / Integer.BYTES))
-
-            // copy as much of the message as possible
-            val buf: ByteBuffer = ByteBuffer.wrap(message)
-            var i = 0
-            val n = message.size / Integer.BYTES
-            while (i < n) {
-                result.put(buf.getInt())
-                ++i
-            }
-            // copy the remaining bytes (less than 4) and append 1 bit (rest is zero)
-            val remainder: ByteBuffer = ByteBuffer.allocate(4)
-            remainder.put(buf).put(128.toByte()).rewind()
-            result.put(remainder.getInt())
-
-            // ignore however many pad bytes (implicitly calculated in the beginning)
-            result.position(result.capacity() - 2)
-            // place original message length as 64-bit integer at the end
-            val msgLength = message.size * 8L
-            result.put((msgLength ushr 32).toInt())
-            result.put(msgLength.toInt())
-            return result.array()
-        }
-
-        private fun ch(x: Int, y: Int, z: Int): Int {
-            return x and y or (x.inv() and z)
-        }
-
-        private fun maj(x: Int, y: Int, z: Int): Int {
-            return x and y or (x and z) or (y and z)
-        }
-
-        private fun bigSig0(x: Int): Int {
-            return (Integer.rotateRight(x, 2)
-                    xor Integer.rotateRight(x, 13)
-                    xor Integer.rotateRight(x, 22))
-        }
-
-        private fun bigSig1(x: Int): Int {
-            return (Integer.rotateRight(x, 6)
-                    xor Integer.rotateRight(x, 11)
-                    xor Integer.rotateRight(x, 25))
-        }
-
-        private fun smallSig0(x: Int): Int {
-            return (Integer.rotateRight(x, 7)
-                    xor Integer.rotateRight(x, 18)
-                    xor (x ushr 3))
-        }
-
-        private fun smallSig1(x: Int): Int {
-            return (Integer.rotateRight(x, 17)
-                    xor Integer.rotateRight(x, 19)
-                    xor (x ushr 10))
-        }
-
-        /**
-         * salsa20
-         */
-        private const val ROUNDS = 10 // tx魔改为10
-        private const val MASK = 0xffffffff
-
-        fun salsa20(randSeedKey: ByteArray): ByteArray { // 乱写的
-            // require(nonce.size == 8)
-            // require(blockCounter.size == 8)
-
-            //  4 bytes + 20 bytes + 8 bytes = 32 bytes
-            val key = randSeedKey + 0x4adc4d1f.toByteArray() + 0x9ad47e38.toByteArray()
-            val nonce = 0x9ad47e38.toByteArray() // 8 bytes
-            val blockCounter = 0x90a5eb50.toByteArray() // 8 bytes
-
-            val k = Array(8) { littleEndian(key.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
-            val n = Array(2) { littleEndian(nonce.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
-            val b = Array(2) { littleEndian(blockCounter.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
-            val sigma = arrayOf(0x61707865L, 0x3320646e, 0x79622d32, 0x6b206574)
-
-            /*
-            val result = ByteArray(this.size)
-            for (i in 0 until this.size) {
-            result[i] = (this[i] xor key[i % key.size] xor ((i and 0xFF).toByte()))
-            }
-            return result*/
-
-            var s = arrayOf(
-                sigma[0],
-                k[0], k[1], k[2], k[3],
-                sigma[1],
-                n[0], n[1], b[0], b[1],
-                sigma[2],
-                k[4], k[5], k[6], k[7],
-                sigma[3]
-            )
-
-            repeat(ROUNDS) {
-                s = round(s)
-            }
-
-            val outv = ByteArray(64)
-
-            storeLittleEndian(outv, 0, s[0])
-            storeLittleEndian(outv, 4, s[1])
-            storeLittleEndian(outv, 8, s[2])
-            storeLittleEndian(outv, 12, s[3])
-            storeLittleEndian(outv, 16, s[4])
-            storeLittleEndian(outv, 20, s[5])
-            storeLittleEndian(outv, 24, s[6])
-            storeLittleEndian(outv, 28, s[7])
-            storeLittleEndian(outv, 32, s[8])
-            storeLittleEndian(outv, 36, s[9])
-            storeLittleEndian(outv, 40, s[10])
-            storeLittleEndian(outv, 44, s[11])
-            storeLittleEndian(outv, 48, s[12])
-            storeLittleEndian(outv, 52, s[13])
-            storeLittleEndian(outv, 56, s[14])
-            storeLittleEndian(outv, 60, s[15])
-
-            return outv
-        }
-
-        private fun storeLittleEndian(a: ByteArray, offset: Int, b: Long) {
-            var tmp = b
-            a[offset] = tmp.toByte()
-            tmp = tmp ushr 8
-            a[offset + 1] = tmp.toByte()
-            tmp = tmp ushr 8
-            a[offset + 2] = tmp.toByte()
-            tmp = tmp ushr 8
-            a[offset + 3] = tmp.toByte()
-        }
-
-        private fun round(s: Array<Long>): Array<Long> {
-            // 12 4 13 5 14 6 15 7 0 8 1 9 2 10 3 11
-            gen(s, 0x0, 0x4, 0xc, 0x10)
-            gen(s, 0x8, 0xc, 0x4, 0x0c, false)
-            gen(s, 0x0, 0x4, 0xc, 0x08)
-            gen(s, 0x8, 0xc, 0x4, 0x07)
-            gen(s, 0x1, 0x5, 0xd, 0x10)
-            gen(s, 0x9, 0xd, 0x5, 0x0c, false)
-            gen(s, 0x1, 0x5, 0xd, 0x08)
-            gen(s, 0x9, 0xd, 0x5, 0x07)
-
-            gen(s, 0x2, 0x6, 0xe, 0x10)
-            gen(s, 0xa, 0xe, 0x6, 0x0c, false)
-            gen(s, 0x2, 0x6, 0xe, 0x08)
-            gen(s, 0xa, 0xe, 0x6, 0x07)
-            gen(s, 0x3, 0x7, 0xf, 0x10)
-            gen(s, 0xb, 0xf, 0x7, 0x0c, false)
-            gen(s, 0x3, 0x7, 0xf, 0x08)
-            gen(s, 0xb, 0xf, 0x7, 0x07)
-
-            gen(s, 0x4, 0x8, 0x0, 0x10)
-            gen(s, 0xc, 0x0, 0x8, 0x0c, false)
-            gen(s, 0x4, 0x8, 0x0, 0x08)
-            gen(s, 0xc, 0x0, 0x8, 0x07)
-            gen(s, 0x5, 0x9, 0x1, 0x10)
-            gen(s, 0xd, 0x1, 0x9, 0x0c, false)
-            gen(s, 0x5, 0x9, 0x1, 0x08)
-            gen(s, 0xd, 0x1, 0x9, 0x07)
-
-            gen(s, 0x6, 0xa, 0x2, 0x10)
-            gen(s, 0xe, 0x2, 0xa, 0x0c, false)
-            gen(s, 0x6, 0xa, 0x2, 0x08)
-            gen(s, 0xe, 0x2, 0xa, 0x07)
-            gen(s, 0x7, 0xb, 0x3, 0x10)
-            gen(s, 0xf, 0x3, 0xb, 0x0c, false)
-            gen(s, 0x7, 0xb, 0x3, 0x08)
-            gen(s, 0xf, 0x3, 0xb, 0x07)
-
-            return arrayOf(
-                s[0], s[4], s[8], s[12],
-                s[1], s[5], s[9], s[13],
-                s[2], s[6], s[10], s[14],
-                s[3], s[7], s[11], s[15]
-            )
-        }
-
-        private fun gen(s: Array<Long>, i1: Int, i2: Int, ti: Int, lsl: Int, xor: Boolean = true) {
-            s[i1] = (s[i1] + s[i2]).and(MASK)
-            if (xor) {
-                s[ti] = s[ti].xor(s[i1])
-            } else {
-                s[ti] = calc(s[ti], s[i1])
-            }
-            s[ti] = rotl32(s[ti].and(MASK), lsl)
-        }
-
-        private fun rotl32(w: Long, v: Int): Long { // rotate left for 32-bits
-            return w.shl(v).and(MASK).or(w.shr(32 - v))
-        }
-
-        private fun calc(a: Long, b: Long): Long {
-            return a and b.inv() or (b and a.inv())
-        }
-
-        private fun littleEndian(b: ByteArray): Int {
-            require(b.size == 4)
-            return b[0].toInt() xor (b[1].toInt() shl 8) xor (b[2].toInt() shl 16) xor (b[3].toInt() shl 24)
-        }
-    }
 }
 
 internal inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): ByteArray {
@@ -876,4 +547,350 @@ internal inline fun buildTlv(tlvVer: Int, block: BytePacketBuilder.() -> Unit): 
     out.writeShort(bodyBuilder.size.toShort())
     out.writePacket(bodyBuilder)
     return out.toByteArray()
+}
+
+// fuqiuluo: Woc!
+// fbk: rubbish code...
+internal object ByteDataHash {
+    fun encryptData(p0: ByteArray, p1: ByteArray): ByteArray {
+        val state = initState(p1)
+        var i1 = 0
+        var i2 = 0
+        val p01 = ByteArray(p0.size)
+        p0.forEachIndexed { index, byte ->
+            i1 = (i1 + 1) % 256
+            val t2 = i1
+            if (i1 < 0) {
+                i1 += state.size
+            }
+            val tmp = state[i1]
+            i2 = (i2 + tmp) % 256
+            val t1 = i2
+            if (i2 < 0) {
+                i2 += state.size
+            }
+            state[i1] = state[i2]
+            state[i2] = tmp
+            val ki = (state[i2] + state[i1]) and 0xff
+            i2 = t1
+            i1 = t2
+            p01[index] = byte.and(state[ki].inv()).or(state[ki].and(byte.inv()))
+        }
+        return p01
+    }
+
+    private fun initState(key: ByteArray): ByteArray {
+        var index = 0
+        val state = ByteArray(256) { it.toByte() }
+        var k = key.copyOf()
+        repeat(256 / key.size) { k += key }
+        k = k.sub(0, 256)!!
+        repeat(256) { i ->
+            index = (index + k[i] + state[i]) % 256
+            val t1 = index
+            if (index < 0) {
+                index += state.size
+            }
+            val tmp = state[i]
+            state[i] = state[index]
+            state[index] = tmp
+            index = t1
+        }
+        return state
+    }
+
+    fun generateHash(p0: ByteArray, p1: ByteArray): ByteArray { // HMAC-SHA256
+        val v1 = ByteArray(64) { 0x36 }
+        val v2 = ByteArray(64) { 0x5c }
+        repeat(if (p0.size < v1.size) p0.size else v1.size) { v3 -> v1[v3] = p0[v3].xor(v1[v3]) }
+        repeat(if (p0.size < v2.size) p0.size else v2.size) { v3 ->
+            v2[v3] = ((p0[v3].and(0xe5) + p0[v3].inv().and(0x1a))
+                .xor(v2[v3].and(0xe5) + v2[v3].inv().and(0x1a))).toByte()
+        }
+        return hash(v2 + hash(v1 + p1))
+    }
+
+    fun generateKey(p0: ByteArray): ByteArray {
+        val v1 = "4c3f286b54372a406124".hex2ByteArray()
+        val v2 = "4061392b3e365829264f".hex2ByteArray()
+        val v3 = if (p0.size < v2.size) p0.size else v2.size
+        val v4 = ByteArray(v3)
+        repeat(v3) { v5 -> v4[v5] = p0[v5].xor(v2[v5]) }
+        val v5 = v4.sub(0, 8)!!
+        val v6 = v4.sub(8, 2)!!
+        return v6 + v1 + v5 // such as: 4f274c3f286b54372a40612428095143565e3140
+    }
+
+    /**
+     * SHA-256
+     */
+    private val K = intArrayOf(
+        0x428a2f98, 0x71374491, -0x4a3f0431, -0x164a245b, 0x3956c25b, 0x59f111f1, -0x6dc07d5c, -0x54e3a12b,
+        -0x27f85568, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, -0x7f214e02, -0x6423f959, -0x3e640e8c,
+        -0x1b64963f, -0x1041b87a, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        -0x67c1aeae, -0x57ce3993, -0x4ffcd838, -0x40a68039, -0x391ff40d, -0x2a586eb9, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, -0x7e3d36d2, -0x6d8dd37b,
+        -0x5d40175f, -0x57e599b5, -0x3db47490, -0x3893ae5d, -0x2e6d17e7, -0x2966f9dc, -0xbf1ca7b, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, -0x7b3787ec, -0x7338fdf8, -0x6f410006, -0x5baf9315, -0x41065c09, -0x398e870e
+    )
+    private val H0 = intArrayOf(0x6A09E669, -0x44985179, 0x3C6BF372, -0x5ab00ac6, -0x64da9774, 0x511E527F, 0x1F73D9AB, 0x5BD0CD19)
+
+    private val BLOCK_BITS = 512
+    private val BLOCK_BYTES = BLOCK_BITS / 8
+
+    // working arrays
+    private val W = IntArray(64)
+    private val H = IntArray(8)
+    private val TEMP = IntArray(8)
+
+    private fun hash(message: ByteArray): ByteArray {
+        // let H = H0
+
+        System.arraycopy(H0, 0, H, 0, H0.size)
+
+        // initialize all words
+        val words = pad(message)
+
+        // enumerate all blocks (each containing 16 words)
+        var i = 0
+        val n = words.size / 16
+        while (i < n) {
+
+
+            // initialize W from the block's words
+            System.arraycopy(words, i * 16, W, 0, 16)
+            for (t in 16 until W.size) {
+                W[t] = smallSig1(W[t - 2]) + W[t - 7] + smallSig0(W[t - 15]) + W[t - 16]
+            }
+
+            // let TEMP = H
+            System.arraycopy(H, 0, TEMP, 0, H.size)
+
+            // operate on TEMP
+            for (t in W.indices) {
+                val t1 = TEMP[7] + bigSig1(TEMP[4]) + ch(
+                    TEMP[4],
+                    TEMP[5], TEMP[6]
+                ) + K[t] + W[t]
+                val t2 = bigSig0(TEMP[0]) + maj(TEMP[0], TEMP[1], TEMP[2])
+                System.arraycopy(TEMP, 0, TEMP, 1, TEMP.size - 1)
+                TEMP[4] += t1
+                TEMP[0] = t1 + t2
+            }
+
+            // add values in TEMP to values in H
+            for (t in H.indices) {
+                H[t] += TEMP[t]
+            }
+            ++i
+        }
+        val buf: ByteBuffer = ByteBuffer.allocate(H.size * Integer.BYTES)
+        H.forEach { buf.putInt(it) }
+        return buf.array()
+    }
+
+    private fun pad(message: ByteArray): IntArray {
+        // new message length: original + 1-bit and padding + 8-byte length
+        // --> block count: whole blocks + (padding + length rounded up)
+        val finalBlockLength = message.size % BLOCK_BYTES
+        val blockCount = message.size / BLOCK_BYTES + if (finalBlockLength + 1 + 8 > BLOCK_BYTES) 2 else 1
+        val result = IntBuffer.allocate(blockCount * (BLOCK_BYTES / Integer.BYTES))
+
+        // copy as much of the message as possible
+        val buf: ByteBuffer = ByteBuffer.wrap(message)
+        var i = 0
+        val n = message.size / Integer.BYTES
+        while (i < n) {
+            result.put(buf.getInt())
+            ++i
+        }
+        // copy the remaining bytes (less than 4) and append 1 bit (rest is zero)
+        val remainder: ByteBuffer = ByteBuffer.allocate(4)
+        remainder.put(buf).put(128.toByte()).rewind()
+        result.put(remainder.getInt())
+
+        // ignore however many pad bytes (implicitly calculated in the beginning)
+        result.position(result.capacity() - 2)
+        // place original message length as 64-bit integer at the end
+        val msgLength = message.size * 8L
+        result.put((msgLength ushr 32).toInt())
+        result.put(msgLength.toInt())
+        return result.array()
+    }
+
+    private fun ch(x: Int, y: Int, z: Int): Int {
+        return x and y or (x.inv() and z)
+    }
+
+    private fun maj(x: Int, y: Int, z: Int): Int {
+        return x and y or (x and z) or (y and z)
+    }
+
+    private fun bigSig0(x: Int): Int {
+        return (Integer.rotateRight(x, 2)
+                xor Integer.rotateRight(x, 13)
+                xor Integer.rotateRight(x, 22))
+    }
+
+    private fun bigSig1(x: Int): Int {
+        return (Integer.rotateRight(x, 6)
+                xor Integer.rotateRight(x, 11)
+                xor Integer.rotateRight(x, 25))
+    }
+
+    private fun smallSig0(x: Int): Int {
+        return (Integer.rotateRight(x, 7)
+                xor Integer.rotateRight(x, 18)
+                xor (x ushr 3))
+    }
+
+    private fun smallSig1(x: Int): Int {
+        return (Integer.rotateRight(x, 17)
+                xor Integer.rotateRight(x, 19)
+                xor (x ushr 10))
+    }
+
+    /**
+     * salsa20
+     */
+    private const val ROUNDS = 10 // tx魔改为10
+    private const val MASK = 0xffffffff
+
+    fun salsa20(randSeedKey: ByteArray): ByteArray { // 乱写的
+        // require(nonce.size == 8)
+        // require(blockCounter.size == 8)
+
+        //  4 bytes + 20 bytes + 8 bytes = 32 bytes
+        val key = randSeedKey + 0x4adc4d1f.toByteArray() + 0x9ad47e38.toByteArray()
+        val nonce = 0x9ad47e38.toByteArray() // 8 bytes
+        val blockCounter = 0x90a5eb50.toByteArray() // 8 bytes
+
+        val k = Array(8) { littleEndian(key.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
+        val n = Array(2) { littleEndian(nonce.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
+        val b = Array(2) { littleEndian(blockCounter.sliceArray(( (4 * it) until (4 * it + 4) ))).toLong() }
+        val sigma = arrayOf(0x61707865L, 0x3320646e, 0x79622d32, 0x6b206574)
+
+        /*
+        val result = ByteArray(this.size)
+        for (i in 0 until this.size) {
+        result[i] = (this[i] xor key[i % key.size] xor ((i and 0xFF).toByte()))
+        }
+        return result*/
+
+        var s = arrayOf(
+            sigma[0],
+            k[0], k[1], k[2], k[3],
+            sigma[1],
+            n[0], n[1], b[0], b[1],
+            sigma[2],
+            k[4], k[5], k[6], k[7],
+            sigma[3]
+        )
+
+        repeat(ROUNDS) {
+            s = round(s)
+        }
+
+        val outv = ByteArray(64)
+
+        storeLittleEndian(outv, 0, s[0])
+        storeLittleEndian(outv, 4, s[1])
+        storeLittleEndian(outv, 8, s[2])
+        storeLittleEndian(outv, 12, s[3])
+        storeLittleEndian(outv, 16, s[4])
+        storeLittleEndian(outv, 20, s[5])
+        storeLittleEndian(outv, 24, s[6])
+        storeLittleEndian(outv, 28, s[7])
+        storeLittleEndian(outv, 32, s[8])
+        storeLittleEndian(outv, 36, s[9])
+        storeLittleEndian(outv, 40, s[10])
+        storeLittleEndian(outv, 44, s[11])
+        storeLittleEndian(outv, 48, s[12])
+        storeLittleEndian(outv, 52, s[13])
+        storeLittleEndian(outv, 56, s[14])
+        storeLittleEndian(outv, 60, s[15])
+
+        return outv
+    }
+
+    private fun storeLittleEndian(a: ByteArray, offset: Int, b: Long) {
+        var tmp = b
+        a[offset] = tmp.toByte()
+        tmp = tmp ushr 8
+        a[offset + 1] = tmp.toByte()
+        tmp = tmp ushr 8
+        a[offset + 2] = tmp.toByte()
+        tmp = tmp ushr 8
+        a[offset + 3] = tmp.toByte()
+    }
+
+    private fun round(s: Array<Long>): Array<Long> {
+        // 12 4 13 5 14 6 15 7 0 8 1 9 2 10 3 11
+        gen(s, 0x0, 0x4, 0xc, 0x10)
+        gen(s, 0x8, 0xc, 0x4, 0x0c, false)
+        gen(s, 0x0, 0x4, 0xc, 0x08)
+        gen(s, 0x8, 0xc, 0x4, 0x07)
+        gen(s, 0x1, 0x5, 0xd, 0x10)
+        gen(s, 0x9, 0xd, 0x5, 0x0c, false)
+        gen(s, 0x1, 0x5, 0xd, 0x08)
+        gen(s, 0x9, 0xd, 0x5, 0x07)
+
+        gen(s, 0x2, 0x6, 0xe, 0x10)
+        gen(s, 0xa, 0xe, 0x6, 0x0c, false)
+        gen(s, 0x2, 0x6, 0xe, 0x08)
+        gen(s, 0xa, 0xe, 0x6, 0x07)
+        gen(s, 0x3, 0x7, 0xf, 0x10)
+        gen(s, 0xb, 0xf, 0x7, 0x0c, false)
+        gen(s, 0x3, 0x7, 0xf, 0x08)
+        gen(s, 0xb, 0xf, 0x7, 0x07)
+
+        gen(s, 0x4, 0x8, 0x0, 0x10)
+        gen(s, 0xc, 0x0, 0x8, 0x0c, false)
+        gen(s, 0x4, 0x8, 0x0, 0x08)
+        gen(s, 0xc, 0x0, 0x8, 0x07)
+        gen(s, 0x5, 0x9, 0x1, 0x10)
+        gen(s, 0xd, 0x1, 0x9, 0x0c, false)
+        gen(s, 0x5, 0x9, 0x1, 0x08)
+        gen(s, 0xd, 0x1, 0x9, 0x07)
+
+        gen(s, 0x6, 0xa, 0x2, 0x10)
+        gen(s, 0xe, 0x2, 0xa, 0x0c, false)
+        gen(s, 0x6, 0xa, 0x2, 0x08)
+        gen(s, 0xe, 0x2, 0xa, 0x07)
+        gen(s, 0x7, 0xb, 0x3, 0x10)
+        gen(s, 0xf, 0x3, 0xb, 0x0c, false)
+        gen(s, 0x7, 0xb, 0x3, 0x08)
+        gen(s, 0xf, 0x3, 0xb, 0x07)
+
+        return arrayOf(
+            s[0], s[4], s[8], s[12],
+            s[1], s[5], s[9], s[13],
+            s[2], s[6], s[10], s[14],
+            s[3], s[7], s[11], s[15]
+        )
+    }
+
+    private fun gen(s: Array<Long>, i1: Int, i2: Int, ti: Int, lsl: Int, xor: Boolean = true) {
+        s[i1] = (s[i1] + s[i2]).and(MASK)
+        if (xor) {
+            s[ti] = s[ti].xor(s[i1])
+        } else {
+            s[ti] = calc(s[ti], s[i1])
+        }
+        s[ti] = rotl32(s[ti].and(MASK), lsl)
+    }
+
+    private fun rotl32(w: Long, v: Int): Long { // rotate left for 32-bits
+        return w.shl(v).and(MASK).or(w.shr(32 - v))
+    }
+
+    private fun calc(a: Long, b: Long): Long {
+        return a and b.inv() or (b and a.inv())
+    }
+
+    private fun littleEndian(b: ByteArray): Int {
+        require(b.size == 4)
+        return b[0].toInt() xor (b[1].toInt() shl 8) xor (b[2].toInt() shl 16) xor (b[3].toInt() shl 24)
+    }
 }
