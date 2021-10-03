@@ -15,7 +15,7 @@ abstract class WtRequest(
     val uin: Long,
     private val commandName: String,
     private val commandId: Int,
-    private val subCmd : Int,
+    val subCmd : Int,
     private val ecdhType: Int,
     private val encryptMethod: EncryptMethod = EncryptMethod.EM_ECDH
 ) {

@@ -44,7 +44,7 @@ class ProtocolInternal(
     @JvmField var isGuidFromFileNull: Boolean = false, // 保存到文件的 GUID 是否为 null
     @JvmField var isGuidAvailable: Boolean = true, // GUID 是否可用(计算/读取成功)
     @JvmField var isGuidChanged: Boolean = false, // GUID 是否有变动
-    @JvmField var oicqBuildVersion: String,
+    @JvmField var sdkVersion: String,
     @JvmField var protocolDetail: String,
     @JvmField var packageName: String,
     @JvmField var packageVersion: String,
@@ -84,7 +84,7 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                oicqBuildVersion = "6.0.0.2475",
+                sdkVersion = "6.0.0.2475",
                 protocolDetail = "||A8.7.5.18f5bf29",
                 packageName = "com.tencent.mobileqq",
                 packageVersion = "8.7.5",
@@ -114,7 +114,7 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                oicqBuildVersion = "6.0.0.2475",
+                sdkVersion = "6.0.0.2475",
                 protocolDetail = "||A8.7.5.18f5bf29",
                 packageName = "com.tencent.minihd.qq",
                 packageVersion = "5.8.9",
@@ -141,7 +141,7 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                oicqBuildVersion = "6.0.0.2475",
+                sdkVersion = "6.0.0.2475",
                 protocolDetail = "||Atestreversion",
                 packageName = "com.tencent.qqwatch",
                 packageVersion = "2.0.8",

@@ -6,6 +6,7 @@ import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
 import moe.ore.util.MD5
 
+// 810_a
 class WtLoginGetSt(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 11, 0x7)  {
     override fun packetType(): PacketType = PacketType.ExChangeEmpSt
 

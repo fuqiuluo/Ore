@@ -5,11 +5,28 @@ import moe.ore.helper.newBuilder
 import moe.ore.helper.toByteArray
 import moe.ore.helper.writeBytes
 
+/*
+tlv 544 sign =
+9 --> 810_9
+10/11 --> 810_a
+13 --> 810_d
+
+810_x
+分析 810是commandId, x是subCmd
+
+8字节 qq号
+2字节 guid size
+16字节 guid
+2字节 sdk version size (6.0.0.2475)
+10字节 sdk version
+4字节 sub cmd
+ */
+
 class WtLoginPassword(uin : Long) : WtRequest(uin, CMD_LOGIN, 0x810, 9, 0x87) {
     override fun packetType(): PacketType = PacketType.LoginPacket
 
     override fun makeTlv(seq : Int): ByteArray = newBuilder().apply {
-        writeShort(25)
+        writeShort(26)
         writeBytes(tlv.t18())
         writeBytes(tlv.t1())
         writeBytes(tlv.t106())
@@ -44,7 +61,7 @@ class WtLoginPassword(uin : Long) : WtRequest(uin, CMD_LOGIN, 0x810, 9, 0x87) {
         writeBytes(tlv.t516())
         writeBytes(tlv.t521())
         writeBytes(tlv.t525())
-        // writeBytes(tlv.t544())
+        writeBytes(tlv.t544(subCmd))
         // writeBytes(tlv.t545())
         // 不需要
     }.toByteArray()
