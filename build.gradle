@@ -56,7 +56,7 @@ subprojects {
 
         implementation("com.google.code.gson:gson:2.6.2")
 
-        implementation("com.squareup.okhttp3:okhttp:4.9.1")
+        implementation("com.squareup.okhttp3:okhttp:4.9.2")
 
         implementation 'org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.2.2'
         implementation 'org.jetbrains.kotlinx:kotlinx-io-jvm:0.1.16'
