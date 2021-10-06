@@ -27,15 +27,10 @@ class TarsTransform(
     }
 
     private fun doLast(clz : ClassFuller?) = clz?.runCatching {
-        if (!hasMethod("setFieldByName") && !hasMethod("getFieldByName") && !hasMethod("containField"))
-            TarsFieldWriter(this, this@TarsTransform.fields).invoke()
-
         if (tarsClassInfo.requireWrite && !hasMethod("writeTo"))
             TarsWriteWriter(this, this@TarsTransform.fields).invoke()
-
         if (tarsClassInfo.requireRead && !hasMethod("readFrom"))
             TarsReadWriter(this, this@TarsTransform.fields).invoke()
-
         if(tarsClassInfo.servantName.isNotEmpty() && !hasMethod("servantName")) this.methods.add(MethodNode(ACC_PUBLIC, "servantName", "()Ljava/lang/String;", null, null).also { mv ->
             mv.visitCode()
             mv.visitLdcInsn(tarsClassInfo.servantName)
@@ -43,7 +38,6 @@ class TarsTransform(
             mv.visitMaxs(1, 1)
             mv.visitEnd()
         })
-
         if(tarsClassInfo.funcName.isNotEmpty() && !hasMethod("funcName")) this.methods.add(MethodNode(ACC_PUBLIC, "funcName", "()Ljava/lang/String;", null, null).also { mv ->
             mv.visitCode()
             mv.visitLdcInsn(tarsClassInfo.funcName)
@@ -51,7 +45,6 @@ class TarsTransform(
             mv.visitMaxs(1, 1)
             mv.visitEnd()
         })
-
         if(tarsClassInfo.reqName.isNotEmpty() && !hasMethod("reqName")) this.methods.add(MethodNode(ACC_PUBLIC, "reqName", "()Ljava/lang/String;", null, null).also { mv ->
             mv.visitCode()
             mv.visitLdcInsn(tarsClassInfo.reqName)
@@ -59,7 +52,6 @@ class TarsTransform(
             mv.visitMaxs(1, 1)
             mv.visitEnd()
         })
-
         if(tarsClassInfo.respName.isNotEmpty() && !hasMethod("respName")) this.methods.add(MethodNode(ACC_PUBLIC, "respName", "()Ljava/lang/String;", null, null).also { mv ->
             mv.visitCode()
             mv.visitLdcInsn(tarsClassInfo.respName)
@@ -67,12 +59,9 @@ class TarsTransform(
             mv.visitMaxs(1, 1)
             mv.visitEnd()
         })
-
         val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
         this.accept(cw)
-
         clzFile.writeBytes(cw.toByteArray())
-        // FileUtil.saveFile(clzFile.absolutePath, )
     }
 
     private fun doFirst() : ClassFuller? {
@@ -130,8 +119,6 @@ class TarsTransform(
                         "id" -> id = v as Int
                         "require" -> require = v as Boolean
                         "isEnum" -> isEnum = v as Boolean
-                        // "prepMethod" -> prepMethod = v as String
-                        // code change
                         else -> error("unknown tars field annotation type : $k")
                     }
                 }

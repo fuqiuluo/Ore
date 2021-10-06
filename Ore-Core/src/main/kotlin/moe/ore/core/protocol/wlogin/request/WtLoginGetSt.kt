@@ -30,7 +30,6 @@ class WtLoginGetSt(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 11, 0x7)
         writeBytes(tlv.t187())
         writeBytes(tlv.t188())
         writeBytes(tlv.t194())
-
         val domains = arrayOf(
             "tenpay.com",
             "openmobile.qq.com",
@@ -47,7 +46,6 @@ class WtLoginGetSt(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 11, 0x7)
             "qzone.com",
             "mma.qq.com"
         )
-
         writeBytes(tlv.t511(domains))
         writeBytes(tlv.t202())
     }.toByteArray()

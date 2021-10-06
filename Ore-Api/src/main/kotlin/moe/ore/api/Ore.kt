@@ -29,7 +29,6 @@ import kotlin.properties.Delegates
  */
 abstract class Ore(val uin : Long) {
     private val servletMap = hashMapOf<String, IPacketServlet>() // 保存服务的map哦
-
     // lateinit var client: Any 还想吧client放这里来着
 
     /**
@@ -51,7 +50,7 @@ abstract class Ore(val uin : Long) {
      * 什么鸡巴东西，写了一堆登录，结果只有二维码登录好用
      */
     abstract fun login()
-    abstract fun tokenLogin()
+    abstract fun tokenLogin() // 什么jb登录方法都在这。草
     abstract fun qrLogin()
 
     /**

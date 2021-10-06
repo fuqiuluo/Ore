@@ -26,9 +26,7 @@ class WtLoginGetSig(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 15, 0x4
         // writeBytes(tlv.t112())
         writeBytes(tlv.t145())
         // writeBytes(tlv.t166())
-
         writeBytes(tlv.t16a(userStSig.noPicSig.ticket()))
-
         // writeBytes(tlv.t154(seq))
         writeBytes(tlv.t141())
         writeBytes(tlv.t8())
@@ -49,6 +47,7 @@ class WtLoginGetSig(uin: Long) : WtRequest(uin, CMD_EXCHANGE_EMP, 0x810, 15, 0x4
         writeBytes(tlv.t516())
         writeBytes(tlv.t521())
         writeBytes(tlv.t525(userStSig.extraDataList))
+
     }.toByteArray()
 
     override fun packetType(): PacketType = PacketType.ExChangeEmpA1

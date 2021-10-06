@@ -1,48 +1,23 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://maven.aliyun.com/repository/central/" }
-        maven { url "https://maven.aliyun.com/repository/public/" }
-        google()
-        maven { url 'https://repo.spring.io/milestone' }
-        maven{ url "https://kotlin.bintray.com/kotlinx"}
-        mavenLocal()
-    }
+    ext.kotlin_version = '1.5.31'
 
+    repositories {
+        google()
+        jcenter()
+    }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id 'java-library'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.0'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlin_version"
 }
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-        resources {
-            srcDir 'src/main/resources'
-        }
-    }
-}
-
-apply plugin: 'java-library'
-apply plugin: 'org.jetbrains.kotlin.jvm'
 
 repositories {
-    mavenCentral()
-    maven { url "https://plugins.gradle.org/m2/" }
-    maven { url "https://maven.aliyun.com/repository/central/" }
-    maven { url "https://maven.aliyun.com/repository/public/" }
     google()
-    maven { url 'https://repo.spring.io/milestone' }
-    maven{ url "https://kotlin.bintray.com/kotlinx"}
-    mavenLocal()
+    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -53,3 +28,4 @@ dependencies {
     implementation "org.ow2.asm:asm-tree:$asmVer"
     implementation "org.ow2.asm:asm-util:$asmVer"
 }
+

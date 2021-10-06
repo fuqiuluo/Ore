@@ -6,14 +6,13 @@ plugins {
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
-group 'moe.ore'
+group 'moe.ore.all'
 version '1.0.0'
 
 repositories {
-    mavenCentral()
-    maven { url "https://plugins.gradle.org/m2/" }
     maven { url "https://maven.aliyun.com/repository/central/" }
     maven { url "https://maven.aliyun.com/repository/public/" }
+    mavenCentral()
     google()
     maven { url 'https://repo.spring.io/milestone' }
     maven{ url "https://kotlin.bintray.com/kotlinx"}
@@ -22,14 +21,11 @@ repositories {
 dependencies {
     implementation project(":Ore-Base")
     implementation project(":Ore-Api")
-
     implementation project(":Ore-Core")
-
-    // Ore功能实现模块
-    implementation project(":Ore-Pay") // QQ钱包相关
-
-    implementation project(":Ore-Group") // 群功能相关 没有聊天
-
+    implementation project(":Ore-Pay")
+    implementation project(":Ore-Group")
+    implementation project(":Ore-Highway")
+    implementation project(":Ore-Message")
 }
 
 tasks.withType(JavaCompile) {

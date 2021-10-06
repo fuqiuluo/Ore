@@ -358,8 +358,9 @@ class WloginHelper(val uin: Long,
 
                             }
 
-                            else -> error("unknown tlv : $ver")
+                            else -> error("unknown t138 tlv : $ver")
                         }
+
                         discardExact(4)
                     }
                 }

@@ -3,11 +3,11 @@ package moe.ore.plugin
 import moe.ore.plugin.full.ClassFuller
 import moe.ore.plugin.util.FileUtil
 import org.gradle.api.Plugin
-import org.gradle.api.Project
+import org.gradle.api.internal.project.ProjectInternal
 import java.io.File
 
-class OrePlugin : Plugin<Project> {
-    override fun apply(project: Project) {
+open class OrePlugin : Plugin<ProjectInternal> {
+    override fun apply(project: ProjectInternal) {
         project.afterEvaluate { thisProject ->
             // 配置项目文件 （构建前执行发生）
             // 构建前给任务注入监听
