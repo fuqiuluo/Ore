@@ -160,6 +160,10 @@ fun ToService.sendTo(client: BotClient) : PacketSender {
                             writeString(it)
                         }
                         // writeInt(4) // qimei 的位置
+                        deviceInfo.qimei.let {
+                            writeInt(it.length + 4)
+                            writeString(it)
+                        }
                     }
                     PacketType.ServicePacket, PacketType.ExChangeEmpA1 -> {
                         commandName.let {

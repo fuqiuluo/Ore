@@ -422,7 +422,7 @@ class Tlv(
 
     fun t545() = buildTlv(0x545) {
         // qimei
-        writeHex("613664343731333466346264656366613138653866303266313030303165353135333131")
+        writeBytes(deviceInfo.qimei.toByteArray())
     }
 
     fun t547(byteArray: ByteArray) = buildTlv(0x547) {
