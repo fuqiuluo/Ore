@@ -2,7 +2,7 @@ package moe.ore.msg.code
 
 import moe.ore.msg.code.util.CodeParser
 
-open class OreCode(): ArrayList<BaseCode>() {
+open class OreCode: ArrayList<BaseCode>() {
     @JvmOverloads
     fun ftext(src: String, id: Int = 0): OreCode {
         add(FlashText(src, id))
@@ -14,7 +14,7 @@ open class OreCode(): ArrayList<BaseCode>() {
         return this
     }
 
-    fun image(file: String): OreCode {
+    protected fun image(file: String): OreCode {
         add(Image(file))
         return this
     }

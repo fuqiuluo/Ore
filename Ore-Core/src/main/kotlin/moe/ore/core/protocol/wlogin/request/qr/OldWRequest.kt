@@ -27,7 +27,7 @@ abstract class OldWRequest(
     open fun publicKey() = "04A1E0AA4DBD8FC08B2CA11DC5942AA4FDB29FCA71E66699D900ACA93D13DB86A632BA9357C20DF9913A648E244A591505".hex2ByteArray()
     open fun shareKey() = "C5F805A74E0CFDA5999D6E75500B36A2".hex2ByteArray()
 
-    private val encryptBody =  newBuilder().apply {
+    private val encryptBody = newBuilder().apply {
         writeByte(1)
         writeByte(1)
         writeBytes(session.randomKey)

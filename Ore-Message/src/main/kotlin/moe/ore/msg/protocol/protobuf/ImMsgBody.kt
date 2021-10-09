@@ -768,7 +768,7 @@ internal data class CustomFace(
     @ProtoNumber(27) @JvmField var uint32_thumb_width: UInt = 0u,
     @ProtoNumber(28) @JvmField var uint32_thumb_height: UInt = 0u,
     @ProtoNumber(29) @JvmField var uint32_show_len: UInt = 0u,
-    @ProtoNumber(30) @JvmField var uint32_download_len: UInt = 0u,
+    @ProtoNumber(30) @JvmField var downloadLen: UInt = 0u,
     @ProtoNumber(31) @JvmField var str_400_url: String = "",
     @ProtoNumber(32) @JvmField var uint32_400_width: UInt = 0u,
     @ProtoNumber(33) @JvmField var uint32_400_height: UInt = 0u,

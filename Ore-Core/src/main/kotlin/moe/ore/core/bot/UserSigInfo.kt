@@ -25,7 +25,6 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.tars.TarsBase
 import moe.ore.tars.TarsClass
 import moe.ore.tars.TarsField
-import java.util.HashMap
 
 @TarsClass(requireRead = true, requireWrite = true)
 class UserSigInfo : TarsBase() {
@@ -71,7 +70,7 @@ class UserSigInfo : TarsBase() {
     @TarsField(id = 13)
     lateinit var gtKey: BytesTicket
 
-    // 保质期：2 hours
+    // 保质期：2 hours 不属于sig
     @TarsField(id = 14)
     lateinit var webSig: BytesTicket
 
@@ -151,7 +150,7 @@ open class Ticket() : TarsBase() {
     }
 
     fun isExpired(): Boolean {
-        return System.currentTimeMillis() > (createTime + shelfLife)
+        return System.currentTimeMillis() > (createTime + shelfLife - (1000 * 60 * 30) ) // 过期的0.5H前刷新
     }
 }
 

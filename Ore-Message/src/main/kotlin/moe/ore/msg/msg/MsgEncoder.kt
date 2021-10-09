@@ -46,18 +46,17 @@ internal class MsgEncoder(
                 is Image -> {
                     when(msgType) {
                         MsgType.TROOP -> {
-                            val file = ImageCache.getImage(ore.uin, msg.file)
                             val fileMd5: ByteArray = msg.file.replace("[{}\\-]".toRegex(), "").split("\\.".toRegex())[0].hex2ByteArray()
 
                             var fileId: ULong = 0u
                             var upServer = 3070484794 to 80
 
-                            trySendImage(file)?.let {
+                            val fileMsg = trySendImage(ImageCache.getImage(ore.uin, msg.file))?.also {
                                 fileId = it.fileId
                                 upServer = it.upServer
                             }
 
-                            elems.add(image(fileMd5, fileId, upServer))
+                            elems.add(image(fileMsg, fileMd5, fileId, upServer))
                         }
                         MsgType.C2C -> TODO("send c2c img")
                     }
@@ -65,13 +64,12 @@ internal class MsgEncoder(
                 is FlashImage -> {
                     when(msgType) {
                         MsgType.TROOP -> {
-                            val file = ImageCache.getImage(ore.uin, msg.file)
                             val fileMd5: ByteArray = msg.file.replace("[{}\\-]".toRegex(), "").split("\\.".toRegex())[0].hex2ByteArray()
 
                             var fileId: ULong = 0u
                             var upServer = 3070484794 to 80
 
-                            trySendImage(file)?.let {
+                            trySendImage(ImageCache.getImage(ore.uin, msg.file))?.let {
                                 fileId = it.fileId
                                 upServer = it.upServer
                             }
@@ -156,7 +154,7 @@ internal class MsgEncoder(
         )
     )
 
-    private fun image(md5: ByteArray, fileId: ULong, upServer: Pair<Long, Int>): Elem = Elem(
+    private fun image(fileMsg: FileMsg?, md5: ByteArray, fileId: ULong, upServer: Pair<Long, Int>): Elem = Elem(
         customFace = CustomFace(
             md5 = md5,
             filePath = md5.toHexString() + ".ore",
@@ -166,7 +164,7 @@ internal class MsgEncoder(
             filetType = 66u,
             useful = 1u,
             imageType = 1000u,
-            bizType = 0u, origin = 1u,
+            bizType = 0u, origin = 1u, size = fileMsg?.fileSize?.toUInt() ?: 0u,
             height = 200u, width = 200u, source = 200u,
         )
     )

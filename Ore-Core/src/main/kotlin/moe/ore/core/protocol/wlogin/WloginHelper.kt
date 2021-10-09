@@ -322,6 +322,8 @@ class WloginHelper(val uin: Long,
                     val count = readInt()
                     // val st = System.currentTimeMillis()
                     repeat(count) {
+                        // val st = System.currentTimeMillis()
+
                         val ver = readShort().toInt()
                         val time = readUInt().toInt() * 1000L
 
@@ -330,7 +332,7 @@ class WloginHelper(val uin: Long,
                         // println("【T${ver.toHexString()}】过期时间：" + timeStr)
 
                         when (ver) {
-                            0x106 -> userStInfo.encryptA1.shelfLife = time // 3 days
+                            0x106 -> userStInfo.encryptA1.shelfLife = time // 30 days
                             0x10a -> {
                                 userStInfo.tgt.shelfLife = time
                                 userStInfo.tgtKey.shelfLife = time
