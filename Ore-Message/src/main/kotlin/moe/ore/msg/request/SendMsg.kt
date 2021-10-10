@@ -11,18 +11,18 @@ internal object SendMsg: ContractPbPacketFactory<PbSendMsgResp>("MessageSvc.PbSe
     override fun handle(data: ByteArray, seq: Int) =  decodePbPacket<PbSendMsgResp>(data)
 
     override fun request(uin: Long, args: Array<out Any>): Protobuf<*> {
-        val msgId = args[0] as Int
+        val msgId = args[0] as Long
         val routingHead = args[1] as RoutingHead
         val msgBody = args[2] as MsgBody
         return PbSendMsgReq(
             routingHead = routingHead,
             contentHead = ContentHead(1u, 0u, 0u),
             msgBody = msgBody,
-            msgSeq = msgId.toUInt(),
+            msgSeq = msgId.toULong(),
             msgRand = Random.nextUInt(),
             msgVia = 1u
         )
     }
 
-    operator fun invoke(ore: Ore, msgSeq: Int, routingHead: RoutingHead, msgBody: MsgBody) = super.invoke(ore, msgSeq, routingHead, msgBody)
+    operator fun invoke(ore: Ore, msgSeq: Long, routingHead: RoutingHead, msgBody: MsgBody) = super.invoke(ore, msgSeq, routingHead, msgBody)
 }

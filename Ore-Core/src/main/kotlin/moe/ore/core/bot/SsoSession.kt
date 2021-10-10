@@ -5,6 +5,7 @@ import moe.ore.tars.TarsBase
 import moe.ore.util.BytesUtil
 import java.security.SecureRandom
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -99,15 +100,15 @@ class SsoSession : TarsBase() {
         return id
     }
 
-    private val msgSeqFactory = AtomicInteger(Random.nextInt(100000) + 60000)
+    private val msgSeqFactory = AtomicLong(Random.nextLong(100000) + 60000)
 
     @Synchronized
-    fun nextMsgSeq(): Int {
-        var id: Int
+    fun nextMsgSeq(): Long {
+        var id: Long
         synchronized(this) {
             id = msgSeqFactory.addAndGet(2)
             if (id > 1000000) {
-                msgSeqFactory.set(Random.nextInt(100000) + 60000)
+                msgSeqFactory.set(Random.nextLong(100000) + 60000)
             }
         }
         return id

@@ -34,7 +34,7 @@ fun main() {
                     troopName: String,
                     uinName: String,
                     msgTime: Long,
-                    msgId: Int,
+                    msgId: Long,
                     msg: String
                 ) {
                     if(msg == "img") {

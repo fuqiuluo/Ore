@@ -7,6 +7,94 @@ import moe.ore.helper.EMPTY_BYTE_ARRAY
 import moe.ore.protobuf.Protobuf
 
 @Serializable
+internal data class PbMsgReadedReportReq(
+    @ProtoNumber(1) @JvmField var grpReadReport: List<PbGroupReadedReportReq>? = null,
+
+    @ProtoNumber(2) @JvmField var disReadReport: ArrayList<PbDiscussReadedReportReq>? = null,
+
+    @ProtoNumber(3) @JvmField var c2c_read_report: PbC2CReadedReportReq? = null,
+
+    @ProtoNumber(4) @JvmField var bind_uin_read_report: PbBindUinMsgReadedConfirmReq? = null,
+): Protobuf<PbMsgReadedReportReq>
+
+@Serializable
+internal data class PbMsgReadedReportResp(
+    @ProtoNumber(1) @JvmField var grp_read_report: ArrayList<PbGroupReadedReportResp>? = null,
+    @ProtoNumber(2) @JvmField var dis_read_report: ArrayList<PbDiscussReadedReportResp>? = null,
+    @ProtoNumber(3) @JvmField var c2c_read_report: PbC2CReadedReportResp? = null,
+    @ProtoNumber(4) @JvmField var bind_uin_read_report: PbBindUinMsgReadedConfirmResp? = null,
+): Protobuf<PbMsgReadedReportResp>
+
+@Serializable
+internal data class PbBindUinMsgReadedConfirmResp(
+    @ProtoNumber(1) @JvmField var result: UInt = 0u,
+    @ProtoNumber(2) @JvmField var errmsg: String = "",
+    @ProtoNumber(3) @JvmField var sync_cookie: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(4) @JvmField var bind_uin: ULong = 0u,
+): Protobuf<PbBindUinMsgReadedConfirmResp>
+
+@Serializable
+internal data class PbC2CReadedReportResp(
+    @ProtoNumber(1) @JvmField var result: UInt = 0u,
+    @ProtoNumber(2) @JvmField var errmsg: String = "",
+    @ProtoNumber(3) @JvmField var sync_cookie: ByteArray = EMPTY_BYTE_ARRAY,
+): Protobuf<PbC2CReadedReportResp>
+
+@Serializable
+internal data class PbDiscussReadedReportResp(
+    @ProtoNumber(1) @JvmField var result: UInt = 0u,
+    @ProtoNumber(2) @JvmField var errmsg: String = "",
+    @ProtoNumber(3) @JvmField var conf_uin: ULong = 0u,
+    @ProtoNumber(4) @JvmField var member_seq: ULong = 0u,
+    @ProtoNumber(5) @JvmField var conf_seq: ULong = 0u,
+): Protobuf<PbDiscussReadedReportResp>
+
+@Serializable
+internal data class PbGroupReadedReportResp(
+    @ProtoNumber(1) @JvmField var result: UInt = 0u,
+    @ProtoNumber(2) @JvmField var errmsg: String = "",
+    @ProtoNumber(3) @JvmField var group_code: ULong = 0u,
+    @ProtoNumber(4) @JvmField var member_seq: ULong = 0u,
+    @ProtoNumber(5) @JvmField var group_msg_seq: ULong = 0u,
+): Protobuf<PbGroupReadedReportResp>
+
+@Serializable
+internal data class PbC2CReadedReportReq(
+    @ProtoNumber(1) @JvmField var sync_cookie: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(2) @JvmField var pair_info: ArrayList<UinPairReadInfo>? = null,
+): Protobuf<PbC2CReadedReportReq>
+
+@Serializable
+internal data class UinPairReadInfo(
+    @ProtoNumber(1) @JvmField var peer_uin: ULong = 0u,
+    @ProtoNumber(2) @JvmField var last_read_time: ULong = 0u,
+    @ProtoNumber(3) @JvmField var crm_sig: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(4) @JvmField var peer_type: Int = 0,
+    @ProtoNumber(5) @JvmField var chat_type: UInt = 0u,
+    @ProtoNumber(6) @JvmField var cpid: ULong = 0u,
+    @ProtoNumber(7) @JvmField var aio_type: UInt = 0u,
+    @ProtoNumber(9) @JvmField var uint64_to_tiny_id: ULong = 0u,
+): Protobuf<UinPairReadInfo>
+
+@Serializable
+internal data class PbBindUinMsgReadedConfirmReq(
+    @ProtoNumber(1) @JvmField var sync_cookie: ByteArray = EMPTY_BYTE_ARRAY,
+    @ProtoNumber(2) @JvmField var bind_uin: ULong = 0u,
+): Protobuf<PbBindUinMsgReadedConfirmReq>
+
+@Serializable
+internal data class PbDiscussReadedReportReq(
+    @ProtoNumber(1) @JvmField var conf_uin: ULong = 0u,
+    @ProtoNumber(2) @JvmField var last_read_seq: ULong = 0u,
+): Protobuf<PbDiscussReadedReportReq>
+
+@Serializable
+internal data class PbGroupReadedReportReq(
+    @ProtoNumber(1) @JvmField var groupCode: ULong = 0u,
+    @ProtoNumber(2) @JvmField var lastReadSeq: ULong = 0u,
+): Protobuf<PbGroupReadedReportReq>
+
+@Serializable
 data class PbSendMsgResp(
     @ProtoNumber(1) @JvmField var result: UInt = 0u,
     // @ProtoNumber(2) @JvmField var errMsg: String = "", 根本没有东西
@@ -25,7 +113,7 @@ internal class PbSendMsgReq(
     @ProtoNumber(1) @JvmField var routingHead: RoutingHead,
     @ProtoNumber(2) @JvmField var contentHead: ContentHead,
     @ProtoNumber(3) @JvmField var msgBody: MsgBody,
-    @ProtoNumber(4) @JvmField var msgSeq: UInt = 0u,
+    @ProtoNumber(4) @JvmField var msgSeq: ULong = 0u,
     @ProtoNumber(5) @JvmField var msgRand: UInt = 0u,
     @ProtoNumber(6) @JvmField var sync_cookie: ByteArray = EMPTY_BYTE_ARRAY,
     @ProtoNumber(7) @JvmField var app_share: AppShareInfo? = null,

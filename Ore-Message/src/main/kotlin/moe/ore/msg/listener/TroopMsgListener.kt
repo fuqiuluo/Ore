@@ -10,7 +10,7 @@ interface TroopMsgListener {
         // troopCard: String,
         // troopLevel: Int,
         msgTime: Long,
-        msgId: Int,
+        msgId: Long,
         msg: String
     )
 

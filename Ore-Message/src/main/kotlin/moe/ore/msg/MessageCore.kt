@@ -17,13 +17,13 @@ import moe.ore.msg.msg.MsgType
 import moe.ore.msg.msg.MsgType.C2C
 import moe.ore.msg.msg.MsgType.TROOP
 import moe.ore.msg.protocol.protobuf.*
+import moe.ore.msg.request.MsgReaded
 import moe.ore.protobuf.decodeProtobuf
 import moe.ore.util.JsonUtil
 import moe.ore.util.ZipUtil
 
 const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 
-@ExperimentalUnsignedTypes
 class MessageCenter(
     private val ore: OreBot
 ): MSFServlet(arrayOf(
@@ -47,24 +47,27 @@ class MessageCenter(
                 val pushMsg = decodeProtobuf<PbPushMsg>(from.body)
                 val msg = pushMsg.msg
                 val msgHead = msg.msgHead
-                if(this@MessageCenter::troopMsgEvent.isInitialized && msgHead.fromUin != ore.uin.toULong()) { // 自己的消息不处理
 
+                if(this@MessageCenter::troopMsgEvent.isInitialized && msgHead.fromUin != ore.uin.toULong()) { // 自己的消息不处理
+                    val troopInfo = msgHead.groupInfo!!
                     val codeMsg = msg.msgBody.richText.toMsg(TROOP)
 
                     if(codeMsg.isNotEmpty()) {
-                        val troopInfo = msgHead.groupInfo!!
-
                         troopMsgEvent.onTroopMsg(
                             troopInfo.groupCode.toLong(),
                             msgHead.fromUin.toLong(),
                             troopInfo.groupName,
                             troopInfo.groupCard,
                             msgHead.msgTime.toLong(),
-                            msgHead.msgSeq.toInt(),
+                            msgHead.msgSeq.toLong(),
                             codeMsg
                         )
                     }
+
+                    MsgReaded(ore, MsgReaded.ReportMode.GRP, listOf(MsgReaded.MsgReport(troopInfo.groupCode, msgHead.msgSeq)))
+
                 }
+
             }
 
         }
