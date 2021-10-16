@@ -7,5 +7,10 @@ open class CoreConfig {
      */
     var handleFriendMessage: Boolean = true
 
+    /**
+     * 接到消息后自动设为已读
+     */
+    var autoReaded: Boolean = true
+
     // var 是开启消息自动分包 可以将一条很长的消息分多条发送 规避长消息上传
 }

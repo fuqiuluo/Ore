@@ -64,8 +64,8 @@ class MessageCenter(
                         )
                     }
 
-                    MsgReaded(ore, MsgReaded.ReportMode.GRP, listOf(MsgReaded.MsgReport(troopInfo.groupCode, msgHead.msgSeq)))
-
+                    if (config.autoReaded)
+                        MsgReaded(ore, MsgReaded.ReportMode.GRP, listOf(MsgReaded.MsgReport(troopInfo.groupCode, msgHead.msgSeq)))
                 }
 
             }

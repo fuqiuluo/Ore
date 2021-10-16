@@ -20,7 +20,7 @@ internal object MsgReaded: ContractPbPacketFactory<PbMsgReadedReportResp>("PbMes
         when(mode) {
             GRP -> readedReport.grpReadReport = list.map { PbGroupReadedReportReq(groupCode = it.fromUin, lastReadSeq = it.fromSeq) }
             DIS -> TODO()
-            ReportMode.C2C -> TODO()
+            C2C -> TODO()
             BIND_UIN -> TODO()
         }
 
