@@ -5,10 +5,7 @@ import moe.ore.api.IPacketServlet
 import moe.ore.api.Ore
 import moe.ore.core.helper.DataManager
 import moe.ore.group.protobuf.MemberInfo
-import moe.ore.group.request.GetMultiTroopInfo
-import moe.ore.group.request.GetTroopList
-import moe.ore.group.request.GetTroopMember
-import moe.ore.group.request.GroupMemberInfo
+import moe.ore.group.request.*
 import moe.ore.group.tars.GetTroopListRespV2
 import moe.ore.group.tars.TroopInfoV2
 import moe.ore.group.tars.TroopMemberInfo
@@ -114,6 +111,15 @@ class TroopManager(private val ore: Ore): IPacketServlet {
             return Result.failure(it)
         }
         return Result.failure(UnknownError())
+    }
+
+    /**
+     * 禁言群成员 时间单位（秒）
+     *
+     * 不给予返回，因为返回无意义
+     */
+    fun muteTroopMember(groupCode: Long, uin: Long, time: Int) {
+        MuteMember(ore, groupCode, uin, time)
     }
 
 }

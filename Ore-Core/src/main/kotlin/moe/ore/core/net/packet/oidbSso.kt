@@ -13,16 +13,24 @@ const val UINT32_RESULT_FIELD_NUMBER = 3
 const val UINT32_SERVICE_TYPE_FIELD_NUMBER = 2
 
 @Serializable
-class OidbSSOPkg : Protobuf<OidbSSOPkg> {
-    @JvmField @ProtoNumber(number = 4) var bodyBuffer = EMPTY_BYTE_ARRAY
-
-    @JvmField @ProtoNumber(number = 6) var clientVersion = ""
-
-    @JvmField @ProtoNumber(number = 5) var errMsg = ""
-
-    @JvmField @ProtoNumber(number = 1) var command = 0
-
-    @JvmField @ProtoNumber(number = 3) var result = 0
-
-    @JvmField @ProtoNumber(number = 2) var serviceType = 0
+data class OidbSSOPkg(
+    @JvmField @ProtoNumber(number = 4) var bodyBuffer: ByteArray = EMPTY_BYTE_ARRAY,
+    @JvmField @ProtoNumber(number = 6) var clientVersion: String = "",
+    @JvmField @ProtoNumber(number = 5) var errMsg: String = "",
+    @JvmField @ProtoNumber(number = 1) var command: Int = 0,
+    @JvmField @ProtoNumber(number = 3) var result: Int = 0,
+    @JvmField @ProtoNumber(number = 2) var serviceType: Int = 0
+) : Protobuf<OidbSSOPkg> {
+    companion object {
+        @JvmStatic
+        fun compose(
+            command: Int,
+            service: Int,
+            buffer: ByteArray
+        ): OidbSSOPkg = OidbSSOPkg(
+            bodyBuffer = buffer,
+            command = command,
+            serviceType = service
+        )
+    }
 }

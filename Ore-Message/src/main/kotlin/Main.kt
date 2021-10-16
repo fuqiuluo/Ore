@@ -5,6 +5,7 @@ import moe.ore.api.listener.OreListener
 import moe.ore.api.listener.SmsHelper
 import moe.ore.core.OreBot
 import moe.ore.core.OreManager
+import moe.ore.group.troopManager
 import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.messageCenter
 import moe.ore.msg.msg.MessageBuilder
@@ -43,6 +44,10 @@ fun main() {
                         println(builder
                             .build()
                             .sendToTroop(fromTroop))
+                        return
+                    } else if (msg == "mute") {
+                        val grpm = ore.troopManager()
+                        grpm.muteTroopMember(fromTroop, 203411690, 10)
                         return
                     }
 

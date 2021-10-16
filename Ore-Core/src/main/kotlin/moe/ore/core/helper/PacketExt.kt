@@ -19,6 +19,8 @@
  *
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package moe.ore.core.helper
 
 import kotlinx.io.core.discardExact
@@ -101,7 +103,24 @@ fun Ore.sendOidbPacket(
     commandName: String,
     oidbSsoPkg: OidbSSOPkg
 ): PacketSender {
+
+    val manager = DataManager.manager(this.uin)
+    oidbSsoPkg.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
+
     return sendPacket(commandName, oidbSsoPkg.toByteArray())
+}
+
+inline fun Ore.sendOidbPacket(
+    commandName: String,
+    command: Int,
+    body: ByteArray,
+    serviceType : Int = 0
+): PacketSender {
+    val oidb = OidbSSOPkg()
+    oidb.command = command
+    oidb.bodyBuffer = body
+    oidb.serviceType = serviceType
+    return sendPacket(commandName, oidb.toByteArray())
 }
 
 inline fun <reified T: Protobuf<T>> Ore.sendOidbPacket(
@@ -110,15 +129,7 @@ inline fun <reified T: Protobuf<T>> Ore.sendOidbPacket(
     body: T,
     serviceType : Int = 0
 ): PacketSender {
-    val oidb = OidbSSOPkg()
-    oidb.command = command
-    oidb.bodyBuffer = body.toByteArray()
-    oidb.serviceType = serviceType
-
-    val manager = DataManager.manager(this.uin)
-    oidb.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
-
-    return sendPacket(commandName, oidb.toByteArray())
+    return sendOidbPacket(commandName, command, body.toByteArray(), serviceType)
 }
 
 fun Ore.sendJcePacket(
