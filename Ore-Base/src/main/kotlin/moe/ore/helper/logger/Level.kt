@@ -1,10 +1,10 @@
 package moe.ore.helper.logger
 
-enum class Level(int: Int) {
-    DEBUG(3),
-    INFO(2),
+enum class Level(val num: Int) {
+    INFO(0),
     WARING(1),
-    ERROR(0),
-    NONE(-1);
+    ERROR(2),
+    DEBUG(3),
 
+    ALL(-1),
 }

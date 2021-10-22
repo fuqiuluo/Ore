@@ -119,7 +119,22 @@ class TroopManager(private val ore: Ore): IPacketServlet {
      * 不给予返回，因为返回无意义
      */
     fun muteTroopMember(groupCode: Long, uin: Long, time: Int) {
-        MuteMember(ore, groupCode, uin, time)
+        MuteTroopMember(ore, groupCode, uin, time)
+    }
+
+    /**
+     * 开启/关闭全群禁言
+     *
+     * 返回参数：-100获取失败, 1287 无权限，1010无该群权限或不在该群内，1006服务器繁忙
+     */
+    fun muteTroop(groupCode: Long, isMute: Boolean): Int {
+        val result = MuteTroop(ore, groupCode, isMute)
+        // println(result) // 1287无管理 1010群不存在
+        result.onSuccess {
+            // println(String(it.bodyBuffer))
+            return it.result!!
+        }
+        return -100
     }
 
 }

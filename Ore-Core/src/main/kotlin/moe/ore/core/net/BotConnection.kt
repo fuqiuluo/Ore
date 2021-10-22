@@ -21,7 +21,6 @@
 
 package moe.ore.core.net
 
-//import moe.ore.core.net.listener.IdleStateHandler
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
@@ -31,9 +30,8 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.handler.logging.LogLevel
-import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.timeout.IdleStateHandler
+import moe.ore.core.OreManager
 import moe.ore.core.bot.DeviceInfo
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.decoder.BotDecoder
@@ -55,7 +53,9 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
     private var nioEventLoopGroup: NioEventLoopGroup = NioEventLoopGroup()
 
     //    private val eventListener: EventListener = EventListener(this)
-    val heartBeatListener: HeartBeatListener = HeartBeatListener(this)
+    val heartBeatListener: HeartBeatListener by lazy {
+        HeartBeatListener(OreManager.getBot(uin)!!, this)
+    }
 
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)
 

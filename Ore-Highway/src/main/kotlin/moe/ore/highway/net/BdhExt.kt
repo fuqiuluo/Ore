@@ -43,7 +43,11 @@ internal fun upResourceByFile(uin: Long, session: SsoSession, appId: Int, fileMs
                     fileMsg.upKey,
                     ByteArray(chunk).also { rf.readFully(it) }
                 ) ?: return // 服务端可能主动断开连接 或者 错误发包导致被踢下线
-                if(result.first.msgSegHead?.rtcode != 0) return // 上传失败
+                if(result.first.msgSegHead?.rtcode != 0) {
+                    return
+                } // 上传失败
+
+                // println(result.first.msgSegHead?.rtcode)
 
                 i += chunk
             }

@@ -2,6 +2,8 @@ package moe.ore.core.transfile.dns
 
 import kotlinx.serialization.protobuf.ProtoBuf
 import moe.ore.core.protocol.pb.configpush.DomainIp
+import moe.ore.helper.logger.Level
+import moe.ore.helper.logger.OLog
 
 class InnerDns private constructor() {
     private val domainDns = hashMapOf<String, DomainData>()
@@ -16,6 +18,7 @@ class InnerDns private constructor() {
     }
 
     fun updateDomainServerList(data: ByteArray) {
+        OLog.log(level = Level.INFO, "inner dns start flush...")
         ProtoBuf.decodeFromByteArray(DomainIp.NameRspBody.serializer(), data).subCmdNameRsp?.let { rsp ->
             rsp.ipListInfo.forEach { info ->
                 if(info.result == 0) {

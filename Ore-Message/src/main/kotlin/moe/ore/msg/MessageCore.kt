@@ -175,7 +175,6 @@ class MessageCenter(
     }
 }
 
-@ExperimentalUnsignedTypes
 fun Ore.messageCenter(): MessageCenter {
     return getServletOrPut(TAG_MESSAGE_CENTER) { MessageCenter(this as OreBot) }
 }

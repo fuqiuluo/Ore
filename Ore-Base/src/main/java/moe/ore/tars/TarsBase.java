@@ -103,12 +103,6 @@ public class TarsBase implements Serializable {
         return out;
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        display(sb, 0);
-        return sb.toString();
-    }
-
     public static String toDisplaySimpleString(TarsBase struct) {
         if (struct == null) {
             return null;

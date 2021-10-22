@@ -10,7 +10,7 @@ import moe.ore.protobuf.Protobuf
 
 // 消息已读
 internal object MsgReaded: ContractPbPacketFactory<PbMsgReadedReportResp>("PbMessageSvc.PbMsgReadedReport") {
-    override fun handle(data: ByteArray, seq: Int) = SendMsg.decodePbPacket<PbMsgReadedReportResp>(data)
+    override fun handle(data: ByteArray, seq: Int) = decodePbPacket<PbMsgReadedReportResp>(data)
 
     override fun request(uin: Long, args: Array<out Any>): Protobuf<*> {
         val mode = args[0] as ReportMode

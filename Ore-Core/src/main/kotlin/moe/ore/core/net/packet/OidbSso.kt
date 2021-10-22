@@ -18,7 +18,7 @@ data class OidbSSOPkg(
     @JvmField @ProtoNumber(number = 6) var clientVersion: String = "",
     @JvmField @ProtoNumber(number = 5) var errMsg: String = "",
     @JvmField @ProtoNumber(number = 1) var command: Int = 0,
-    @JvmField @ProtoNumber(number = 3) var result: Int = 0,
+    @JvmField @ProtoNumber(number = 3) var result: Int? = null,
     @JvmField @ProtoNumber(number = 2) var serviceType: Int = 0
 ) : Protobuf<OidbSSOPkg> {
     companion object {
@@ -30,7 +30,8 @@ data class OidbSSOPkg(
         ): OidbSSOPkg = OidbSSOPkg(
             bodyBuffer = buffer,
             command = command,
-            serviceType = service
+            serviceType = service,
+            result = 0
         )
     }
 }

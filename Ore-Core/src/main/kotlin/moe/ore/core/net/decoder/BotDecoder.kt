@@ -24,6 +24,7 @@ package moe.ore.core.net.decoder
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageDecoder
+import moe.ore.helper.runtimeError
 import java.io.IOException
 
 class BotDecoder : ByteToMessageDecoder() {
@@ -50,12 +51,8 @@ class BotDecoder : ByteToMessageDecoder() {
             return null
         }
         val length = channelBuffer.readInt() - 4
-        if (length > 10 * 1024 * 1024 || length <= 0) {
-            throw RuntimeException(
-                "the length header of the package must be between 0~10M bytes. data length:"
-                        + Integer.toHexString(length)
-            )
-        }
+        if (length > 10 * 1024 * 1024 || length <= 0)
+            runtimeError("the length header of the package must be between 0~10M bytes. data length:" + Integer.toHexString(length))
         if (channelBuffer.readableBytes() < length) {
             return null
         }

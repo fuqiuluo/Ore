@@ -6,7 +6,7 @@ import moe.ore.core.net.packet.OidbSSOPkg
 import moe.ore.protobuf.Protobuf
 import java.nio.ByteBuffer
 
-object MuteMember: ContractPbPacketFactory<OidbSSOPkg>("OidbSvc.0x570_8", false) {
+object MuteTroopMember: ContractPbPacketFactory<OidbSSOPkg>("OidbSvc.0x570_8", false) {
     override fun handle(data: ByteArray, seq: Int) = decodePbPacket<OidbSSOPkg>(data)
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")

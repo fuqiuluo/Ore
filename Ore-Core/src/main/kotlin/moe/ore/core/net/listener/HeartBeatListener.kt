@@ -26,12 +26,14 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
+import moe.ore.api.Ore
 import moe.ore.api.OreStatus
 import moe.ore.core.OreManager
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.BotConnection
 import moe.ore.core.net.exc.HeartbeatTimeoutException
 import moe.ore.core.protocol.ProtocolInternal
+import moe.ore.core.request.statsvc.SimpleGet
 import moe.ore.helper.*
 
 /**
@@ -39,7 +41,7 @@ import moe.ore.helper.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class HeartBeatListener(private val connection: BotConnection) : ChannelDuplexHandler() {
+class HeartBeatListener(private val ore: Ore, private val connection: BotConnection) : ChannelDuplexHandler() {
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
@@ -51,6 +53,8 @@ class HeartBeatListener(private val connection: BotConnection) : ChannelDuplexHa
                     println("send a heartbeat packet")
                     // 无任何写操作发生 即开始发送心跳包
                     connection.send(makeHeartBeatPacket())
+                    SimpleGet(ore)
+
                 }
                 evt.state() == IdleState.READER_IDLE -> {
                     println("not receive any packet, went to reconnect")

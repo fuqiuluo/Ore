@@ -17,9 +17,9 @@ abstract class ContractPbPacketFactory<T>( // this is resp
 ) {
     private var timeout = 5 * 1000L
 
-    abstract fun handle(data: ByteArray, seq: Int): Any
+    protected abstract fun handle(data: ByteArray, seq: Int): Any
 
-    abstract fun request(uin: Long, vararg args: Any): Protobuf<*> // send request
+    protected abstract fun request(uin: Long, vararg args: Any): Protobuf<*> // send request
 
     operator fun invoke(ore: Ore, vararg args: Any): Result<T> {
         val sender = request(ore.uin, *args).let {
@@ -45,11 +45,12 @@ abstract class ContractPbPacketFactory<T>( // this is resp
         this.timeout = timeout
     }
 
-    fun <R: TarsBase> decodeUniPacket(data: ByteArray, resp: R): R {
+    protected fun <R: TarsBase> decodeUniPacket(data: ByteArray, resp: R): R {
         return TarsUtil.decodeRequest(resp, data)
     }
 
-    inline fun <reified R: Protobuf<*>> decodePbPacket(data: ByteArray): R {
+    @Suppress("TYPE_MISMATCH_WARNING")
+    protected inline fun <reified R: Protobuf<*>> decodePbPacket(data: ByteArray): R {
         return decodeProtobuf(data)
     }
 }

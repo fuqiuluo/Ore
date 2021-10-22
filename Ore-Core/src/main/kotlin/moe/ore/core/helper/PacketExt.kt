@@ -103,8 +103,8 @@ fun Ore.sendOidbPacket(
     commandName: String,
     oidbSsoPkg: OidbSSOPkg
 ): PacketSender {
-
     val manager = DataManager.manager(this.uin)
+
     oidbSsoPkg.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
 
     return sendPacket(commandName, oidbSsoPkg.toByteArray())
@@ -160,13 +160,13 @@ fun Ore.sendPacket(
         firstToken: ByteArray? = null,
         secondToken: ByteArray? = null,
 
-        seq : Int = -1
+        seq : Int? = null
 ): PacketSender {
     val bot = this as OreBot
     val client = bot.client
     val manager = DataManager.manager(bot.uin)
     val to = ToService(
-            seq = seq.let { if (it == -1) manager.session.nextSeqId() else seq },
+            seq = seq ?: manager.session.nextSeqId(),
             commandName = cmd,
             body = body
     )
