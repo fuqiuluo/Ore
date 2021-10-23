@@ -32,7 +32,7 @@ import java.util.concurrent.locks.Lock
  * @author 飞翔的企鹅
  * create 2021-05-30 13:18
  */
-internal class MutexLock : Lock, Serializable {
+class MutexLock : Lock, Serializable {
     // 内部类，自定义同步器
     private class Sync : AbstractQueuedSynchronizer() {
         // 是否处于占用状态
@@ -69,6 +69,7 @@ internal class MutexLock : Lock, Serializable {
 
     // 仅需要将操作代理到Sync上即可
     private val sync = Sync()
+
     override fun lock() {
         sync.acquire(1)
     }

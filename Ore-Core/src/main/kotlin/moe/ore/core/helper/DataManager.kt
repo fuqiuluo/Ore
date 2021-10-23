@@ -52,7 +52,6 @@ class DataManager private constructor(
         // 暂时移除
         // private val safePwd: String
 ) : TarsBase() {
-
     /**
      * 缓存器
      */

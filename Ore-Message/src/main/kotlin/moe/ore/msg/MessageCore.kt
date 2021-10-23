@@ -10,6 +10,7 @@ import moe.ore.msg.event.TroopEvent
 import moe.ore.msg.event.TroopMsgEvent
 import moe.ore.msg.helper.MsgHandleHelper
 import moe.ore.msg.helper.PushHandleHelper
+import moe.ore.msg.helper.SyncManager
 import moe.ore.msg.msg.MsgType.TROOP
 import moe.ore.msg.protocol.protobuf.PbPushMsg
 import moe.ore.msg.protocol.tars.SvcReqPushMsg
@@ -28,6 +29,7 @@ class MessageCenter(
 )) {
     private val config: CoreConfig = CoreConfig()
     private val manager = DataManager.manager(ore.uin)
+    private val syncManager = SyncManager.getOrPut(ore.uin)
 
     /**
      * 消息处理辅助器
@@ -87,16 +89,12 @@ class MessageCenter(
             "OnlinePush.ReqPush" -> {
                 val push = decodePacket(from.body, "req", SvcReqPushMsg())
                 push.msgInfos?.forEach { msgInfo ->
+                    if (!syncManager.onlinePushSyncer.sync(msgInfo.msgType, msgInfo.msgSeq)) return
                     when(msgInfo.msgType) {
-                        732 -> {
-                            troopEvent?.let { pushHandleHelper.push732(it, msgInfo.vMsg) }
-                        }
-
+                        732 -> troopEvent?.let { pushHandleHelper.push732(it, msgInfo.vMsg) }
                     }
                     PushResp(ore, push.svrip, msgInfo)
                 }
-
-
             }
         }
     }

@@ -35,8 +35,13 @@ internal class PushHandleHelper(val ore: Ore, val config: CoreConfig) {
             val shutTime = readInt()
             if (uin == 0L)
                 troopEvent.onTroopMute(groupCode, operator, time, shutTime > 0 || shutTime == -1)
-            else
+            else {
+                /*
+                if (uin == ore.uin) {
+                    config.troopShut[groupCode] = shutTime + time
+                }*/
                 troopEvent.onTroopMemberMute(groupCode, operator, uin, time, shutTime)
+            }
         }
     }
 }
