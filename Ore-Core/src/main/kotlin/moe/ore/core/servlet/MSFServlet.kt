@@ -25,7 +25,7 @@ abstract class MSFServlet(
 
     abstract fun onReceive(from: FromService)
 
-    fun <T: TarsBase> decodePacket(data: ByteArray, req: String, base: T): T {
+    protected fun <T: TarsBase> decodePacket(data: ByteArray, req: String, base: T): T {
         return TarsUtil.decodeRequest(base, req, data)
     }
 }

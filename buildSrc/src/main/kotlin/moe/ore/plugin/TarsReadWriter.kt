@@ -11,6 +11,11 @@ class TarsReadWriter(
     private val fuller: ClassFuller,
     private val fields : TreeMap<Int, FieldInfo>
 ) {
+    init {
+        val a = hashMapOf<String, ByteArray>()
+        a.put("aaa", ByteArray(1))
+    }
+
     private val className = fuller.name // not have "L" and ";"
 
     fun invoke() = with(fuller) {
@@ -45,7 +50,6 @@ class TarsReadWriter(
                         frameSame()
                     }
                     else {
-
                         val fieldType = field.type
                         if(field.isTarsObject()) {
                             val codeLabel = Label()
@@ -59,20 +63,24 @@ class TarsReadWriter(
                                     val allType = field.sign!!.substring(fieldType.length).let { it.substring(0, it.length - 2) }.split(";")
                                     // 0 key 1 value 2 empty
                                     val keyType = allType[0].substring(1)
-                                    val newClassName = allType[1].substring(1)
+                                    var newClassName = allType[1]
                                     newInstance("java/util/HashMap", "()V")
                                     storeObject(2)
 
                                     loadObject(2)
                                     forPut(keyType) // key
-                                    forPut(newClassName) // value
+
+                                    if (newClassName.startsWith("[")) {
+                                        newArray(newClassName.substring(1), 1)
+                                    } else {
+                                        newClassName = newClassName.substring(1)
+                                        forPut(newClassName) // value
+                                    }
                                     invokeVirtual("java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
                                     pop() // 弹出put操作的返回值
 
                                     loadObject(2)
                                     putField(className, cacheName, fieldType, true)
-
-                                    // getField(className, cacheName, fieldType, true) // for put value
                                 }
                                 fieldType == "Ljava/util/ArrayList;" || fieldType == "Ljava/util/List;" -> {
                                     // Ljava/util/ArrayList<Lxxx;>;
@@ -180,7 +188,10 @@ class TarsReadWriter(
                 invokeStatic("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;")
             }
             "java/lang/String" -> ldc("")
-            else -> newInstance(type, "()V")
+            // "L", "I",
+            else -> {
+                newInstance(type, "()V")
+            }
         }
     }
 

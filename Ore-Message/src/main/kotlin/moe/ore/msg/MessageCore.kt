@@ -17,6 +17,7 @@ import moe.ore.msg.msg.MsgType
 import moe.ore.msg.msg.MsgType.C2C
 import moe.ore.msg.msg.MsgType.TROOP
 import moe.ore.msg.protocol.protobuf.*
+import moe.ore.msg.protocol.tars.SvcReqPushMsg
 import moe.ore.msg.request.MsgReaded
 import moe.ore.protobuf.decodeProtobuf
 import moe.ore.util.JsonUtil
@@ -27,7 +28,8 @@ const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 class MessageCenter(
     private val ore: OreBot
 ): MSFServlet(arrayOf(
-    "OnlinePush.PbPushGroupMsg"
+    "OnlinePush.PbPushGroupMsg", // 群消息
+    "OnlinePush.ReqPush", // 群禁言通知
     // OnlinePush.PbPushGroupMsg || OnlinePush.PbPushDisMsg || OnlinePush.PbC2CMsgSync || OnlinePush.PbPushC2CMsg || OnlinePush.PbPushBindUinMsg
 )) {
     private val config: CoreConfig = CoreConfig()
@@ -69,11 +71,15 @@ class MessageCenter(
                 }
 
             }
-
+            "OnlinePush.ReqPush" -> {
+                val push = decodePacket(from.body, "req", SvcReqPushMsg())
+                println(push)
+            }
         }
     }
 
     fun setTroopMsgEvent(event: TroopMsgEvent) {
+        event.ore = ore
         this.troopMsgEvent = event
     }
 

@@ -4,6 +4,4 @@ import moe.ore.msg.listener.TroopMsgListener
 
 abstract class TroopMsgEvent: BaseEvent(), TroopMsgListener {
 
-
-
 }
