@@ -145,7 +145,7 @@ fun Ore.sendJcePacket(
     requestId: Int
 ): PacketSender {
     return sendPacket(commandName, TarsUtil.encodeRequest(requestId, body)
-        // .also { println(it.toHexString()) }
+        .also { println(it.toHexString()) }
     )
 }
 

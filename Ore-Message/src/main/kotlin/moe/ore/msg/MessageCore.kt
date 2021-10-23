@@ -5,6 +5,8 @@ import moe.ore.core.OreBot
 import moe.ore.core.helper.DataManager
 import moe.ore.core.net.packet.FromService
 import moe.ore.core.servlet.MSFServlet
+import moe.ore.helper.logger.Level
+import moe.ore.helper.logger.OLog
 import moe.ore.msg.cache.ImageCache
 import moe.ore.msg.event.TroopEvent
 import moe.ore.msg.event.TroopMsgEvent
@@ -17,6 +19,7 @@ import moe.ore.msg.protocol.tars.SvcReqPushMsg
 import moe.ore.msg.request.MsgReaded
 import moe.ore.msg.request.PushResp
 import moe.ore.protobuf.decodeProtobuf
+import moe.ore.util.TarsUtil
 
 const val TAG_MESSAGE_CENTER = "MESSAGE_CENTER"
 
@@ -87,13 +90,15 @@ class MessageCenter(
                 }
             }
             "OnlinePush.ReqPush" -> {
-                val push = decodePacket(from.body, "req", SvcReqPushMsg())
+                val uni = TarsUtil.decodeRequest(from.body)
+                val push = uni.findByClass("req", SvcReqPushMsg())
                 push.msgInfos?.forEach { msgInfo ->
                     if (!syncManager.onlinePushSyncer.sync(msgInfo.msgType, msgInfo.msgSeq)) return
-                    when(msgInfo.msgType) {
+                    when(val type = msgInfo.msgType) {
                         732 -> troopEvent?.let { pushHandleHelper.push732(it, msgInfo.vMsg) }
+                        else -> OLog.log(Level.WARING, "unknown push type: $type")
                     }
-                    PushResp(ore, push.svrip, msgInfo)
+                    PushResp(ore, from.seq, uni.requestId, push.svrip, msgInfo) // 让这个傻缺不再二次返回
                 }
             }
         }

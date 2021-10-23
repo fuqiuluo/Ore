@@ -9,22 +9,21 @@ import moe.ore.helper.logger.Level
 import moe.ore.helper.logger.OLog
 import moe.ore.helper.readBuf32ToInt64
 import moe.ore.helper.reader
+import moe.ore.helper.toHexString
 import moe.ore.msg.CoreConfig
 import moe.ore.msg.event.TroopEvent
 
 internal class PushHandleHelper(val ore: Ore, val config: CoreConfig) {
     fun push732(troopEvent: TroopEvent, vMsg: ByteArray) {
-        // println(vMsg.toHexString())
         vMsg.reader {
             val groupId = readBuf32ToInt64()
             when(val type = readByte().toInt()) {
                 12 -> push732x12(troopEvent, groupId) // 禁言
-
-                else -> OLog.log(Level.WARING, "unknown push type: $type")
+                16 -> push732x16(troopEvent, groupId)
+                else -> OLog.log(Level.WARING, "unknown push732 type: $type, ${vMsg.toHexString()}")
             }
         }
     }
-
 
     private fun ByteReadPacket.push732x12(troopEvent: TroopEvent, groupCode: Long) {
         discardExact(1) // 01
@@ -43,6 +42,11 @@ internal class PushHandleHelper(val ore: Ore, val config: CoreConfig) {
                 troopEvent.onTroopMemberMute(groupCode, operator, uin, time, shutTime)
             }
         }
+    }
+
+    private fun ByteReadPacket.push732x16(troopEvent: TroopEvent, groupCode: Long) {
+        if(!hasBytes(7)) return
+
     }
 }
 
