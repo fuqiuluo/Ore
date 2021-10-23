@@ -104,8 +104,12 @@ class OreBot(uin: Long) : Ore(uin) {
         }) // 强迫下线 所有的sig/cookie报废
         client.registerSpecialHandler(object : LongHandler("StatSvc.SvcReqMSFLoginNotify") {
             override fun handle(from: FromService) {
-                val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
-                oreListener?.onLoginAnother(notify.platform, notify.title, notify.info)
+                if (status != OreStatus.OffLine) {
+                    val notify = UniPacket.decode(from.body).findByClass("SvcReqMSFLoginNotify", SvcReqMSFLoginNotify())
+                    changeStatus(OreStatus.OffLine)
+                    oreListener?.onLoginAnother(notify.platform, notify.title, notify.info)
+                    client.close() // 顺便释放netty
+                }
             }
         }) // 这里的提示 腾讯一个提示会发3次 请注意！！！
 
