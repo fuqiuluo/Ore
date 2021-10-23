@@ -133,3 +133,7 @@ inline fun ByteArray.reader(block: ByteReadPacket.() -> Unit) {
 fun ByteReadPacket.readByteReadPacket(length: Int): ByteReadPacket {
     return readBytes(length).toByteReadPacket()
 }
+
+fun ByteReadPacket.readBuf32ToInt64(): Long {
+    return BytesUtil.buf32ToInt64(readBytes(4))
+}

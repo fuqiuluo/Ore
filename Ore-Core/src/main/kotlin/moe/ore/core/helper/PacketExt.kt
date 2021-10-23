@@ -40,7 +40,7 @@ import moe.ore.util.ZipUtil
 
 val DEFAULT_TEA_KEY = ByteArray(16)
 
-inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, FromService) -> Unit) {
+internal inline fun ByteArray.readMsfSsoPacket(uin: Long, crossinline block: (String, FromService) -> Unit) {
     val manager = DataManager.manager(uin)
     this.reader {
         val packetType = readInt()
@@ -144,7 +144,9 @@ fun Ore.sendJcePacket(
     body: TarsBase,
     requestId: Int
 ): PacketSender {
-    return sendPacket(commandName, TarsUtil.encodeRequest(requestId, body))
+    return sendPacket(commandName, TarsUtil.encodeRequest(requestId, body)
+        // .also { println(it.toHexString()) }
+    )
 }
 
 @JvmOverloads

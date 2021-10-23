@@ -229,7 +229,7 @@ open class PacketSender (
     }
 
     private fun send() {
-        OLog.log(Level.DEBUG,"T = Packet[cmd = $commandName, seq = $seq,body = ${body.toHexString()}]")
+        OLog.log(Level.DEBUG,"T = Packet[cmd = $commandName, seq = $seq, body = ${body.toHexString()}]")
         this.client.send(body)
     }
 

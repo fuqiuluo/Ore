@@ -21,6 +21,7 @@
 
 package moe.ore.util
 
+import java.nio.ByteBuffer
 import kotlin.random.Random
 
 object BytesUtil {
@@ -163,6 +164,12 @@ object BytesUtil {
                 (bArr[i + 5].toLong() shl 16 and 16711680) +
                 (bArr[i + 6].toLong() shl 8 and 65280) +
                 (bArr[i + 7].toLong() and 255)
+    }
+
+    fun buf32ToInt64(data: ByteArray): Long {
+        val test = byteArrayOf(0x00, 0x00, 0x00, 0x00, data[0], data[1], data[2], data[3])
+        val u: ByteBuffer = ByteBuffer.wrap(test)
+        return u.long
     }
 
     @JvmStatic
