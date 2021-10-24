@@ -9,8 +9,8 @@ import moe.ore.protobuf.Protobuf
 object TroopTips0x857 {
     @Serializable
     internal data class AIOGrayTipsInfo(
-        @ProtoNumber(1) @JvmField var opt_uint32_show_lastest: UInt = 0u,
-        @ProtoNumber(2) @JvmField var opt_bytes_content: ByteArray = EMPTY_BYTE_ARRAY,
+        @ProtoNumber(1) @JvmField var showLastest: UInt = 0u,
+        @ProtoNumber(2) @JvmField var content: ByteArray = EMPTY_BYTE_ARRAY,
         @ProtoNumber(3) @JvmField var opt_uint32_remind: UInt = 0u,
         @ProtoNumber(4) @JvmField var opt_bytes_brief: ByteArray = EMPTY_BYTE_ARRAY,
         @ProtoNumber(5) @JvmField var uint64_receiver_uin: ULong = 0u,
@@ -286,14 +286,18 @@ object TroopTips0x857 {
 
     @Serializable
     internal data class GroupInfoChange(
-        @ProtoNumber(1) @JvmField var uint32_group_honor_switch: UInt = 0u,
-        @ProtoNumber(2) @JvmField var uint32_group_member_level_switch: UInt = 0u,
-        @ProtoNumber(3) @JvmField var uint32_group_flagext4: UInt = 0u,
-        @ProtoNumber(4) @JvmField var uint32_appeal_deadline: UInt = 0u,
-        @ProtoNumber(5) @JvmField var uint32_group_flag: UInt = 0u,
-        @ProtoNumber(7) @JvmField var uint32_group_flagext3: UInt = 0u,
-        @ProtoNumber(8) @JvmField var uint32_group_class_ext: UInt = 0u,
-        @ProtoNumber(9) @JvmField var uint32_group_info_ext_seq: UInt = 0u,
+        @ProtoNumber(1) @JvmField var uint32_group_honor_switch: Int? = null,
+        @ProtoNumber(2) @JvmField var uint32_group_member_level_switch: Int? = null,
+
+        @ProtoNumber(3) @JvmField var groupFlagExt4: Int? = null,
+
+        @ProtoNumber(4) @JvmField var uint32_appeal_deadline: Int? = null,
+        @ProtoNumber(5) @JvmField var uint32_group_flag: Int? = null,
+
+        @ProtoNumber(7) @JvmField var groupFlagExt3: Int? = null,
+
+        @ProtoNumber(8) @JvmField var uint32_group_class_ext: Int? = null,
+        @ProtoNumber(9) @JvmField var uint32_group_info_ext_seq: Int? = null,
     ): Protobuf<GroupInfoChange>
 
     @Serializable
@@ -366,11 +370,11 @@ object TroopTips0x857 {
 
     @Serializable
     internal data class NotifyMsgBody(
-        @ProtoNumber(1) @JvmField var opt_enum_type: Int = 0,
-        @ProtoNumber(2) @JvmField var opt_uint64_msg_time: ULong = 0u,
-        @ProtoNumber(3) @JvmField var opt_uint64_msg_expires: ULong = 0u,
-        @ProtoNumber(4) @JvmField var opt_uint64_group_code: ULong = 0u,
-        @ProtoNumber(5) @JvmField var opt_msg_graytips: AIOGrayTipsInfo? = null,
+        @ProtoNumber(1) @JvmField var enumType: Int = 0,
+        @ProtoNumber(2) @JvmField var msgTime: ULong = 0u,
+        @ProtoNumber(3) @JvmField var msgExpires: ULong = 0u,
+        @ProtoNumber(4) @JvmField var groupCode: ULong = 0u,
+        @ProtoNumber(5) @JvmField var aioGrayTipsInfo: AIOGrayTipsInfo? = null,
         @ProtoNumber(6) @JvmField var opt_msg_messagebox: MessageBoxInfo? = null,
         @ProtoNumber(7) @JvmField var opt_msg_floatedtips: FloatedTipsInfo? = null,
         @ProtoNumber(8) @JvmField var opt_msg_toptips: AIOTopTipsInfo? = null,
@@ -385,7 +389,7 @@ object TroopTips0x857 {
         @ProtoNumber(17) @JvmField var apllo_msg_push: ApolloGameStatus.STPushMsgElem? = null,
         @ProtoNumber(18) @JvmField var opt_msg_goldtips: GoldMsgTipsElem? = null,
         @ProtoNumber(20) @JvmField var opt_msg_miniapp_notify: MiniAppNotify? = null,
-        @ProtoNumber(21) @JvmField var opt_uint64_sender_uin: ULong = 0u,
+        @ProtoNumber(21) @JvmField var senderUin: ULong = 0u,
         @ProtoNumber(22) @JvmField var opt_msg_luckybag_notify: LuckyBagNotify? = null,
         @ProtoNumber(23) @JvmField var opt_msg_troopformtips_push: TroopFormGrayTipsInfo? = null,
         @ProtoNumber(24) @JvmField var opt_msg_media_push: MediaChangePushInfo? = null,
@@ -393,7 +397,7 @@ object TroopTips0x857 {
         @ProtoNumber(27) @JvmField var opt_msg_video_push: VideoChangePushInfo? = null,
         @ProtoNumber(28) @JvmField var opt_lbs_share_change_plus_info: LbsShareChangePushInfo? = null,
         @ProtoNumber(29) @JvmField var opt_msg_sing_push: SingChangePushInfo? = null,
-        @ProtoNumber(30) @JvmField var opt_msg_group_info_change: GroupInfoChange? = null,
+        @ProtoNumber(30) @JvmField var groupInfoChange: GroupInfoChange? = null,
         @ProtoNumber(31) @JvmField var opt_group_announce_tbc_info: GroupAnnounceTBCInfo? = null,
         @ProtoNumber(32) @JvmField var opt_qq_vedio_game_push_info: QQVedioGamePushInfo? = null,
         @ProtoNumber(33) @JvmField var opt_qq_group_digest_msg: QQGroupDigestMsg? = null,
