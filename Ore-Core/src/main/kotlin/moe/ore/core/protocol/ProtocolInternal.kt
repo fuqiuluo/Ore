@@ -71,7 +71,7 @@ class ProtocolInternal(
                 pingVersion = 1,
                 ipVersion = 1,
                 ssoVersion = 1536,
-                msfSsoVersion = 17,
+                msfSsoVersion = 15, // 17 原来是17 改成15跳过滑块异常
                 tgtgVersion = 4,
                 mainSigMap = 0x21410e0,
                 miscBitmap = 184024956,
