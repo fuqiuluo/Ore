@@ -53,7 +53,7 @@ class HeartBeatListener(private val ore: Ore?, private val connection: BotConnec
                     println("send a heartbeat packet")
                     // 无任何写操作发生 即开始发送心跳包
                     connection.send(makeHeartBeatPacket())
-                    ore?.let { SimpleGet(it) }
+                    ore?.let { if (it.status() == OreStatus.Online) SimpleGet(it) }
                 }
                 evt.state() == IdleState.READER_IDLE -> {
                     println("not receive any packet, went to reconnect")

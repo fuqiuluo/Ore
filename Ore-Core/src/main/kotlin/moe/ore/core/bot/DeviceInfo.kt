@@ -37,22 +37,31 @@ class DeviceInfo : TarsBase() {
     // 53f156a0b5b89966【真的】  53f256a0aaff9966【假的】
     @TarsField(id = 2)
     var androidId: String = "53f156a0b5b89966"
+
     @TarsField(id = 3)
     var imsi: String = "460023785098616"
+
     @TarsField(id = 4)
     var model: String = "M2002J9E"
+
     @TarsField(id = 5)
     var osType: String = "android"
+
     @TarsField(id = 6)
     var brand: String = "Xiaomi"
+
     @TarsField(id = 7)
     var androidVersion: String = "11"
+
     @TarsField(id = 8)
     var androidSdkVersion: Int = 30
+
     @TarsField(id = 9)
     var wifiSsid: String = "<unknown ssid>"
+
     @TarsField(id = 10)
     var wifiBSsid = "02:00:00:00:00:00"
+
     @TarsField(id = 11)
     var macAddress = "02:00:00:00:00:00"
 

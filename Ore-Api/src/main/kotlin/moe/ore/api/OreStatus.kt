@@ -43,6 +43,11 @@ enum class OreStatus {
     QRLogin,
 
     /**
+     * Token登录
+     */
+    TokenLogin,
+
+    /**
      * 重新连接服务器中
      */
     Reconnecting,
@@ -55,11 +60,6 @@ enum class OreStatus {
      * 请做好判断
      */
     ReconnectFail,
-
-    /**
-     * 重连成功
-     */
-    ReconnectSuccess,
 
     /**
      * 在别的地方登录

@@ -61,7 +61,7 @@ class OreBot(uin: Long) : Ore(uin) {
                     /**
                      * 重连或者在线状态下被触发操作
                      */
-                    OreStatus.Reconnecting, OreStatus.Online -> {
+                    OreStatus.Reconnecting, OreStatus.Online, OreStatus.TokenLogin -> {
                         // 重连
                         println("ore reconnect begin")
                         WloginHelper(uin, this@apply, oreListener).loginByToken()
@@ -89,14 +89,16 @@ class OreBot(uin: Long) : Ore(uin) {
     init {
         client.registerSpecialHandler(object : LongHandler("MessageSvc.PushForceOffline") {
             override fun handle(from: FromService) {
-                val forceOffline = UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
+                val forceOffline =
+                    UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
                 changeStatus(OreStatus.OffLine) // change status
                 oreListener?.onKicked(forceOffline.sameDevice, forceOffline.title, forceOffline.tips)
             }
         }) // kicked from code[2013]
         client.registerSpecialHandler(object : LongHandler("StatSvc.ReqMSFOffline") {
             override fun handle(from: FromService) {
-                val forceOffline = UniPacket.decode(from.body).findByClass("RequestMSFForceOffline", RequestMSFForceOffline())
+                val forceOffline =
+                    UniPacket.decode(from.body).findByClass("RequestMSFForceOffline", RequestMSFForceOffline())
                 changeStatus(OreStatus.OffLine) // change status
                 manager.clearToken()
                 oreListener?.onKickedAndClearToken(forceOffline.sameDevice, forceOffline.title, forceOffline.info)
@@ -132,7 +134,7 @@ class OreBot(uin: Long) : Ore(uin) {
     override fun tokenLogin() {
         // 登录开始传递登录开始事件
         oreListener?.onLoginStart()
-        this.status = OreStatus.Reconnecting
+        this.status = OreStatus.TokenLogin
         // 连接到服务器会自动发送登录包
         client.connect()
     }
