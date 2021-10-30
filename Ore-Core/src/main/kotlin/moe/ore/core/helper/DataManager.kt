@@ -44,13 +44,13 @@ import java.io.File
 
 @TarsClass(requireWrite = true, requireRead = true)
 class DataManager private constructor(
-        val uin: Long,
-        /**
-         * 数据保存路径
-         */
-        path: String,
-        // 暂时移除
-        // private val safePwd: String
+    val uin: Long,
+    /**
+     * 数据保存路径
+     */
+    path: String,
+    // 暂时移除
+    // private val safePwd: String
 ) : TarsBase() {
     /**
      * 缓存器
@@ -67,7 +67,7 @@ class DataManager private constructor(
      */
     @JvmField
     @Transient
-    var dataPath: String = path + "/" + MD5.toMD5(uin.toString())
+    var dataPath: String = path + "/" + MD5.toMD5(uin.toString()) + ".ore"
 
     var session = SsoSession()
 
@@ -99,7 +99,7 @@ class DataManager private constructor(
         kotlin.runCatching {
             if (FileUtil.has(dataPath)) {
                 readFrom(
-                    TarsInputStream(File("$dataPath.ore").readBytes())
+                    TarsInputStream(File("$dataPath").readBytes())
                 )
             }
         }
@@ -123,7 +123,7 @@ class DataManager private constructor(
     }
 
     fun flush() {
-        File("$dataPath.ore").writeBytes(toByteArray())
+        File(dataPath).writeBytes(toByteArray())
     }
 
     companion object {
