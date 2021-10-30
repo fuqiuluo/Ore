@@ -119,7 +119,7 @@ class DataManager private constructor(
         if (save) {
             this.flush()
         }
-        managerMap.remove(uin, this)
+        managerMap.remove(uin)
     }
 
     fun flush() {
