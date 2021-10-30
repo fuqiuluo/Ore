@@ -54,7 +54,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     //    private val eventListener: EventListener = EventListener(this)
     val heartBeatListener: HeartBeatListener by lazy {
-        HeartBeatListener(OreManager.getBot(uin)!!, this)
+        HeartBeatListener(OreManager.getBot(uin), this)
     }
 
     private val reconnectionHandler: ReconnectionListener = ReconnectionListener(this)

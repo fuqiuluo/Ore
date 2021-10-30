@@ -51,6 +51,7 @@ abstract class Ore(val uin : Long) {
      */
     abstract fun login()
     abstract fun tokenLogin() // 什么jb登录方法都在这。草
+    @Deprecated("二维码登录的入口不在这里哦！")
     abstract fun qrLogin()
 
     /**

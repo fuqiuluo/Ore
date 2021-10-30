@@ -22,7 +22,7 @@ import moe.ore.util.TeaUtil
 
 class QRLoginHelper(
     dataPath : String,
-    val oreListener: OreListener
+    private val oreListener: OreListener
 ) : Thread() {
     val manager = DataManager.init(0, dataPath).apply {
         protocolType = ProtocolInternal.ProtocolType.ANDROID_WATCH

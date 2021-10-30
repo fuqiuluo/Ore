@@ -41,7 +41,7 @@ import moe.ore.helper.*
  * create 2021-05-30 13:18
  */
 @Sharable
-class HeartBeatListener(private val ore: Ore, private val connection: BotConnection) : ChannelDuplexHandler() {
+class HeartBeatListener(private val ore: Ore?, private val connection: BotConnection) : ChannelDuplexHandler() {
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
@@ -53,8 +53,7 @@ class HeartBeatListener(private val ore: Ore, private val connection: BotConnect
                     println("send a heartbeat packet")
                     // 无任何写操作发生 即开始发送心跳包
                     connection.send(makeHeartBeatPacket())
-                    SimpleGet(ore)
-
+                    ore?.let { SimpleGet(it) }
                 }
                 evt.state() == IdleState.READER_IDLE -> {
                     println("not receive any packet, went to reconnect")

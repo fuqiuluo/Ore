@@ -137,7 +137,6 @@ class OreBot(uin: Long) : Ore(uin) {
         client.connect()
     }
 
-    @Deprecated("二维码登录的入口不在这里哦！")
     override fun qrLogin() {
         // 登录开始传递登录开始事件
         this.status = OreStatus.QRLogin
