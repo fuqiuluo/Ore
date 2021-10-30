@@ -45,10 +45,6 @@ class WloginHelper(val uin: Long,
                 val ret = SvcRegisterHelper(uin).register()
                 if (ret.cReplyCode.toInt() == 0) {
                     eventHandler.onRegisterSuccess(ret)
-                    val status = OreManager.getStatus(uin)
-                    if (status != null && status == OreStatus.Reconnecting) {
-                        OreManager.changeStatus(uin, OreStatus.ReconnectSuccess)
-                    }
                     OreManager.changeStatus(uin, OreStatus.Online)
                 } else {
                     OreManager.changeStatus(uin, OreStatus.ReconnectFail)
