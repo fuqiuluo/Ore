@@ -108,13 +108,13 @@ class QRLoginHelper(
                             }
                             17 -> listener?.onQRExpired()
                             48 -> {
-                                sleepQuietly(500)
+                                sleepQuietly(1000)
                                 handle(checkQRCode())
                             }
                             53 -> {
                                 // 有设备扫描了二维码 请等待设备按确认登录
                                 listener?.onScanCode()
-                                sleepQuietly(500)
+                                sleepQuietly(1000)
                                 handle(checkQRCode())
                             }
                             54->listener?.onQRCancel()
