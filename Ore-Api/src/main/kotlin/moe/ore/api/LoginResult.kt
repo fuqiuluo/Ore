@@ -58,6 +58,11 @@ enum class LoginResult {
     TokenLoginError,
 
     /**
+     * token 登录成功
+     */
+    TokenLoginSuccess,
+
+    /**
      * 刷新st失败 RefreshStError
      */
 }
