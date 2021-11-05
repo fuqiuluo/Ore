@@ -44,9 +44,6 @@ class DeviceInfo : TarsBase() {
     @TarsField(id = 4)
     var model: String = "M2002J9E"
 
-    @TarsField(id = 5)
-    var osType: String = "android"
-
     @TarsField(id = 6)
     var brand: String = "Xiaomi"
 

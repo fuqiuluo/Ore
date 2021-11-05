@@ -39,6 +39,8 @@ import moe.ore.core.net.listener.HeartBeatListener
 import moe.ore.core.net.listener.ReconnectionListener
 import moe.ore.core.net.listener.UsefulListener
 import moe.ore.core.util.QQUtil
+import moe.ore.helper.logger.Level
+import moe.ore.helper.logger.OLog
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -67,7 +69,7 @@ class BotConnection(private val usefulListener: UsefulListener, val uin: Long) {
 
     fun close() {
         if (this::channelFuture.isInitialized) {
-            println("exec close the client")
+            OLog.log(Level.INFO, "exec close the client")
             if (!channelFuture.isVoid || channelFuture.channel().isActive) {
                 channelFuture.channel().close()
             }

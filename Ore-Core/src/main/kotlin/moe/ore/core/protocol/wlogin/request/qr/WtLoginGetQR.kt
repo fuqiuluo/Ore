@@ -40,7 +40,7 @@ class WtLoginGetQR : OldWRequest(0, CMD_TRANS_EMP, 0xff, 0x31, 0x812, 0x7) {
         })
         writeBytes(buildTlv(0x1f){
             writeByte(1)
-            writeStringWithShortLen(device.osType)
+            writeStringWithShortLen(protocol.osType)
             writeStringWithShortLen(device.androidVersion)
             writeShort(device.netType.value)
             writeShort(0)

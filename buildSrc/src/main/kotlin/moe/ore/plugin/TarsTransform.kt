@@ -23,7 +23,9 @@ class TarsTransform(
     private lateinit var className : String
 
     fun transform() {
-        println("tars task result : " + doLast(doFirst()))
+        doLast(doFirst())?.let {
+            println("tars task result : ${it.isSuccess}")
+        }
     }
 
     private fun doLast(clz : ClassFuller?) = clz?.runCatching {

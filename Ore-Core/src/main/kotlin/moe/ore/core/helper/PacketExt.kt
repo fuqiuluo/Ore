@@ -105,7 +105,9 @@ fun Ore.sendOidbPacket(
 ): PacketSender {
     val manager = DataManager.manager(this.uin)
 
-    oidbSsoPkg.clientVersion = "${manager.deviceInfo.osType} ${ProtocolInternal[manager.protocolType].packageVersion}"
+    ProtocolInternal[manager.protocolType].let {
+        oidbSsoPkg.clientVersion = "${it.osType} ${it.packageVersion}"
+    }
 
     return sendPacket(commandName, oidbSsoPkg.toByteArray())
 }

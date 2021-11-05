@@ -26,6 +26,7 @@ import java.util.*
 
 class ProtocolInternal(
     @JvmField var openAppId: Int,
+    @JvmField var osType: String = "android",
     @JvmField var appId: Int,
     @JvmField var subAppId: Int,
     @JvmField var pingVersion: Int,
@@ -114,8 +115,36 @@ class ProtocolInternal(
                 isGuidAvailable = true,
                 isGuidFromFileNull = false,
                 isGuidChanged = false,
-                sdkVersion = "6.0.0.2475",
-                protocolDetail = "||A8.7.5.18f5bf29",
+                sdkVersion = "6.0.0.2433",
+                protocolDetail = "||A5.8.9.3460",
+                packageName = "com.tencent.minihd.qq",
+                packageVersion = "5.8.9",
+                tencentSdkMd5 = "aa3978f41fd96ff9914a669e186474c7".hex2ByteArray(),
+                osType = "iPad"
+            )
+
+            protocols[ProtocolType.MAC_OS] = ProtocolInternal(
+                openAppId = -1,
+                appId = 537064315,
+                subAppId = 16,
+                pingVersion = 1,
+                ipVersion = 1,
+                ssoVersion = 1536,
+                msfSsoVersion = 12,
+                tgtgVersion = 4,
+                mainSigMap = 1970400,
+                miscBitmap = 150470524,
+                subSigMap = 66560,
+                dbVersion = 1,
+                buildTime = 1595836208,
+                localId = 2052,
+                protocolVersion = 8001,
+                loginType = 1,
+                isGuidAvailable = true,
+                isGuidFromFileNull = false,
+                isGuidChanged = false,
+                sdkVersion = "6.0.0.2433",
+                protocolDetail = "||A5.8.9.3460",
                 packageName = "com.tencent.minihd.qq",
                 packageVersion = "5.8.9",
                 tencentSdkMd5 = "aa3978f41fd96ff9914a669e186474c7".hex2ByteArray()
@@ -158,5 +187,6 @@ class ProtocolInternal(
         MQQ,
         ANDROID_WATCH,
         IOS_IPAD,
+        MAC_OS
     }
 }

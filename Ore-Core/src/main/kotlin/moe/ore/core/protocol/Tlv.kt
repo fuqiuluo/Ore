@@ -153,7 +153,7 @@ class Tlv(
     }
 
     private fun t124() = buildTlv(0x124) {
-        writeStringWithShortLen(deviceInfo.osType)
+        writeStringWithShortLen(protocolInfo.osType)
         writeStringWithShortLen(deviceInfo.androidVersion)
         writeShort(deviceInfo.netType.value)
         writeStringWithShortLen(deviceInfo.apnName)

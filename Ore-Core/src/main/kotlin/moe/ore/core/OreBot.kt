@@ -92,6 +92,7 @@ class OreBot(uin: Long) : Ore(uin) {
                 val forceOffline =
                     UniPacket.decode(from.body).findByClass("req_PushForceOffline", RequestPushForceOffline())
                 changeStatus(OreStatus.OffLine) // change status
+                client.close()
                 oreListener?.onKicked(forceOffline.sameDevice, forceOffline.title, forceOffline.tips)
             }
         }) // kicked from code[2013]
@@ -100,6 +101,7 @@ class OreBot(uin: Long) : Ore(uin) {
                 val forceOffline =
                     UniPacket.decode(from.body).findByClass("RequestMSFForceOffline", RequestMSFForceOffline())
                 changeStatus(OreStatus.OffLine) // change status
+                client.close()
                 manager.clearToken()
                 oreListener?.onKickedAndClearToken(forceOffline.sameDevice, forceOffline.title, forceOffline.info)
             }
@@ -110,6 +112,9 @@ class OreBot(uin: Long) : Ore(uin) {
                 // changeStatus(OreStatus.OffLine)
                 oreListener?.onLoginAnother(notify.platform, notify.title, notify.info)
                 // client.close() // 顺便释放netty
+
+                // TODO RESP
+
             }
         }) // 这里的提示 腾讯一个提示会发3次 请注意！！！
 
