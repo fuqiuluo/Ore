@@ -63,7 +63,7 @@ class ProtocolInternal(
             protocols[protocolType] ?: error("Internal Error: Missing protocol $protocolType")
 
         init {
-            protocols[ProtocolType.ANDROID_PHONE] = ProtocolInternal(
+            protocols[ProtocolType.MQQ] = ProtocolInternal(
                 openAppId = 0x2a9e5427,
                 // from 8.7.5
                 appId = 0x200302d5,
@@ -155,7 +155,7 @@ class ProtocolInternal(
         /**
          * Android
          */
-        ANDROID_PHONE,
+        MQQ,
         ANDROID_WATCH,
         IOS_IPAD,
     }

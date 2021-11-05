@@ -92,7 +92,7 @@ class DataManager private constructor(
     var deviceInfo = DeviceInfo()
 
     @TarsField(id = 5, isEnum = true)
-    var protocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+    var protocolType = ProtocolInternal.ProtocolType.MQQ
 
     init {
         if (path.isBlank()) runtimeError("错误：${uin}，请先调用${OreBot::class.java.simpleName}.setDataPath()完成初始化")

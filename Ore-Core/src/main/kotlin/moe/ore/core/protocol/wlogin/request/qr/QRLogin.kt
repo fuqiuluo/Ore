@@ -93,7 +93,7 @@ class QRLoginHelper(
                                 manager.session.t318 = tlvMap[0x65]!!
 
                                 // #112 解决二维码登录后协议没有切回原来的版本
-                                manager.protocolType = ProtocolInternal.ProtocolType.ANDROID_PHONE
+                                manager.protocolType = ProtocolInternal.ProtocolType.MQQ
 
                                 val ore = OreManager.addBot(uin, "", manager.dataPath) as OreBot
                                 ore.oreListener = oreListener
