@@ -47,7 +47,7 @@ subprojects {
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-        implementation 'io.netty:netty-buffer:4.1.69.Final'
+        implementation 'io.netty:netty-buffer:4.1.71.Final'
         implementation 'io.netty:netty-transport:4.1.69.Final'
         implementation 'io.netty:netty-handler:4.1.69.Final'
         implementation 'io.netty:netty-codec:4.1.69.Final'
