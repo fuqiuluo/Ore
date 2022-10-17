@@ -23,7 +23,7 @@ repositories {
 dependencies {
     implementation gradleApi()
 
-    def asmVer = "9.2"
+    def asmVer = "9.4"
     implementation "org.ow2.asm:asm-commons:$asmVer"
     implementation "org.ow2.asm:asm-tree:$asmVer"
     implementation "org.ow2.asm:asm-util:$asmVer"
